@@ -2,3 +2,4 @@
 *.suo
 *.ncb
 /Debug
+/LuaUPnP/Debug
