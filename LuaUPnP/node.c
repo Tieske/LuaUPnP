@@ -31,7 +31,7 @@ static int L_getNodeType(lua_State *L)
 {
 	switch (ixmlNode_getNodeType(checknode(L, 1))) {
 		case eELEMENT_NODE: {
-			lua_pushstring(L, "INVALID_NODE");
+			lua_pushstring(L, "ELEMENT_NODE");
 			break; }
 		case eATTRIBUTE_NODE: {
 			lua_pushstring(L, "ATTRIBUTE_NODE");
@@ -168,28 +168,21 @@ static int L_insertBefore(lua_State *L)
 
 static int L_replaceChild(lua_State *L)
 {
-	IXML_Node* addtonode = checknode(L, 1);
-	IXML_Node* newchild = checknode(L, 2);
-	IXML_Node* oldchild = checknode(L, 3);
-	IXML_Node* ret;
-	int result;
-	result = ixmlNode_replaceChild(addtonode, newchild, oldchild, &ret);
+	IXML_Node* ret = NULL;
+	int result = IXML_SUCCESS;
+	result = ixmlNode_replaceChild(checknode(L, 1), checknode(L, 2), checknode(L, 3), &ret);
 	if (result != IXML_SUCCESS)	pushIXMLerror(L, result);
-	//TODO: old node (in ret) will have been removed from the document, update tracking stuff
-	lua_pushinteger(L, 1);
+	pushLuaNode(L, ret);
 	return 1;
 }
 
 static int L_removeChild(lua_State *L)
 {
-	IXML_Node* removefromnode = checknode(L, 1);
-	IXML_Node* oldchild = checknode(L, 3);
-	IXML_Node* ret;
-	int result;
-	result = ixmlNode_removeChild(removefromnode, oldchild, &ret);
+	IXML_Node* ret = NULL;
+	int result = IXML_SUCCESS;
+	result = ixmlNode_removeChild(checknode(L, 1), checknode(L, 2), &ret);
 	if (result != IXML_SUCCESS)	pushIXMLerror(L, result);
-	//TODO: old node (in ret) will have been removed from the document, update tracking stuff
-	lua_pushinteger(L, 1);
+	pushLuaNode(L, ret);
 	return 1;
 }
 

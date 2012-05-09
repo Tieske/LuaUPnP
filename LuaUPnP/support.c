@@ -35,7 +35,7 @@ static pLuaNode pushLuaNode(lua_State *L, IXML_Node *node)
 	{
 		// It is not in the table yet, so we must create a new userdata for this one
 		lua_pop(L, 1);									// pop the nil value
-		ln = lua_newuserdata(L, sizeof(LuaNode));		// create userdata (the value)
+		ln = (pLuaNode)lua_newuserdata(L, sizeof(LuaNode));		// create userdata (the value)
 		if (ln != NULL)
 		{
 			// Success, so initialize
@@ -61,7 +61,7 @@ static pLuaNode pushLuaNode(lua_State *L, IXML_Node *node)
 	else
 	{
 		// Found it, go get it
-		ln = lua_touserdata(L, -1);
+		ln = (pLuaNode)lua_touserdata(L, -1);
 	}
 	
 	lua_remove(L,-2);	// pop the ref table, only the userdata or a nil is left now.
@@ -291,6 +291,22 @@ int pushIXMLerror(lua_State *L, int err)
 	return 3;
 }
 
+
+/*
+** ===============================================================
+**  tostring method for the node userdatas
+** ===============================================================
+*/
+
+int L_tostring(lua_State *L)
+{
+    char buf[32];
+	L_getNodeType(L);			// pushes string with node type
+    sprintf(buf, "%p", lua_touserdata(L, 1));	// creates HEX address
+    lua_pushfstring(L, "%s: %s", lua_tostring(L, -1), buf);
+    return 1;
+}
+
 /*
 ** ===============================================================
 **  Destroying objects from Lua
@@ -303,7 +319,7 @@ static void FreeCallBack(IXML_Node* node)
 	pLuaNode ln;
 	if (node != NULL)
 	{
-		ln = ixmlNode_getCTag(node);
+		ln = (pLuaNode)ixmlNode_getCTag(node);
 		if (ln != NULL)
 		{
 			// There is a Lua reference, so must clear that so document
@@ -316,7 +332,7 @@ static void FreeCallBack(IXML_Node* node)
 // GC method for object
 static int L_DestroyNode(lua_State *L)
 {
-	pLuaNode node = lua_touserdata(L, 1);
+	pLuaNode node = (pLuaNode)lua_touserdata(L, 1);
 	if (node->node != NULL)
 	{
 		if (node->node->ctag == node)

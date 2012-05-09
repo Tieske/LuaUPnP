@@ -1,8 +1,23 @@
+#include "LuaIXML.h"
+
+/*
+** ===============================================================
+**  Forward declarations
+** ===============================================================
+*/
+
+static int L_getNodeType(lua_State *L);
+
+
+
 #ifndef LuaIXML_c
 #define LuaIXML_c
+/*
+** ===============================================================
+**  Core code files
+** ===============================================================
+*/
 
-#include "LuaIXML.h"
-#include "LuaNodeStore.c"
 #include "Support.c"
 #include "Node.c"
 #include "Document.c"
@@ -123,7 +138,7 @@ static int L_getElementsByTagNameNS(lua_State *L)		// Document and Element
 
 static int L_item(lua_State *L)							// NamedNodeMap and NodeList
 {
-	// TODO: implement
+	// TODO: implement, NodeList is all Lua table, map, to be decided
 	return luaL_error(L, "Not implemented");
 }
 
@@ -225,9 +240,6 @@ static const struct luaL_Reg LPNP_Node_Methods[] = {
 
 LPNP_API	int luaopen_LuaUPnP(lua_State *L)
 {
-	// Register functions
-	luaL_register(L,"ixml",IXMLfunctions);
-
 	// Create a new metatable for the nodes
 	luaL_newmetatable(L, LPNP_NODE_MT);
 	// Set it as a metatable to itself
@@ -236,6 +248,10 @@ LPNP_API	int luaopen_LuaUPnP(lua_State *L)
 	// Add GC method
 	lua_pushstring(L, "__gc");
 	lua_pushcfunction(L, L_DestroyNode);
+	lua_settable(L, -3);
+	// add tostring method
+	lua_pushstring(L, "__tostring");
+	lua_pushcfunction(L, L_tostring);
 	lua_settable(L, -3);
 	// Register the methods of the object
 	luaL_register(L, NULL, LPNP_Node_Methods);
@@ -251,6 +267,9 @@ LPNP_API	int luaopen_LuaUPnP(lua_State *L)
 
 	// set the 'free' callback from IXML
 	ixmlSetBeforeFree(&FreeCallBack);
+
+	// Register functions
+	luaL_register(L,"ixml",IXMLfunctions);
 
 	return 1;
 };
