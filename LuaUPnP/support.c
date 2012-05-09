@@ -152,7 +152,7 @@ static IXML_Node* checknode(lua_State *L, int idx)
 {
 	pLuaNode node;
 	luaL_checkudata(L, idx, LPNP_NODE_MT);
-	node = lua_touserdata(L, idx);
+	node = (pLuaNode)lua_touserdata(L, idx);
 	if (node->node == NULL) luaL_error(L, "Invalid Node (document closed?)");
 	return node->node;
 }

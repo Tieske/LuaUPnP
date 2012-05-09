@@ -1,3 +1,7 @@
+-----------------------------------------------------------------
+--  Test module, initialize here, main test function below
+-----------------------------------------------------------------
+
 local myxml = [[<?xml version="1.0" encoding="utf-8"?>
 <root xmlns="urn:schemas-upnp-org:device-1-0">
    <specVersion>
@@ -36,25 +40,21 @@ local myxml = [[<?xml version="1.0" encoding="utf-8"?>
 </root>
 ]]
 
-local ixml = require("LuaUPnP")
+local upnp = require("LuaUPnP")
+local ixml = upnp.ixml
 
-local _children = function(ininode, node)
 
-	if node == nil then
-		print("Getting first child of", ininode)
-		node = ixml.getFirstChild(ininode)
-		print("     Got", node)
-	else
-		print("Getting next sibling of", node)
-		node = ixml.getNextSibling(node)
-		print("     Got", node)
+local function printtree(n, level)
+	level = level or ""
+	print(level .. tostring(n), n:getNodeName(), n:getNodeValue(), n:hasChildNodes())
+	for node in n:children() do
+		printtree(node, level .. "   ")
 	end
-	return node
 end
-ixml.children = function(ininode)
-	print ("starting iterator with", ininode)
-	return _children, ininode, nil
-end
+
+-----------------------------------------------------------------
+--  Test function, put main code here
+-----------------------------------------------------------------
 
 local test = function()
 	print (myxml)
@@ -64,17 +64,14 @@ local test = function()
 	print(type(myxml))
 	local file = ixml.ParseBuffer(myxml)
 
-	for node in ixml.children(file) do
-		print(node)
-	end
+	printtree(file)
 
-	--[[
-	print("Content of IXML library:")
-	for k,v in pairs(xml) do
-		print("   ", k, v);
-	end
-	]]--
 end
+
+-----------------------------------------------------------------
+--  Generic test functionality to start and trace errors
+-----------------------------------------------------------------
+
 
 local errf = function(msg)
 	print (debug.traceback(msg or "Stacktrace:"))

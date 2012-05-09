@@ -228,18 +228,101 @@ static const struct luaL_Reg IXMLfunctions[] = {
 */	// API Doubles
 	{"getElementsByTagName",L_getElementsByTagName},		// Document and Element
 	{"getElementsByTagNameNS",L_getElementsByTagNameNS},	// Document and Element
+	{"children", L_children},
 /*	{"item",L_item},										// NamedNodeMap and NodeList
 */	{NULL,NULL}
 };
 
-// Methods for the document object
+// Methods for the nodes
 static const struct luaL_Reg LPNP_Node_Methods[] = {
-	//{"new", LPNP_DocNew},
-	{NULL, NULL}
+	// Node API
+	{"getNodeName",L_getNodeName},
+	{"getNodeValue",L_getNodeValue},
+	{"setNodeValue",L_setNodeValue},
+	{"getNodeType",L_getNodeType},
+	{"getParentNode",L_getParentNode},
+	{"getChildNodes",L_getChildNodes},
+	{"getFirstChild",L_getFirstChild},
+	{"getLastChild",L_getLastChild},
+	{"getPreviousSibling",L_getPreviousSibling},
+	{"getNextSibling",L_getNextSibling},
+	{"getAttributes",L_getAttributes},
+	{"getOwnerDocument",L_getOwnerDocument},
+	{"getNamespaceURI",L_getNameSpaceURI},
+	{"getPrefix",L_getPrefix},
+	{"getLocalName",L_getLocalName},
+	{"insertBefore",L_insertBefore},
+	{"replaceChild",L_replaceChild},
+	{"removeChild",L_removeChild},
+	{"appendChild",L_appendChild},
+	{"hasChildNodes",L_hasChildNodes},
+	{"cloneNode",L_cloneNode},
+	{"hasAttributes",L_hasAttributes},
+	// Attr API
+	/* empty */
+	// CDATA API
+	/* empty */
+	// Document API
+	{"createDocument",L_createDocumentEx},
+	{"createElement",L_createElementEx},
+	{"createTextNode",L_createTextNodeEx},
+	{"createCDATASection",L_createCDATASectionEx},
+	{"createAttribute",L_createAttributeEx},
+	//{"getElementsByTagName",L_getElementsByTagName}
+	{"createElementNS",L_createElementNSEx},
+	{"createAttributeNS",L_createAttributeNSEx},
+	//{"getElementsByTagNameNS",L_getElementsByTagName},
+	{"getElementById",L_getElementById},
+	{"importNode",L_importNode},
+	// Element API
+	{"getTagName",L_getTagName},
+	{"getAttribute",L_getAttribute},
+	{"setAttribute",L_setAttribute},
+	{"removeAttribute",L_removeAttribute},
+	{"getAttributeNode",L_getAttributeNode},
+	{"setAttributeNode",L_setAttributeNode},
+	{"removeAttributeNode",L_removeAttributeNode},
+	//{"getElementsByTagName",L_getElementsByTagName},
+	{"getAttributeNS",L_getAttributeNS},
+	{"setAttributeNS",L_setAttributeNS},
+	{"removeAttributeNS",L_removeAttributeNS},
+	{"getAttributeNodeNS",L_getAttributeNodeNS},
+	{"setAttributeNodeNS",L_setAttributeNodeNS},
+	//{"getElementsByTagNameNS",L_getElementsByTagNameNS},
+	{"hasAttribute",L_hasAttribute},
+	{"hasAttributeNS",L_hasAttributeNS},
+/*	// NamedNodeMap API
+	{"getLength",L_getLength},
+	{"getNamedItem",L_getNamedItem},
+	{"setNamedItem",L_setNamedItem},
+	{"removeNamedItem",L_removeNamedItem},
+	//{"item",L_item},
+	{"getNamedItemNS",L_getNamedItemNS},
+	{"setNamedItemNS",L_setNamedItemNS},
+	{"removeNamedItemNS",L_removeNamedItemNS},
+	// NodeList API
+	//{"item",L_item},
+	{"length",L_length},
+*/	// API Doubles
+	{"getElementsByTagName",L_getElementsByTagName},		// Document and Element
+	{"getElementsByTagNameNS",L_getElementsByTagNameNS},	// Document and Element
+	{"children", L_children},
+/*	{"item",L_item},										// NamedNodeMap and NodeList
+*/	{NULL,NULL}
 };
+
+// Register table for the UPnP functions
+static const struct luaL_Reg UPnPfunctions[] = {
+	{NULL,NULL}
+};
+
 
 LPNP_API	int luaopen_LuaUPnP(lua_State *L)
 {
+	/////////////////////////////////////////////
+	//  Initialize IXML part
+	/////////////////////////////////////////////
+
 	// Create a new metatable for the nodes
 	luaL_newmetatable(L, LPNP_NODE_MT);
 	// Set it as a metatable to itself
@@ -268,8 +351,24 @@ LPNP_API	int luaopen_LuaUPnP(lua_State *L)
 	// set the 'free' callback from IXML
 	ixmlSetBeforeFree(&FreeCallBack);
 
-	// Register functions
-	luaL_register(L,"ixml",IXMLfunctions);
+	/////////////////////////////////////////////
+	//  Initialize UPnP part
+	/////////////////////////////////////////////
+
+	// Register UPnP functions
+	luaL_register(L,"LuaUPnP",UPnPfunctions);
+
+
+
+	/////////////////////////////////////////////
+	//  Register IXML functions
+	/////////////////////////////////////////////
+
+	// Register functions in sub-table of main UPnP table
+	lua_pushstring(L, "ixml");
+	lua_newtable(L);
+	luaL_register(L, NULL, IXMLfunctions);
+	lua_settable(L, -3);
 
 	return 1;
 };

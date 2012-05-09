@@ -218,3 +218,31 @@ static int L_hasAttributes(lua_State *L)
 	return 1;
 }
 
+/*
+** ===============================================================
+**  In addition to the interface, an node-child iterator
+** ===============================================================
+*/
+
+// iterator closure
+static int L_childIter(lua_State *L)
+{
+	pLuaNode node = (pLuaNode)lua_touserdata(L,2);
+	if (node == NULL)
+		node = pushLuaNode(L, ixmlNode_getFirstChild(((pLuaNode)lua_touserdata(L,1))->node));
+	else
+		node = pushLuaNode(L, ixmlNode_getNextSibling(node->node));
+	return 1;
+}
+
+// iterator factory
+static int L_children(lua_State *L)
+{
+	checknode(L,1);
+	lua_settop(L, 1);		// remove extra values
+	lua_pushcfunction(L, &L_childIter);	// 1st value for iterator craetion, include the 1 upvalue
+	lua_pushvalue(L, 1);	// duplicate node, 2nd value for iterator creation
+	//lua_pushnil(L);			// initial value for iterator (3rd value)
+	//return 3;
+	return 2;
+}
