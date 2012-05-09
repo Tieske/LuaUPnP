@@ -98,7 +98,10 @@
     <ClCompile Include="element.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="LuaIXML.c" />
+    <ClCompile Include="LuaIXML.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="LuaUPnP.c" />
     <ClCompile Include="node.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -108,6 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LuaIXML.h" />
+    <ClInclude Include="LuaUPnP.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="IXMLtest.lua">
