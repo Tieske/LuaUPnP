@@ -5,17 +5,6 @@
 #include <lua.h>
 #include <lauxlib.h>
 
-// Define platform specific extern statement
-#ifdef WIN32
-	#define LPNP_API __declspec(dllexport)
-#else
-	#define LPNP_API extern
-#endif
-
-// Registry ID for the start/end of the node (linked)list
-#define STARTNODE "LuaIXML.nodelists"
-#define ENDNODE "LuaIXML.nodeliste"
-
 // Required to track usage and free resources when all is out of scope
 // Typedefinition for a record that points to an IXML node
 typedef struct LuaNodeRecord *pLuaNode;
@@ -25,7 +14,7 @@ typedef struct LuaNodeRecord {
 } LuaNode;
 
 // Metatable names to define objects
-#define LPNP_NODE_MT "LuaUPnP.Node"	
+#define LPNP_NODE_MT "LuaUPnP.IXMLNode"	
 
 // Registry (weak) table name with userdata references by pointers (lightuserdata)
 #define LPNP_WTABLE_IXML "LuaUPnP.IXMLuserdata"

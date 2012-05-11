@@ -31,7 +31,7 @@ static int L_getNodeType(lua_State *L)
 {
 	switch (ixmlNode_getNodeType(checknode(L, 1))) {
 		case eELEMENT_NODE: {
-			lua_pushstring(L, "INVALID_NODE");
+			lua_pushstring(L, "ELEMENT_NODE");
 			break; }
 		case eATTRIBUTE_NODE: {
 			lua_pushstring(L, "ATTRIBUTE_NODE");
@@ -168,28 +168,21 @@ static int L_insertBefore(lua_State *L)
 
 static int L_replaceChild(lua_State *L)
 {
-	IXML_Node* addtonode = checknode(L, 1);
-	IXML_Node* newchild = checknode(L, 2);
-	IXML_Node* oldchild = checknode(L, 3);
-	IXML_Node* ret;
-	int result;
-	result = ixmlNode_replaceChild(addtonode, newchild, oldchild, &ret);
+	IXML_Node* ret = NULL;
+	int result = IXML_SUCCESS;
+	result = ixmlNode_replaceChild(checknode(L, 1), checknode(L, 2), checknode(L, 3), &ret);
 	if (result != IXML_SUCCESS)	pushIXMLerror(L, result);
-	//TODO: old node (in ret) will have been removed from the document, update tracking stuff
-	lua_pushinteger(L, 1);
+	pushLuaNode(L, ret);
 	return 1;
 }
 
 static int L_removeChild(lua_State *L)
 {
-	IXML_Node* removefromnode = checknode(L, 1);
-	IXML_Node* oldchild = checknode(L, 3);
-	IXML_Node* ret;
-	int result;
-	result = ixmlNode_removeChild(removefromnode, oldchild, &ret);
+	IXML_Node* ret = NULL;
+	int result = IXML_SUCCESS;
+	result = ixmlNode_removeChild(checknode(L, 1), checknode(L, 2), &ret);
 	if (result != IXML_SUCCESS)	pushIXMLerror(L, result);
-	//TODO: old node (in ret) will have been removed from the document, update tracking stuff
-	lua_pushinteger(L, 1);
+	pushLuaNode(L, ret);
 	return 1;
 }
 
@@ -225,3 +218,31 @@ static int L_hasAttributes(lua_State *L)
 	return 1;
 }
 
+/*
+** ===============================================================
+**  In addition to the interface, an node-child iterator
+** ===============================================================
+*/
+
+// iterator closure
+static int L_childIter(lua_State *L)
+{
+	pLuaNode node = (pLuaNode)lua_touserdata(L,2);
+	if (node == NULL)
+		node = pushLuaNode(L, ixmlNode_getFirstChild(((pLuaNode)lua_touserdata(L,1))->node));
+	else
+		node = pushLuaNode(L, ixmlNode_getNextSibling(node->node));
+	return 1;
+}
+
+// iterator factory
+static int L_children(lua_State *L)
+{
+	checknode(L,1);
+	lua_settop(L, 1);		// remove extra values
+	lua_pushcfunction(L, &L_childIter);	// 1st value for iterator craetion, include the 1 upvalue
+	lua_pushvalue(L, 1);	// duplicate node, 2nd value for iterator creation
+	//lua_pushnil(L);			// initial value for iterator (3rd value)
+	//return 3;
+	return 2;
+}
