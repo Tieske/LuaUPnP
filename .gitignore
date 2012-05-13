@@ -3,3 +3,5 @@
 *.ncb
 /Debug
 /LuaUPnP/Debug
+/ipch
+*.sdf

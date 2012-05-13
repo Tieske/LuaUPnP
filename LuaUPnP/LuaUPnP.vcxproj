@@ -53,7 +53,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\Lua\5.1\include;W:\Thijs\Visual Studio 2010\Projects\pupnp\upnp\inc;W:\Thijs\Visual Studio 2010\Projects\pupnp\ixml\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>W:\Thijs\Visual Studio 2010\Projects\pupnp\build\msvc;C:\Program Files (x86)\Lua\5.1\include;W:\Thijs\Visual Studio 2010\Projects\pupnp\upnp\inc;W:\Thijs\Visual Studio 2010\Projects\pupnp\ixml\inc;W:\Thijs\Visual Studio 2010\Projects\pupnp\build\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LUAUPNP_EXPORTS;SCRIPTSUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
