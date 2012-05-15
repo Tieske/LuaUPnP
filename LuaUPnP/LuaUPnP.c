@@ -18,43 +18,136 @@
 
 /*
 ** ===============================================================
+**  UPnP API: Callbacks
+** ===============================================================
+*/
+
+static int ClientCallback(Upnp_EventType EventType, const void *Event, void *Cookie)
+{
+	// TODO: implement callback
+}
+
+static int DeviceCallback(Upnp_EventType EventType, const void *Event, void *Cookie)
+{
+	// TODO: implement callback
+}
+
+
+/*
+** ===============================================================
 **  UPnP API: Initialization & Registration
 ** ===============================================================
 */
 
 static int L_UpnpInit(lua_State *L)
 {
-	// TODO: implement
+	const char* ipaddr = NULL;
+	unsigned short port = 0;
+	int result = UPNP_E_SUCCESS;
+
+	if (lua_gettop(L) > 0) ipaddr = luaL_checkstring(L, 1);
+	if (lua_gettop(L) > 1) port = (unsigned short)luaL_checkint(L,2);
+
+	result = UpnpInit(ipaddr, port);
+
+	lua_checkstack(L,3);
+	if (result == UPNP_E_SUCCESS)	
+	{
+		lua_pushinteger(L, 1);	// push 1 as positive result
+		return 1;
+	}
+	// report error
+	return pushUPnPerror(L, result);
 }
 
 static int L_UpnpFinish(lua_State *L)
 {
-	// TODO: implement
+	int result = UPNP_E_SUCCESS;
+
+	result = UpnpFinish();
+
+	lua_checkstack(L,3);
+	if (result == UPNP_E_SUCCESS)	
+	{
+		lua_pushinteger(L, 1);	// push 1 as positive result
+		return 1;
+	}
+	// report error
+	return pushUPnPerror(L, result);
 }
 
 static int L_UpnpGetServerPort(lua_State *L)
 {
-	// TODO: implement
+	lua_pushinteger(L, (int)UpnpGetServerPort());
+	return 1;
 }
 
 static int L_UpnpGetServerIpAddress(lua_State *L)
 {
-	// TODO: implement
+	lua_pushstring(L, UpnpGetServerIpAddress());
+	return 1;
 }
 
 static int L_UpnpRegisterClient(lua_State *L)
 {
-	// TODO: implement
+	int result = UPNP_E_SUCCESS;
+	UpnpClient_Handle handle = 0;
+	pLuaClient lc;
+	result = UpnpRegisterClient(&ClientCallback, NULL, &handle);
+	if (result == UPNP_E_SUCCESS)
+	{
+		lc = pushLuaClient(L, handle);
+		if (lc != NULL) return 1;		// success
+		// failure, so unregister again
+		result = UpnpUnRegisterClient(handle);
+		// nil is already present on stack, add error text
+		lua_pushstring(L, "LuaUPnP; Failed to create client userdata, out of memory?");
+		return 2;
+	}
+	// report error
+	return pushUPnPerror(L, result);
 }
 
 static int L_UpnpRegisterRootDevice(lua_State *L)
 {
-	// TODO: implement
+	int result = UPNP_E_SUCCESS;
+	UpnpDevice_Handle handle = 0;
+	pLuaDevice ld;
+	result = UpnpRegisterRootDevice(luaL_checkstring(L,1), &DeviceCallback, NULL, &handle);
+	if (result == UPNP_E_SUCCESS)
+	{
+		ld = pushLuaDevice(L, handle);
+		if (ld != NULL) return 1;		// success
+		// failure, so unregister again
+		result = UpnpUnRegisterRootDevice(handle);
+		// nil is already present on stack, add error text
+		lua_pushstring(L, "LuaUPnP; Failed to create device userdata, out of memory?");
+		return 2;
+	}
+	// report error
+	return pushUPnPerror(L, result);
 }
 
 static int L_UpnpRegisterRootDevice2(lua_State *L)
 {
-	// TODO: implement
+	int result = UPNP_E_SUCCESS;
+	UpnpDevice_Handle handle = 0;
+	pLuaDevice ld;
+	size_t slen;
+	const char* str = luaL_checklstring(L, 2, &slen);
+	result = UpnpRegisterRootDevice2(checkdesctype(L, 1), str, slen, lua_toboolean(L, 3), &DeviceCallback, NULL, &handle);
+	if (result == UPNP_E_SUCCESS)
+	{
+		ld = pushLuaDevice(L, handle);
+		if (ld != NULL) return 1;		// success
+		// failure, so unregister again
+		result = UpnpUnRegisterRootDevice(handle);
+		// nil is already present on stack, add error text
+		lua_pushstring(L, "LuaUPnP; Failed to create device userdata, out of memory?");
+		return 2;
+	}
+	// report error
+	return pushUPnPerror(L, result);
 }
 
 static int L_UpnpUnRegisterClient(lua_State *L)

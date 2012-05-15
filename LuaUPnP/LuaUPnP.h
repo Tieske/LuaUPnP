@@ -27,6 +27,7 @@ typedef struct LuaDevRecord {
 	// if Device == NULL, the device is closed/unopened
 	UpnpDevice_Handle device;	
 } LuaDevice;
+
 // Typedefinition for a record that points to a UPnP client
 typedef struct LuaClientRecord *pLuaClient;
 typedef struct LuaClientRecord {

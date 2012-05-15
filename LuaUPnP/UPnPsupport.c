@@ -141,6 +141,36 @@ static UpnpClient_Handle checkclient(lua_State *L, int idx)
 	return client->client;
 }
 
+// Get the Upnp_DescType from Lua
+static Upnp_DescType checkdesctype(lua_State *L, int idx)
+{
+	const char* etype = NULL;
+	etype = luaL_checkstring(L, idx);
+	lua_checkstack(L,1);
+	if (idx < 0) idx = idx - 1;		// one less because we added a string
+
+	lua_pushstring(L, "URL");
+	if (lua_equal(L, idx, -1))
+	{
+		lua_pop(L,1);
+		return UPNPREG_URL_DESC;
+	}
+	lua_pop(L,1);
+	lua_pushstring(L, "FILENAME");
+	{
+		lua_pop(L,1);
+		return UPNPREG_FILENAME_DESC;
+	}
+	lua_pop(L,1);
+	lua_pushstring(L, "STRING");
+	{
+		lua_pop(L,1);
+		return UPNPREG_BUF_DESC;
+	}
+	lua_pop(L,1);
+	// we failed to parse it, error...
+	return (Upnp_DescType)luaL_error(L, "Expected a type identifier (string); 'URL', 'FILENAME', or 'STRING'");
+}
 
 /*
 ** ===============================================================
