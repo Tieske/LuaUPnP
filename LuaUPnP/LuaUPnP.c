@@ -32,12 +32,12 @@ static int L_UpnpFinish(lua_State *L)
 	// TODO: implement
 }
 
-static int L_GetServerPort(lua_State *L)
+static int L_UpnpGetServerPort(lua_State *L)
 {
 	// TODO: implement
 }
 
-static int L_GetServerIpAddress(lua_State *L)
+static int L_UpnpGetServerIpAddress(lua_State *L)
 {
 	// TODO: implement
 }
@@ -370,7 +370,7 @@ static const struct luaL_Reg UPnPfunctions[] = {
 	{"SetMaxContentLength",L_UpnpSetMaxContentLength},
 	// Discovery
 	{"SearchAsync",L_UpnpSearchAsync},
-	{"SendAdvertisment",L_UpnpSendAdvertisment},
+	{"SendAdvertisement",L_UpnpSendAdvertisement},
 	// Control
 	{"GetServiceVarStatus",L_UpnpGetServiceVarStatus},
 	{"GetServiceVarAsync",L_UpnpGetServiceVarStatusAsync},
@@ -400,7 +400,7 @@ static const struct luaL_Reg UPnPDeviceMethods[] = {
 	// Initialization & Registration
 	{"UnRegisterRootDevice",L_UpnpUnRegisterRootDevice},
 	// Discovery
-	{"SendAdvertisment",L_UpnpSendAdvertisment},
+	{"SendAdvertisement",L_UpnpSendAdvertisement},
 	// Eventing
 	{"AcceptSubscription",L_UpnpAcceptSubscription},
 	{"AcceptSubscriptionExt",L_UpnpAcceptSubscriptionExt},

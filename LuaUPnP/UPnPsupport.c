@@ -14,22 +14,16 @@
 ** ===============================================================
 */
 
-// Pushes the Device as a userdata on the stack, or nil if the ref is NULL
+// Pushes the Device as a userdata on the stack
 // returns the userdata, or NULL.
 static pLuaDevice pushLuaDevice(lua_State *L, UpnpDevice_Handle dev)
 {
 	pLuaDevice ld = NULL;
 
-	if (dev == NULL)
-	{
-		lua_pushnil(L);
-		return NULL;
-	}
-
 	lua_checkstack(L,6);
 	// Try and find the node
 	lua_getfield(L, LUA_REGISTRYINDEX, LPNP_WTABLE_UPNP);
-	lua_pushlightuserdata(L, dev);
+	lua_pushinteger(L, dev);
 	lua_gettable(L, -2);
 	if (lua_isnil(L, -1))
 	{
@@ -42,7 +36,7 @@ static pLuaDevice pushLuaDevice(lua_State *L, UpnpDevice_Handle dev)
 			ld->device = dev;
 
 			// store in registry userdata reference table
-			lua_pushlightuserdata(L, dev);		// the KEY
+			lua_pushinteger(L, dev);			// the KEY
 			lua_pushvalue(L, -2);				// copy userdata as VALUE
 			lua_settable(L, -4);				// store KEY/VALUE pair in ref table
 
@@ -68,22 +62,16 @@ static pLuaDevice pushLuaDevice(lua_State *L, UpnpDevice_Handle dev)
 	return ld;
 }
 
-// Pushes the Client as a userdata on the stack, or nil if the ref is NULL
+// Pushes the Client as a userdata on the stack
 // returns the userdata, or NULL.
 static pLuaClient pushLuaClient(lua_State *L, UpnpClient_Handle client)
 {
 	pLuaClient lc = NULL;
 
-	if (client == NULL)
-	{
-		lua_pushnil(L);
-		return NULL;
-	}
-
 	lua_checkstack(L,6);
 	// Try and find the node
 	lua_getfield(L, LUA_REGISTRYINDEX, LPNP_WTABLE_UPNP);
-	lua_pushlightuserdata(L, client);
+	lua_pushinteger(L, client);
 	lua_gettable(L, -2);
 	if (lua_isnil(L, -1))
 	{
@@ -96,7 +84,7 @@ static pLuaClient pushLuaClient(lua_State *L, UpnpClient_Handle client)
 			lc->client = client;
 
 			// store in registry userdata reference table
-			lua_pushlightuserdata(L, client);		// the KEY
+			lua_pushinteger(L, client);			// the KEY
 			lua_pushvalue(L, -2);				// copy userdata as VALUE
 			lua_settable(L, -4);				// store KEY/VALUE pair in ref table
 
@@ -137,7 +125,7 @@ static UpnpDevice_Handle checkdevice(lua_State *L, int idx)
 	pLuaDevice dev;
 	luaL_checkudata(L, idx, LPNP_DEVICE_MT);
 	dev = (pLuaDevice)lua_touserdata(L, idx);
-	if (dev->device == NULL) luaL_error(L, "Invalid UPnP device (closed/not started?)");
+	//if (dev->device == NULL) luaL_error(L, "Invalid UPnP device (closed/not started?)");
 	return dev->device;
 }
 
@@ -149,7 +137,7 @@ static UpnpClient_Handle checkclient(lua_State *L, int idx)
 	pLuaClient client;
 	luaL_checkudata(L, idx, LPNP_CLIENT_MT);
 	client = (pLuaClient)lua_touserdata(L, idx);
-	if (client->client == NULL) luaL_error(L, "Invalid UPnP controlpoint (closed/not started?)");
+	//if (client->client == NULL) luaL_error(L, "Invalid UPnP controlpoint (closed/not started?)");
 	return client->client;
 }
 
@@ -167,7 +155,7 @@ int pushUPnPerror(lua_State *L, int err)
 {
 	lua_checkstack(L,3);
 	lua_pushnil(L);
-	lua_pushstring(L, UpnpGerErrorMessage(err));
+	lua_pushstring(L, UpnpGetErrorMessage(err));
 /*	switch (err) {
 		case UPNP_E_SUCCESS: 
 			lua_pushstring(L, "UPNP_E_SUCCESS");
@@ -361,10 +349,8 @@ int L_clienttostring(lua_State *L)
 static int L_DestroyDevice(lua_State *L)
 {
 	pLuaDevice dev = (pLuaDevice)lua_touserdata(L, 1);
-	if (dev->device != NULL)
-	{
-		UpnpUnRegisterRootDevice(dev->device);
-	}
+	//if (dev->device != NULL)
+	UpnpUnRegisterRootDevice(dev->device);
 	return 0;
 }
 
@@ -372,9 +358,7 @@ static int L_DestroyDevice(lua_State *L)
 static int L_DestroyClient(lua_State *L)
 {
 	pLuaClient client = (pLuaClient)lua_touserdata(L, 1);
-	if (client->client != NULL)
-	{
-		UpnpUnRegisterClient(client->client);
-	}
+	//if (client->client != NULL)
+	UpnpUnRegisterClient(client->client);
 	return 0;
 }

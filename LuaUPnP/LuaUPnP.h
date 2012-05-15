@@ -2,6 +2,7 @@
 #define LuaUPnP_h
 
 #include "upnp.h"
+#include "upnptools.h"
 #include <lua.h>
 #include <lauxlib.h>
 
