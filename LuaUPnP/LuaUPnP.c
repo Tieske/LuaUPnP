@@ -286,6 +286,7 @@ static int L_UpnpAcceptSubscription(lua_State *L)
 
 static int L_UpnpAcceptSubscriptionExt(lua_State *L)
 {
+	// TODO: check the cast of the string from a const
 	int result = UpnpAcceptSubscriptionExt(checkdevice(L, 1), luaL_checkstring(L,2), luaL_checkstring(L,3), checkdocument(L, 4), (char*)luaL_checkstring(L,5));
 	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
 	lua_pushinteger(L, 1);
@@ -317,6 +318,7 @@ static int L_UpnpRenewSubscription(lua_State *L)
 
 static int L_UpnpRenewSubscriptionAsync(lua_State *L)
 {
+	// TODO: check the cast to a string below, make copy?
 	int result = UpnpRenewSubscriptionAsync(checkclient(L, 1), luaL_checkint(L,2), (char*)luaL_checkstring(L,3), &ClientCallback, COOKIENULL);
 	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
 	lua_pushinteger(L, 1);
@@ -345,22 +347,38 @@ static int L_UpnpSetMaxSubscriptionTimeOut(lua_State *L)
 
 static int L_UpnpSubscribe(lua_State *L)
 {
-	// TODO: implement
+	int timeout = luaL_checkint(L,3);
+	Upnp_SID SubsId;
+	int result = UpnpSubscribe(checkclient(L, 1), luaL_checkstring(L,2), &timeout, SubsId);
+	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, timeout);
+	lua_pushstring(L, SubsId);
+	return 2;
 }
 
 static int L_UpnpSubscribeAsync(lua_State *L)
 {
-	// TODO: implement
+	int result = UpnpSubscribeAsync(checkclient(L, 1), luaL_checkstring(L,2), luaL_checkint(L,3), &ClientCallback, COOKIENULL);
+	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 static int L_UpnpUnSubscribe(lua_State *L)
 {
-	// TODO: implement
+	int result = UpnpUnSubscribe(checkclient(L, 1), luaL_checkstring(L,2));
+	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 static int L_UpnpUnSubscribeAsync(lua_State *L)
 {
-	// TODO: implement
+	// TODO: check the cast from a const on the checkstring below, make copy?
+	int result = UpnpUnSubscribeAsync(checkclient(L, 1), (char *)luaL_checkstring(L,2), &ClientCallback, COOKIENULL);
+	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 
