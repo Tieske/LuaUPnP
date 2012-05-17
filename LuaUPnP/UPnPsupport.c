@@ -125,7 +125,6 @@ static UpnpDevice_Handle checkdevice(lua_State *L, int idx)
 	pLuaDevice dev;
 	luaL_checkudata(L, idx, LPNP_DEVICE_MT);
 	dev = (pLuaDevice)lua_touserdata(L, idx);
-	//if (dev->device == NULL) luaL_error(L, "Invalid UPnP device (closed/not started?)");
 	return dev->device;
 }
 
@@ -137,12 +136,11 @@ static UpnpClient_Handle checkclient(lua_State *L, int idx)
 	pLuaClient client;
 	luaL_checkudata(L, idx, LPNP_CLIENT_MT);
 	client = (pLuaClient)lua_touserdata(L, idx);
-	//if (client->client == NULL) luaL_error(L, "Invalid UPnP controlpoint (closed/not started?)");
 	return client->client;
 }
 
 // Get the Upnp_DescType from Lua
-static Upnp_DescType checkdesctype(lua_State *L, int idx)
+static Upnp_DescType checkUpnp_DescType(lua_State *L, int idx)
 {
 	const char* etype = NULL;
 	etype = luaL_checkstring(L, idx);
@@ -179,9 +177,9 @@ static Upnp_DescType checkdesctype(lua_State *L, int idx)
 */
 
 // Pushes nil + UPnP error, call from a return statement; eg:  
-//     return pushUPnPerror(L, errno);
+//     return pushUPnPerror(L, errno, soap);
 // SOFT ERROR
-int pushUPnPerror(lua_State *L, int err)
+int pushUPnPerror(lua_State *L, int err, IXML_Document* respdoc)
 {
 	lua_checkstack(L,3);
 	lua_pushnil(L);
@@ -342,6 +340,11 @@ int pushUPnPerror(lua_State *L, int err)
 			break;
 	}
 */	lua_pushinteger(L, err);
+	if (err > 0)	// SOAP error, also add document containing error
+	{
+		pushLuaDocument(L, respdoc);
+		return 4;
+	}
 	return 3;
 }
 

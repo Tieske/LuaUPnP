@@ -1,5 +1,9 @@
 #include "LuaUPnP.h"
 
+// this define is used to easily spot the currently unused COOKIEs, 
+// in case we might need them later on
+#define COOKIENULL NULL
+
 /*
 ** ===============================================================
 **  Forward declarations
@@ -57,7 +61,7 @@ static int L_UpnpInit(lua_State *L)
 		return 1;
 	}
 	// report error
-	return pushUPnPerror(L, result);
+	return pushUPnPerror(L, result, NULL);
 }
 
 static int L_UpnpFinish(lua_State *L)
@@ -73,7 +77,7 @@ static int L_UpnpFinish(lua_State *L)
 		return 1;
 	}
 	// report error
-	return pushUPnPerror(L, result);
+	return pushUPnPerror(L, result, NULL);
 }
 
 static int L_UpnpGetServerPort(lua_State *L)
@@ -93,7 +97,7 @@ static int L_UpnpRegisterClient(lua_State *L)
 	int result = UPNP_E_SUCCESS;
 	UpnpClient_Handle handle = 0;
 	pLuaClient lc;
-	result = UpnpRegisterClient(&ClientCallback, NULL, &handle);
+	result = UpnpRegisterClient(&ClientCallback, COOKIENULL, &handle);
 	if (result == UPNP_E_SUCCESS)
 	{
 		lc = pushLuaClient(L, handle);
@@ -105,7 +109,7 @@ static int L_UpnpRegisterClient(lua_State *L)
 		return 2;
 	}
 	// report error
-	return pushUPnPerror(L, result);
+	return pushUPnPerror(L, result, NULL);
 }
 
 static int L_UpnpRegisterRootDevice(lua_State *L)
@@ -113,7 +117,7 @@ static int L_UpnpRegisterRootDevice(lua_State *L)
 	int result = UPNP_E_SUCCESS;
 	UpnpDevice_Handle handle = 0;
 	pLuaDevice ld;
-	result = UpnpRegisterRootDevice(luaL_checkstring(L,1), &DeviceCallback, NULL, &handle);
+	result = UpnpRegisterRootDevice(luaL_checkstring(L,1), &DeviceCallback, COOKIENULL, &handle);
 	if (result == UPNP_E_SUCCESS)
 	{
 		ld = pushLuaDevice(L, handle);
@@ -125,7 +129,7 @@ static int L_UpnpRegisterRootDevice(lua_State *L)
 		return 2;
 	}
 	// report error
-	return pushUPnPerror(L, result);
+	return pushUPnPerror(L, result, NULL);
 }
 
 static int L_UpnpRegisterRootDevice2(lua_State *L)
@@ -135,7 +139,7 @@ static int L_UpnpRegisterRootDevice2(lua_State *L)
 	pLuaDevice ld;
 	size_t slen;
 	const char* str = luaL_checklstring(L, 2, &slen);
-	result = UpnpRegisterRootDevice2(checkdesctype(L, 1), str, slen, lua_toboolean(L, 3), &DeviceCallback, NULL, &handle);
+	result = UpnpRegisterRootDevice2(checkUpnp_DescType(L, 1), str, slen, lua_toboolean(L, 3), &DeviceCallback, COOKIENULL, &handle);
 	if (result == UPNP_E_SUCCESS)
 	{
 		ld = pushLuaDevice(L, handle);
@@ -147,22 +151,31 @@ static int L_UpnpRegisterRootDevice2(lua_State *L)
 		return 2;
 	}
 	// report error
-	return pushUPnPerror(L, result);
+	return pushUPnPerror(L, result, NULL);
 }
 
 static int L_UpnpUnRegisterClient(lua_State *L)
 {
-	// TODO: implement
+	int result = UpnpUnRegisterClient(checkclient(L, 1));
+	if (result != UPNP_E_SUCCESS) return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 static int L_UpnpUnRegisterRootDevice(lua_State *L)
 {
-	// TODO: implement
+	int result = UpnpUnRegisterRootDevice(checkdevice(L, 1));
+	if (result != UPNP_E_SUCCESS) return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 static int L_UpnpSetMaxContentLength(lua_State *L)
 {
-	// TODO: implement
+	int result = UpnpSetMaxContentLength((size_t)luaL_checklong(L, 1));
+	if (result != UPNP_E_SUCCESS) return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 /*
@@ -173,12 +186,18 @@ static int L_UpnpSetMaxContentLength(lua_State *L)
 
 static int L_UpnpSearchAsync(lua_State *L)
 {
-	// TODO: implement
+	int result = UpnpSearchAsync(checkclient(L, 1), luaL_checkint(L,2), luaL_checkstring(L,3), COOKIENULL);
+	if (result != UPNP_E_SUCCESS) return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 static int L_UpnpSendAdvertisement(lua_State *L)
 {
-	// TODO: implement
+	int result = UpnpSendAdvertisement(checkdevice(L, 1), luaL_checkint(L,2));
+	if (result != UPNP_E_SUCCESS) return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 
@@ -190,32 +209,66 @@ static int L_UpnpSendAdvertisement(lua_State *L)
 
 static int L_UpnpGetServiceVarStatus(lua_State *L)
 {
-	// TODO: implement
+	DOMString res = NULL;
+	int result = UpnpGetServiceVarStatus(checkclient(L, 1), luaL_checkstring(L,2), luaL_checkstring(L,3), &res);
+	if (result != UPNP_E_SUCCESS)
+	{
+		if (res != NULL) ixmlFreeDOMString(res);
+		return pushUPnPerror(L, result, NULL);
+	}
+	lua_pushstring(L, res);
+	ixmlFreeDOMString(res);
+	return 1;
 }
 
 static int L_UpnpGetServiceVarStatusAsync(lua_State *L)
 {
-	// TODO: implement
+	int result = UpnpGetServiceVarStatusAsync(checkclient(L, 1), luaL_checkstring(L,2), luaL_checkstring(L,3), &ClientCallback, COOKIENULL);
+	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 static int L_UpnpSendAction(lua_State *L)
 {
-	// TODO: implement, combine with EX version
+	IXML_Document* RespNode = NULL;
+	int result = UpnpSendAction(checkclient(L, 1), luaL_checkstring(L,2), luaL_checkstring(L,3), NULL, checkdocument(L, 4), &RespNode);
+	if (result == UPNP_E_SUCCESS)
+	{
+		pushLuaDocument(L, RespNode);
+		return 1;
+	}
+	return pushUPnPerror(L, result, RespNode);
 }
 
 static int L_UpnpSendActionEx(lua_State *L)
 {
-	// TODO: implement
+	IXML_Document* RespNode = NULL;
+	int result = UpnpSendActionEx(checkclient(L, 1), luaL_checkstring(L,2), luaL_checkstring(L,3), NULL, checkdocument(L, 4), checkdocument(L, 5), &RespNode);
+	if (result == UPNP_E_SUCCESS)
+	{
+		pushLuaDocument(L, RespNode);
+		return 1;
+	}
+	return pushUPnPerror(L, result, RespNode);
 }
 
 static int L_UpnpSendActionAsync(lua_State *L)
 {
-	// TODO: implement, combine with Ex version
+	IXML_Document* RespNode = NULL;
+	int result = UpnpSendActionAsync(checkclient(L, 1), luaL_checkstring(L,2), luaL_checkstring(L,3), NULL, checkdocument(L, 4), &ClientCallback, COOKIENULL);
+	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 static int L_UpnpSendActionExAsync(lua_State *L)
 {
-	// TODO: implement
+	IXML_Document* RespNode = NULL;
+	int result = UpnpSendActionExAsync(checkclient(L, 1), luaL_checkstring(L,2), luaL_checkstring(L,3), NULL, checkdocument(L, 4), checkdocument(L, 5), &ClientCallback, COOKIENULL);
+	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 
@@ -227,42 +280,67 @@ static int L_UpnpSendActionExAsync(lua_State *L)
 
 static int L_UpnpAcceptSubscription(lua_State *L)
 {
+	luaL_error(L, "Not implemented, use the 'Ext' version");
 	// TODO: implement
 }
 
 static int L_UpnpAcceptSubscriptionExt(lua_State *L)
 {
-	// TODO: implement
+	int result = UpnpAcceptSubscriptionExt(checkdevice(L, 1), luaL_checkstring(L,2), luaL_checkstring(L,3), checkdocument(L, 4), (char*)luaL_checkstring(L,5));
+	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 static int L_UpnpNotify(lua_State *L)
 {
-	// TODO: implement, combine with Ext
+	luaL_error(L, "Not implemented, use the 'Ext' version");
+	// TODO: implement
 }
 
 static int L_UpnpNotifyExt(lua_State *L)
 {
-	// TODO: implement
+	int result = UpnpNotifyExt(checkdevice(L, 1), luaL_checkstring(L,2), luaL_checkstring(L,3), checkdocument(L, 4));
+	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 static int L_UpnpRenewSubscription(lua_State *L)
 {
-	// TODO: implement
+	int timeout = luaL_checkint(L,2);
+	int result = UpnpRenewSubscription(checkclient(L, 1), &timeout, luaL_checkstring(L,3));
+	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, timeout);
+	return 1;
 }
 
 static int L_UpnpRenewSubscriptionAsync(lua_State *L)
 {
-	// TODO: implement
+	int result = UpnpRenewSubscriptionAsync(checkclient(L, 1), luaL_checkint(L,2), (char*)luaL_checkstring(L,3), &ClientCallback, COOKIENULL);
+	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 static int L_UpnpSetMaxSubscriptions(lua_State *L)
 {
-	// TODO: implement
+	int setmax = luaL_checkint(L,2);
+	if (setmax == -1) setmax = UPNP_INFINITE;		// use -1 to set no limit
+	int result = UpnpSetMaxSubscriptions(checkdevice(L, 1), setmax);
+	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 static int L_UpnpSetMaxSubscriptionTimeOut(lua_State *L)
 {
-	// TODO: implement
+	int setto = luaL_checkint(L,2);
+	if (setto == -1) setto = UPNP_INFINITE;		// use -1 to set no timeout, wait forever
+	int result = UpnpSetMaxSubscriptionTimeOut(checkdevice(L, 1), setto);
+	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 static int L_UpnpSubscribe(lua_State *L)
