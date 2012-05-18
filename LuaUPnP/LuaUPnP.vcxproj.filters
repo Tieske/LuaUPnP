@@ -36,6 +36,9 @@
     <ClCompile Include="UPnPsupport.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UPnPcallback.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LuaIXML.h">
