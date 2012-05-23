@@ -53,7 +53,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>W:\Thijs\Visual Studio 2010\Projects\pupnp\build\inc;W:\Thijs\Visual Studio 2010\Projects\pupnp\build\msvc;W:\Thijs\Visual Studio 2010\Projects\pupnp\upnp\inc;W:\Thijs\Visual Studio 2010\Projects\pupnp\ixml\inc;C:\Program Files (x86)\Lua\5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>W:\Thijs\Visual Studio 2010\Projects\pupnp\build\inc;W:\Thijs\Visual Studio 2010\Projects\pupnp\build\msvc;W:\Thijs\Visual Studio 2010\Projects\pupnp\upnp\inc;W:\Thijs\Visual Studio 2010\Projects\pupnp\ixml\inc;W:\Thijs\Visual Studio 2010\Projects\pupnp\threadutil\inc;W:\Thijs\Visual Studio 2010\Projects\pupnp\pthreads\include;C:\Program Files (x86)\Lua\5.1\include;C:\Users\Thijs Schreijer\Desktop\LuaUPnP\dss;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LUAUPNP_EXPORTS;SCRIPTSUPPORT;UPNP_USE_MSVCPP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -92,6 +92,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\dss\darksidesync_aux.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="document.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -116,6 +119,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\dss\darksidesync_api.h" />
     <ClInclude Include="LuaIXML.h" />
     <ClInclude Include="LuaUPnP.h" />
   </ItemGroup>

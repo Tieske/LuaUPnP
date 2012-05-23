@@ -1,9 +1,5 @@
 #include "LuaUPnP.h"
 
-// this define is used to easily spot the currently unused COOKIEs, 
-// in case we might need them later on
-#define COOKIENULL NULL
-
 /*
 ** ===============================================================
 **  Forward declarations
@@ -25,7 +21,7 @@
 **  UPnP API: Callbacks
 ** ===============================================================
 */
-
+#include "darksidesync_aux.c"
 #include "UPnPcallback.c"
 
 static int LuaCallback(Upnp_EventType EventType, const void *Event, void *Cookie)
@@ -141,7 +137,7 @@ static int L_UpnpRegisterClient(lua_State *L)
 	int result = UPNP_E_SUCCESS;
 	UpnpClient_Handle handle = 0;
 	pLuaClient lc;
-	result = UpnpRegisterClient(&LuaCallback, COOKIENULL, &handle);
+	result = UpnpRegisterClient(&LuaCallback, DSS_getutilid(L), &handle);
 	if (result == UPNP_E_SUCCESS)
 	{
 		lc = pushLuaClient(L, handle);
@@ -161,7 +157,7 @@ static int L_UpnpRegisterRootDevice(lua_State *L)
 	int result = UPNP_E_SUCCESS;
 	UpnpDevice_Handle handle = 0;
 	pLuaDevice ld;
-	result = UpnpRegisterRootDevice(luaL_checkstring(L,1), &LuaCallback, COOKIENULL, &handle);
+	result = UpnpRegisterRootDevice(luaL_checkstring(L,1), &LuaCallback, DSS_getutilid(L), &handle);
 	if (result == UPNP_E_SUCCESS)
 	{
 		ld = pushLuaDevice(L, handle);
@@ -183,7 +179,7 @@ static int L_UpnpRegisterRootDevice2(lua_State *L)
 	pLuaDevice ld;
 	size_t slen;
 	const char* str = luaL_checklstring(L, 2, &slen);
-	result = UpnpRegisterRootDevice2(checkUpnp_DescType(L, 1), str, slen, lua_toboolean(L, 3), &LuaCallback, COOKIENULL, &handle);
+	result = UpnpRegisterRootDevice2(checkUpnp_DescType(L, 1), str, slen, lua_toboolean(L, 3), &LuaCallback, DSS_getutilid(L), &handle);
 	if (result == UPNP_E_SUCCESS)
 	{
 		ld = pushLuaDevice(L, handle);
@@ -230,7 +226,7 @@ static int L_UpnpSetMaxContentLength(lua_State *L)
 
 static int L_UpnpSearchAsync(lua_State *L)
 {
-	int result = UpnpSearchAsync(checkclient(L, 1), luaL_checkint(L,2), luaL_checkstring(L,3), COOKIENULL);
+	int result = UpnpSearchAsync(checkclient(L, 1), luaL_checkint(L,2), luaL_checkstring(L,3), DSS_getutilid(L));
 	if (result != UPNP_E_SUCCESS) return pushUPnPerror(L, result, NULL);
 	lua_pushinteger(L, 1);
 	return 1;
@@ -267,7 +263,7 @@ static int L_UpnpGetServiceVarStatus(lua_State *L)
 
 static int L_UpnpGetServiceVarStatusAsync(lua_State *L)
 {
-	int result = UpnpGetServiceVarStatusAsync(checkclient(L, 1), luaL_checkstring(L,2), luaL_checkstring(L,3), &LuaCallback, COOKIENULL);
+	int result = UpnpGetServiceVarStatusAsync(checkclient(L, 1), luaL_checkstring(L,2), luaL_checkstring(L,3), &LuaCallback, DSS_getutilid(L));
 	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
 	lua_pushinteger(L, 1);
 	return 1;
@@ -300,7 +296,7 @@ static int L_UpnpSendActionEx(lua_State *L)
 static int L_UpnpSendActionAsync(lua_State *L)
 {
 	IXML_Document* RespNode = NULL;
-	int result = UpnpSendActionAsync(checkclient(L, 1), luaL_checkstring(L,2), luaL_checkstring(L,3), NULL, checkdocument(L, 4), &LuaCallback, COOKIENULL);
+	int result = UpnpSendActionAsync(checkclient(L, 1), luaL_checkstring(L,2), luaL_checkstring(L,3), NULL, checkdocument(L, 4), &LuaCallback, DSS_getutilid(L));
 	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
 	lua_pushinteger(L, 1);
 	return 1;
@@ -309,7 +305,7 @@ static int L_UpnpSendActionAsync(lua_State *L)
 static int L_UpnpSendActionExAsync(lua_State *L)
 {
 	IXML_Document* RespNode = NULL;
-	int result = UpnpSendActionExAsync(checkclient(L, 1), luaL_checkstring(L,2), luaL_checkstring(L,3), NULL, checkdocument(L, 4), checkdocument(L, 5), &LuaCallback, COOKIENULL);
+	int result = UpnpSendActionExAsync(checkclient(L, 1), luaL_checkstring(L,2), luaL_checkstring(L,3), NULL, checkdocument(L, 4), checkdocument(L, 5), &LuaCallback, DSS_getutilid(L));
 	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
 	lua_pushinteger(L, 1);
 	return 1;
@@ -363,7 +359,7 @@ static int L_UpnpRenewSubscription(lua_State *L)
 static int L_UpnpRenewSubscriptionAsync(lua_State *L)
 {
 	// TODO: check the cast to a string below, make copy?
-	int result = UpnpRenewSubscriptionAsync(checkclient(L, 1), luaL_checkint(L,2), (char*)luaL_checkstring(L,3), &LuaCallback, COOKIENULL);
+	int result = UpnpRenewSubscriptionAsync(checkclient(L, 1), luaL_checkint(L,2), (char*)luaL_checkstring(L,3), &LuaCallback, DSS_getutilid(L));
 	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
 	lua_pushinteger(L, 1);
 	return 1;
@@ -404,7 +400,7 @@ static int L_UpnpSubscribe(lua_State *L)
 
 static int L_UpnpSubscribeAsync(lua_State *L)
 {
-	int result = UpnpSubscribeAsync(checkclient(L, 1), luaL_checkstring(L,2), luaL_checkint(L,3), &LuaCallback, COOKIENULL);
+	int result = UpnpSubscribeAsync(checkclient(L, 1), luaL_checkstring(L,2), luaL_checkint(L,3), &LuaCallback, DSS_getutilid(L));
 	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
 	lua_pushinteger(L, 1);
 	return 1;
@@ -421,7 +417,7 @@ static int L_UpnpUnSubscribe(lua_State *L)
 static int L_UpnpUnSubscribeAsync(lua_State *L)
 {
 	// TODO: check the cast from a const on the checkstring below, make copy?
-	int result = UpnpUnSubscribeAsync(checkclient(L, 1), (char *)luaL_checkstring(L,2), &LuaCallback, COOKIENULL);
+	int result = UpnpUnSubscribeAsync(checkclient(L, 1), (char *)luaL_checkstring(L,2), &LuaCallback, DSS_getutilid(L));
 	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
 	lua_pushinteger(L, 1);
 	return 1;

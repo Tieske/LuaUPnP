@@ -39,12 +39,18 @@
     <ClCompile Include="UPnPcallback.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\dss\darksidesync_aux.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LuaIXML.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LuaUPnP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dss\darksidesync_api.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -348,6 +348,20 @@ int pushUPnPerror(lua_State *L, int err, IXML_Document* respdoc)
 	return 3;
 }
 
+// Transform EventType enum to a string
+const char *UpnpGetEventType(int et)
+{
+	size_t i;
+
+	for (i = 0; i < sizeof (EventTypes) / sizeof (EventTypes[0]); ++i) {
+		if (et == EventTypes[i].et) {
+			return EventTypes[i].etTypeDesc;
+		}
+	}
+
+	return "Unknown event type";
+}
+
 
 /*
 ** ===============================================================
