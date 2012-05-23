@@ -32,22 +32,47 @@ static int decodeUpnpDiscovery(lua_State *L, void* pData, void* utilid)
 	{
 		// Create and fill the event table for Lua
 		lua_newtable(L);
-		lua_pushstring(L, "event");
+		lua_pushstring(L, "Event");
 		lua_pushstring(L, UpnpGetEventType(mydata->EventType));
 		lua_settable(L, -3);
-		lua_pushstring(L, "errcode");
+		lua_pushstring(L, "ErrCode");
 		lua_pushinteger(L, UpnpDiscovery_get_ErrCode(dEvent));
 		lua_settable(L, -3);
-		lua_pushstring(L, "error");
+		lua_pushstring(L, "Error");
 		lua_pushstring(L, UpnpGetErrorMessage(UpnpDiscovery_get_ErrCode(dEvent)));
 		lua_settable(L, -3);
-		lua_pushstring(L, "expires");
+		lua_pushstring(L, "Expires");
 		lua_pushinteger(L, UpnpDiscovery_get_Expires(dEvent));
 		lua_settable(L, -3);
-		lua_pushstring(L, "date");
+		// TODO: DeviceId is in the documentation, but not in the code ???
+		//lua_pushstring(L, "DeviceId");
+		//lua_pushstring(L, UpnpDiscovery_get_DeviceId(dEvent));
+		//lua_settable(L, -3);
+		lua_pushstring(L, "DeviceType");
+		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_DeviceType(dEvent)));
+		lua_settable(L, -3);
+		lua_pushstring(L, "ServiceType");
+		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceType(dEvent)));
+		lua_settable(L, -3);
+		lua_pushstring(L, "ServiceVer");
+		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceVer(dEvent)));
+		lua_settable(L, -3);
+		lua_pushstring(L, "Location");
+		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Location(dEvent)));
+		lua_settable(L, -3);
+		lua_pushstring(L, "Os");
+		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Os(dEvent)));
+		lua_settable(L, -3);
+		lua_pushstring(L, "Date");
 		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Date(dEvent)));
 		lua_settable(L, -3);
-		// TODO add remainder of fields
+		lua_pushstring(L, "Ext");
+		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Ext(dEvent)));
+		lua_settable(L, -3);
+		// TODO: add address info
+		//lua_pushstring(L, "DestAddr");
+		//lua_pushstring(L, UpnpDiscovery_get_DestAddr(dEvent));
+		//lua_settable(L, -3);
 		result = 1;	// 1 return argument, the table
 	}
 	UpnpDiscovery_delete(dEvent);
