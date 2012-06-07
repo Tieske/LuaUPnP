@@ -53,7 +53,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>W:\Thijs\Visual Studio 2010\Projects\pupnp\build\inc;W:\Thijs\Visual Studio 2010\Projects\pupnp\build\msvc;W:\Thijs\Visual Studio 2010\Projects\pupnp\upnp\inc;W:\Thijs\Visual Studio 2010\Projects\pupnp\ixml\inc;W:\Thijs\Visual Studio 2010\Projects\pupnp\threadutil\inc;W:\Thijs\Visual Studio 2010\Projects\pupnp\pthreads\include;C:\Program Files (x86)\Lua\5.1\include;C:\Users\Thijs Schreijer\Desktop\LuaUPnP\dss;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\pupnp\build\inc;$(SolutionDir)..\pupnp\build\msvc;$(SolutionDir)..\pupnp\upnp\inc;$(SolutionDir)..\pupnp\ixml\inc;$(SolutionDir)..\pupnp\threadutil\inc;$(SolutionDir)..\pupnp\pthreads\include;C:\Users\Public\Lua\5.1\include;$(SolutionDir)dss;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LUAUPNP_EXPORTS;SCRIPTSUPPORT;UPNP_USE_MSVCPP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -65,7 +65,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>lua51.lib;libupnp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>W:\Thijs\Visual Studio 2010\Projects\pupnp\build\vc10\out.vc10.Win32\Debug\lib\ixml;W:\Thijs\Visual Studio 2010\Projects\pupnp\build\vc10\out.vc10.Win32\Debug\bin;C:\Program Files (x86)\Lua\5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\pupnp\build\vc10\out.vc10.Win32\Debug\lib\ixml;$(SolutionDir)..\pupnp\build\vc10\out.vc10.Win32\Debug\bin;C:\Users\Public\Lua\5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
