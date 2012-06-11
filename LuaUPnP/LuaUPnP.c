@@ -887,7 +887,7 @@ static const struct luaL_Reg UPnPWeb[] = {
 	{"SetRootDir",L_UpnpSetWebServerRootDir},
 	{"SetVirtualDirCallbacks",L_UpnpSetVirtualDirCallbacks},
 	{"Enable",L_UpnpEnableWebserver},
-	{"IsEnbaled",L_UpnpIsWebserverEnabled},
+	{"IsEnabled",L_UpnpIsWebserverEnabled},
 	{"AddVirtualDir",L_UpnpAddVirtualDir},
 	{"RemoveVirtualDir",L_UpnpRemoveVirtualDir},
 	{"RemoveAllVirtualDirs",L_UpnpRemoveAllVirtualDirs},
@@ -907,10 +907,18 @@ static const struct luaL_Reg UPnPUtil[] = {
 	{NULL,NULL}
 };
 
+// Cancel method to be provide to DSS
+void DSScancel(void* utilid, void* pData)
+{
+	//TODO: unregister myself with DSS
 
+};
 
 LPNP_API	int luaopen_LuaUPnP(lua_State *L)
 {
+
+	DSS_initialize(L, &DSScancel);	// will not return on error.
+
 	/////////////////////////////////////////////
 	//  Initialize IXML part
 	/////////////////////////////////////////////

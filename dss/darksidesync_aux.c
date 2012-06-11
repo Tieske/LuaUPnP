@@ -8,7 +8,7 @@ static void* DSS_LibID = &DSS_LibID;
 // Static pointer to the DSS api, will be set by the initialize function below
 static pDSS_api_1v0_t DSSapi = NULL;	// TODO: static, so it is not state independent!! add to utilid struct? must make utilid public then...
 
-// will return the api struct (pointer) for the api version 1v0
+// will get the api struct (pointer) for the api version 1v0
 // in case of errors it will provide a proper error message and call 
 // luaL_error. In case of an error the call will not return.
 static void DSS_initialize(lua_State *L, DSS_cancel_1v0_t pCancel)
