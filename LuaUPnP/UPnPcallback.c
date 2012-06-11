@@ -44,10 +44,9 @@ static int decodeUpnpDiscovery(lua_State *L, void* pData, void* utilid)
 		lua_pushstring(L, "Expires");
 		lua_pushinteger(L, UpnpDiscovery_get_Expires(dEvent));
 		lua_settable(L, -3);
-		// TODO: DeviceId is in the documentation, but not in the code ???
-		//lua_pushstring(L, "DeviceId");
-		//lua_pushstring(L, UpnpDiscovery_get_DeviceId(dEvent));
-		//lua_settable(L, -3);
+		lua_pushstring(L, "DeviceID");
+		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_DeviceID(dEvent)));
+		lua_settable(L, -3);
 		lua_pushstring(L, "DeviceType");
 		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_DeviceType(dEvent)));
 		lua_settable(L, -3);
@@ -136,18 +135,19 @@ static int decodeUpnpActionComplete(lua_State *L, void* pData, void* utilid)
 		lua_pushstring(L, UpnpGetErrorMessage(UpnpActionComplete_get_ErrCode(acEvent)));
 		lua_settable(L, -3);
 		lua_pushstring(L, "CtrlUrl");
-		lua_pushstring(L, (const char*)UpnpActionComplete_get_CtrlUrl(acEvent));
+		lua_pushstring(L, UpnpString_get_String(UpnpActionComplete_get_CtrlUrl(acEvent)));
 		lua_settable(L, -3);
 		lua_pushstring(L, "ActionRequest");
-		//TODO: should the IXML_document be copied, or can we use this instance? did copying the event already craete a new IXML copy as well?
+		//TODO: should the IXML_document be copied, or can we use this instance? did copying the event already create a new IXML copy as well?
 		pushLuaDocument(L, UpnpActionComplete_get_ActionRequest(acEvent));
 		lua_settable(L, -3);
 		lua_pushstring(L, "ActionResult");
-		//TODO: should the IXML_document be copied, or can we use this instance? did copying the event already craete a new IXML copy as well?
+		//TODO: should the IXML_document be copied, or can we use this instance? did copying the event already create a new IXML copy as well?
 		pushLuaDocument(L, UpnpActionComplete_get_ActionResult(acEvent));
 		lua_settable(L, -3);
 		result = 1;	// 1 return argument, the table
 	}
+	//TODO: if IXML docs don't get disposed by class destructor, then do it here!
 	UpnpActionComplete_delete(acEvent);
 	free(mydata);
 	return result;
@@ -206,35 +206,16 @@ static int decodeUpnpStateVarComplete(lua_State *L, void* pData, void* utilid)
 		lua_pushinteger(L, UpnpStateVarComplete_get_ErrCode(svcEvent));
 		lua_settable(L, -3);
 		lua_pushstring(L, "Error");
-		lua_pushstring(L, UpnpGetErrorMessage(UpnpStateVarComplete_get_ErrCode(dEvent)));
+		lua_pushstring(L, UpnpGetErrorMessage(UpnpStateVarComplete_get_ErrCode(svcEvent)));
 		lua_settable(L, -3);
-		lua_pushstring(L, "Expires");
-		lua_pushinteger(L, UpnpDiscovery_get_Expires(dEvent));
+		lua_pushstring(L, "CtrlUrl");
+		lua_pushstring(L, UpnpString_get_String(UpnpStateVarComplete_get_CtrlUrl(svcEvent)));
 		lua_settable(L, -3);
-		// TODO: DeviceId is in the documentation, but not in the code ???
-		//lua_pushstring(L, "DeviceId");
-		//lua_pushstring(L, UpnpDiscovery_get_DeviceId(dEvent));
-		//lua_settable(L, -3);
-		lua_pushstring(L, "DeviceType");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_DeviceType(dEvent)));
+		lua_pushstring(L, "StateVarName");
+		lua_pushstring(L, UpnpString_get_String(UpnpStateVarComplete_get_StateVarName(svcEvent)));
 		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceType");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceType(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceVer");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceVer(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Location");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Location(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Os");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Os(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Date");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Date(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Ext");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Ext(dEvent)));
+		lua_pushstring(L, "CurrentVal");
+		lua_pushstring(L, UpnpStateVarComplete_get_CurrentVal(svcEvent));
 		lua_settable(L, -3);
 		result = 1;	// 1 return argument, the table
 	}
@@ -278,11 +259,11 @@ static int deliverUpnpStateVarComplete(Upnp_EventType EventType, const UpnpState
 }
 
 // =================== Event events ==========================
-static int decodeUpnpActionComplete(lua_State *L, void* pData, void* utilid)
+static int decodeUpnpEvent(lua_State *L, void* pData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
-x	UpnpActionComplete* acEvent = (UpnpActionComplete*)mydata->Event;
+	UpnpEvent* eEvent = (UpnpEvent*)mydata->Event;
 
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L != NULL)
@@ -292,43 +273,20 @@ x	UpnpActionComplete* acEvent = (UpnpActionComplete*)mydata->Event;
 		lua_pushstring(L, "Event");
 		lua_pushstring(L, UpnpGetEventType(mydata->EventType));
 		lua_settable(L, -3);
-		lua_pushstring(L, "ErrCode");
-		lua_pushinteger(L, UpnpDiscovery_get_ErrCode(dEvent));
+		lua_pushstring(L, "EventKey");
+		lua_pushinteger(L, UpnpEvent_get_EventKey(eEvent));
 		lua_settable(L, -3);
-		lua_pushstring(L, "Error");
-		lua_pushstring(L, UpnpGetErrorMessage(UpnpDiscovery_get_ErrCode(dEvent)));
+		lua_pushstring(L, "ChangedVariables");
+		//TODO: should the IXML_document be copied, or can we use this instance? did copying the event already create a new IXML copy as well?
+		pushLuaDocument(L, UpnpEvent_get_ChangedVariables(eEvent));
 		lua_settable(L, -3);
-		lua_pushstring(L, "Expires");
-		lua_pushinteger(L, UpnpDiscovery_get_Expires(dEvent));
-		lua_settable(L, -3);
-		// TODO: DeviceId is in the documentation, but not in the code ???
-		//lua_pushstring(L, "DeviceId");
-		//lua_pushstring(L, UpnpDiscovery_get_DeviceId(dEvent));
-		//lua_settable(L, -3);
-		lua_pushstring(L, "DeviceType");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_DeviceType(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceType");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceType(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceVer");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceVer(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Location");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Location(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Os");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Os(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Date");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Date(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Ext");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Ext(dEvent)));
+		lua_pushstring(L, "SID");
+		lua_pushstring(L, UpnpString_get_String(UpnpEvent_get_SID(eEvent)));
 		lua_settable(L, -3);
 		result = 1;	// 1 return argument, the table
 	}
-x	UpnpDiscovery_delete(acEvent);
+	//TODO: if IXML docs don't get disposed by class destructor, then do it here!
+	UpnpEvent_delete(eEvent);
 	free(mydata);
 	return result;
 }
@@ -368,11 +326,11 @@ static int deliverUpnpEvent(Upnp_EventType EventType, const UpnpEvent *eEvent, v
 }
 
 // =================== Event Subscribe events ==========================
-static int decodeUpnpActionComplete(lua_State *L, void* pData, void* utilid)
+static int decodeUpnpEventSubscribe(lua_State *L, void* pData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
-x	UpnpActionComplete* acEvent = (UpnpActionComplete*)mydata->Event;
+	UpnpEventSubscribe* esEvent = (UpnpEventSubscribe*)mydata->Event;
 
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L != NULL)
@@ -383,42 +341,23 @@ x	UpnpActionComplete* acEvent = (UpnpActionComplete*)mydata->Event;
 		lua_pushstring(L, UpnpGetEventType(mydata->EventType));
 		lua_settable(L, -3);
 		lua_pushstring(L, "ErrCode");
-		lua_pushinteger(L, UpnpDiscovery_get_ErrCode(dEvent));
+		lua_pushinteger(L, UpnpEventSubscribe_get_ErrCode(esEvent));
 		lua_settable(L, -3);
 		lua_pushstring(L, "Error");
-		lua_pushstring(L, UpnpGetErrorMessage(UpnpDiscovery_get_ErrCode(dEvent)));
+		lua_pushstring(L, UpnpGetErrorMessage(UpnpEventSubscribe_get_ErrCode(esEvent)));
 		lua_settable(L, -3);
-		lua_pushstring(L, "Expires");
-		lua_pushinteger(L, UpnpDiscovery_get_Expires(dEvent));
+		lua_pushstring(L, "TimeOut");
+		lua_pushinteger(L, UpnpEventSubscribe_get_TimeOut(esEvent));
 		lua_settable(L, -3);
-		// TODO: DeviceId is in the documentation, but not in the code ???
-		//lua_pushstring(L, "DeviceId");
-		//lua_pushstring(L, UpnpDiscovery_get_DeviceId(dEvent));
-		//lua_settable(L, -3);
-		lua_pushstring(L, "DeviceType");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_DeviceType(dEvent)));
+		lua_pushstring(L, "SID");
+		lua_pushstring(L, UpnpString_get_String(UpnpEventSubscribe_get_SID(esEvent)));
 		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceType");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceType(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceVer");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceVer(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Location");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Location(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Os");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Os(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Date");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Date(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Ext");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Ext(dEvent)));
+		lua_pushstring(L, "PublisherUrl");
+		lua_pushstring(L, UpnpString_get_String(UpnpEventSubscribe_get_PublisherUrl(esEvent)));
 		lua_settable(L, -3);
 		result = 1;	// 1 return argument, the table
 	}
-x	UpnpDiscovery_delete(acEvent);
+	UpnpEventSubscribe_delete(esEvent);
 	free(mydata);
 	return result;
 }
@@ -458,57 +397,29 @@ static int deliverUpnpEventSubscribe(Upnp_EventType EventType, const UpnpEventSu
 }
 
 // =================== Subscription Request events ==========================
-static int decodeUpnpActionComplete(lua_State *L, void* pData, void* utilid)
+static int decodeUpnpSubscriptionRequest(lua_State *L, void* pData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
-x	UpnpActionComplete* acEvent = (UpnpActionComplete*)mydata->Event;
+	UpnpSubscriptionRequest* srEvent = (UpnpSubscriptionRequest*)mydata->Event;
 
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L != NULL)
 	{
 		// Create and fill the event table for Lua
 		lua_newtable(L);
-		lua_pushstring(L, "Event");
-		lua_pushstring(L, UpnpGetEventType(mydata->EventType));
+		lua_pushstring(L, "ServiceId");
+		lua_pushstring(L, UpnpString_get_String(UpnpSubscriptionRequest_get_ServiceId(srEvent)));
 		lua_settable(L, -3);
-		lua_pushstring(L, "ErrCode");
-		lua_pushinteger(L, UpnpDiscovery_get_ErrCode(dEvent));
+		lua_pushstring(L, "UDN");
+		lua_pushstring(L, UpnpString_get_String(UpnpSubscriptionRequest_get_UDN(srEvent)));
 		lua_settable(L, -3);
-		lua_pushstring(L, "Error");
-		lua_pushstring(L, UpnpGetErrorMessage(UpnpDiscovery_get_ErrCode(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Expires");
-		lua_pushinteger(L, UpnpDiscovery_get_Expires(dEvent));
-		lua_settable(L, -3);
-		// TODO: DeviceId is in the documentation, but not in the code ???
-		//lua_pushstring(L, "DeviceId");
-		//lua_pushstring(L, UpnpDiscovery_get_DeviceId(dEvent));
-		//lua_settable(L, -3);
-		lua_pushstring(L, "DeviceType");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_DeviceType(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceType");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceType(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceVer");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceVer(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Location");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Location(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Os");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Os(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Date");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Date(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Ext");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Ext(dEvent)));
+		lua_pushstring(L, "SID");
+		lua_pushstring(L, UpnpString_get_String(UpnpSubscriptionRequest_get_SID(srEvent)));
 		lua_settable(L, -3);
 		result = 1;	// 1 return argument, the table
 	}
-x	UpnpDiscovery_delete(acEvent);
+	UpnpSubscriptionRequest_delete(srEvent);
 	free(mydata);
 	return result;
 }
@@ -548,11 +459,11 @@ static int deliverUpnpSubscriptionRequest(Upnp_EventType EventType, const UpnpSu
 }
 
 // =================== StateVar request events ==========================
-static int decodeUpnpActionComplete(lua_State *L, void* pData, void* utilid)
+static int decodeUpnpStateVarRequest(lua_State *L, void* pData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
-x	UpnpActionComplete* acEvent = (UpnpActionComplete*)mydata->Event;
+	UpnpStateVarRequest* svrEvent = (UpnpStateVarRequest*)mydata->Event;
 
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L != NULL)
@@ -563,42 +474,36 @@ x	UpnpActionComplete* acEvent = (UpnpActionComplete*)mydata->Event;
 		lua_pushstring(L, UpnpGetEventType(mydata->EventType));
 		lua_settable(L, -3);
 		lua_pushstring(L, "ErrCode");
-		lua_pushinteger(L, UpnpDiscovery_get_ErrCode(dEvent));
+		lua_pushinteger(L, UpnpStateVarRequest_get_ErrCode(svrEvent));
 		lua_settable(L, -3);
 		lua_pushstring(L, "Error");
-		lua_pushstring(L, UpnpGetErrorMessage(UpnpDiscovery_get_ErrCode(dEvent)));
+		lua_pushstring(L, UpnpGetErrorMessage(UpnpStateVarRequest_get_ErrCode(svrEvent)));
 		lua_settable(L, -3);
-		lua_pushstring(L, "Expires");
-		lua_pushinteger(L, UpnpDiscovery_get_Expires(dEvent));
+		lua_pushstring(L, "Socket");
+		lua_pushinteger(L, UpnpStateVarRequest_get_Socket(svrEvent));
 		lua_settable(L, -3);
-		// TODO: DeviceId is in the documentation, but not in the code ???
-		//lua_pushstring(L, "DeviceId");
-		//lua_pushstring(L, UpnpDiscovery_get_DeviceId(dEvent));
+		lua_pushstring(L, "ErrStr");
+		lua_pushstring(L, UpnpString_get_String(UpnpStateVarRequest_get_ErrStr(svrEvent)));
+		lua_settable(L, -3);
+		lua_pushstring(L, "DevUDN");
+		lua_pushstring(L, UpnpString_get_String(UpnpStateVarRequest_get_DevUDN(svrEvent)));
+		lua_settable(L, -3);
+		lua_pushstring(L, "ServiceID");
+		lua_pushstring(L, UpnpString_get_String(UpnpStateVarRequest_get_ServiceID(svrEvent)));
+		lua_settable(L, -3);
+		lua_pushstring(L, "StateVarName");
+		lua_pushstring(L, UpnpString_get_String(UpnpStateVarRequest_get_StateVarName(svrEvent)));
+		lua_settable(L, -3);
+		// TODO: add address info
+		//lua_pushstring(L, "CtrlCpIPAddr");
+		//lua_pushstring(L, UpnpString_get_String(UpnpStateVarRequest_get_CtrlCpIPAddr(svrEvent)));
 		//lua_settable(L, -3);
-		lua_pushstring(L, "DeviceType");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_DeviceType(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceType");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceType(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceVer");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceVer(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Location");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Location(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Os");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Os(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Date");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Date(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Ext");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Ext(dEvent)));
+		lua_pushstring(L, "CurrentVal");
+		lua_pushstring(L, UpnpStateVarRequest_get_CurrentVal(svrEvent));
 		lua_settable(L, -3);
 		result = 1;	// 1 return argument, the table
 	}
-x	UpnpDiscovery_delete(acEvent);
+	UpnpStateVarRequest_delete(svrEvent);
 	free(mydata);
 	return result;
 }
@@ -638,11 +543,11 @@ static int deliverUpnpStateVarRequest(Upnp_EventType EventType, const UpnpStateV
 }
 
 // =================== Action request events ==========================
-static int decodeUpnpActionComplete(lua_State *L, void* pData, void* utilid)
+static int decodeUpnpActionRequest(lua_State *L, void* pData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
-x	UpnpActionComplete* acEvent = (UpnpActionComplete*)mydata->Event;
+	UpnpActionRequest* arEvent = (UpnpActionRequest*)mydata->Event;
 
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L != NULL)
@@ -653,42 +558,40 @@ x	UpnpActionComplete* acEvent = (UpnpActionComplete*)mydata->Event;
 		lua_pushstring(L, UpnpGetEventType(mydata->EventType));
 		lua_settable(L, -3);
 		lua_pushstring(L, "ErrCode");
-		lua_pushinteger(L, UpnpDiscovery_get_ErrCode(dEvent));
+		lua_pushinteger(L, UpnpActionRequest_get_ErrCode(arEvent));
 		lua_settable(L, -3);
 		lua_pushstring(L, "Error");
-		lua_pushstring(L, UpnpGetErrorMessage(UpnpDiscovery_get_ErrCode(dEvent)));
+		lua_pushstring(L, UpnpGetErrorMessage(UpnpActionRequest_get_ErrCode(arEvent)));
 		lua_settable(L, -3);
-		lua_pushstring(L, "Expires");
-		lua_pushinteger(L, UpnpDiscovery_get_Expires(dEvent));
+		lua_pushstring(L, "Socket");
+		lua_pushinteger(L, UpnpActionRequest_get_Socket(arEvent));
 		lua_settable(L, -3);
-		// TODO: DeviceId is in the documentation, but not in the code ???
-		//lua_pushstring(L, "DeviceId");
-		//lua_pushstring(L, UpnpDiscovery_get_DeviceId(dEvent));
+		lua_pushstring(L, "ErrStr");
+		lua_pushstring(L, UpnpString_get_String(UpnpActionRequest_get_ErrStr(arEvent)));
+		lua_settable(L, -3);
+		lua_pushstring(L, "DevUDN");
+		lua_pushstring(L, UpnpString_get_String(UpnpActionRequest_get_DevUDN(arEvent)));
+		lua_settable(L, -3);
+		lua_pushstring(L, "ServiceID");
+		lua_pushstring(L, UpnpString_get_String(UpnpActionRequest_get_ServiceID(arEvent)));
+		lua_settable(L, -3);
+		lua_pushstring(L, "ActionRequest");
+		//TODO: should the IXML_document be copied, or can we use this instance? did copying the event already create a new IXML copy as well?
+		pushLuaDocument(L, UpnpActionRequest_get_ActionRequest(arEvent));
+		lua_pushstring(L, "ActionResult");
+		//TODO: should the IXML_document be copied, or can we use this instance? did copying the event already create a new IXML copy as well?
+		pushLuaDocument(L, UpnpActionRequest_get_ActionResult(arEvent));
+		lua_pushstring(L, "SoapHeader");
+		//TODO: should the IXML_document be copied, or can we use this instance? did copying the event already create a new IXML copy as well?
+		pushLuaDocument(L, UpnpActionRequest_get_SoapHeader(arEvent));
+		// TODO: add address info
+		//lua_pushstring(L, "CtrlCpIPAddr");
+		//lua_pushstring(L, UpnpString_get_String(UpnpActionRequest_get_CtrlCpIPAddr(arEvent)));
 		//lua_settable(L, -3);
-		lua_pushstring(L, "DeviceType");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_DeviceType(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceType");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceType(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceVer");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceVer(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Location");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Location(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Os");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Os(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Date");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Date(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Ext");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Ext(dEvent)));
-		lua_settable(L, -3);
 		result = 1;	// 1 return argument, the table
 	}
-x	UpnpDiscovery_delete(acEvent);
+	//TODO: if IXML docs don't get disposed by class destructor, then do it here!
+	UpnpActionRequest_delete(arEvent);
 	free(mydata);
 	return result;
 }
