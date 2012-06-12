@@ -8,6 +8,12 @@
 ** ===============================================================
 */
 
+// Shortcut to cloning an IXML_Document
+static IXML_Document* copyIXMLdoc(IXML_Document* inputDoc)
+{
+	return (IXML_Document*)ixmlNode_cloneNode((IXML_Node*)inputDoc, TRUE);
+}
+
 // =================== Error reporting ===========================
 static int decodeUpnpCallbackError(lua_State *L, void* pData, void* utilid)
 {
@@ -138,16 +144,13 @@ static int decodeUpnpActionComplete(lua_State *L, void* pData, void* utilid)
 		lua_pushstring(L, UpnpString_get_String(UpnpActionComplete_get_CtrlUrl(acEvent)));
 		lua_settable(L, -3);
 		lua_pushstring(L, "ActionRequest");
-		//TODO: should the IXML_document be copied, or can we use this instance? did copying the event already create a new IXML copy as well?
 		pushLuaDocument(L, UpnpActionComplete_get_ActionRequest(acEvent));
 		lua_settable(L, -3);
 		lua_pushstring(L, "ActionResult");
-		//TODO: should the IXML_document be copied, or can we use this instance? did copying the event already create a new IXML copy as well?
 		pushLuaDocument(L, UpnpActionComplete_get_ActionResult(acEvent));
 		lua_settable(L, -3);
 		result = 1;	// 1 return argument, the table
 	}
-	//TODO: if IXML docs don't get disposed by class destructor, then do it here!
 	UpnpActionComplete_delete(acEvent);
 	free(mydata);
 	return result;
@@ -157,18 +160,35 @@ static int deliverUpnpActionComplete(Upnp_EventType EventType, const UpnpActionC
 {
 	int err = DSS_SUCCESS;
 	cbdelivery* mydata = (cbdelivery*)malloc(sizeof(cbdelivery));
+	IXML_Document* ActionRequest = NULL;
+	IXML_Document* ActionRequestCopy = NULL;
+	IXML_Document* ActionResult = NULL;
+	IXML_Document* ActionResultCopy = NULL;
 
 	if (mydata == NULL)
 	{
 		deliverUpnpCallbackError("Out of memory allocating 'mydata' for UpnpActionComplete callback.", cookie);
 		return 0;
 	}
+	ActionRequest = UpnpActionComplete_get_ActionRequest(acEvent);
+	ActionResult = UpnpActionComplete_get_ActionResult(acEvent);
 	mydata->EventType = EventType;
 	mydata->Event =  UpnpActionComplete_dup(acEvent);
 	mydata->Cookie = cookie;
 	if (mydata->Event == NULL)
 	{
 		deliverUpnpCallbackError("Out of memory duplicating 'event' for UpnpActionComplete callback.", cookie);
+		free(mydata);
+		return 0;
+	}
+	ActionRequestCopy = copyIXMLdoc(ActionRequest);
+	ActionResultCopy = copyIXMLdoc(ActionResult);
+	if ((ActionRequest != NULL && ActionRequestCopy == NULL) || (ActionResult != NULL && ActionResultCopy == NULL))
+	{
+		deliverUpnpCallbackError("Out of memory duplicating 'event IXMLs' for UpnpActionComplete callback.", cookie);
+		ixmlNode_free((IXML_Node*)ActionRequestCopy);
+		ixmlNode_free((IXML_Node*)ActionResultCopy);
+		UpnpActionComplete_delete((UpnpActionComplete *)mydata->Event);
 		free(mydata);
 		return 0;
 	}
@@ -179,6 +199,8 @@ static int deliverUpnpActionComplete(Upnp_EventType EventType, const UpnpActionC
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpActionComplete callback.", cookie);
 		if (err != DSS_ERR_UDP_SEND_FAILED) // only in this case data is still delivered and shouldn't be released
 		{
+			ixmlNode_free((IXML_Node*)ActionRequestCopy);
+			ixmlNode_free((IXML_Node*)ActionResultCopy);
 			UpnpActionComplete_delete((UpnpActionComplete *)mydata->Event);
 			free(mydata);
 		}
@@ -277,7 +299,6 @@ static int decodeUpnpEvent(lua_State *L, void* pData, void* utilid)
 		lua_pushinteger(L, UpnpEvent_get_EventKey(eEvent));
 		lua_settable(L, -3);
 		lua_pushstring(L, "ChangedVariables");
-		//TODO: should the IXML_document be copied, or can we use this instance? did copying the event already create a new IXML copy as well?
 		pushLuaDocument(L, UpnpEvent_get_ChangedVariables(eEvent));
 		lua_settable(L, -3);
 		lua_pushstring(L, "SID");
@@ -285,7 +306,6 @@ static int decodeUpnpEvent(lua_State *L, void* pData, void* utilid)
 		lua_settable(L, -3);
 		result = 1;	// 1 return argument, the table
 	}
-	//TODO: if IXML docs don't get disposed by class destructor, then do it here!
 	UpnpEvent_delete(eEvent);
 	free(mydata);
 	return result;
@@ -295,18 +315,30 @@ static int deliverUpnpEvent(Upnp_EventType EventType, const UpnpEvent *eEvent, v
 {
 	int err = DSS_SUCCESS;
 	cbdelivery* mydata = (cbdelivery*)malloc(sizeof(cbdelivery));
+	IXML_Document* ChangedVariables;
+	IXML_Document* ChangedVariablesCopy;
 
 	if (mydata == NULL)
 	{
 		deliverUpnpCallbackError("Out of memory allocating 'mydata' for UpnpEvent callback.", cookie);
 		return 0;
 	}
+	ChangedVariables = UpnpEvent_get_ChangedVariables(eEvent);
 	mydata->EventType = EventType;
 	mydata->Event =  UpnpEvent_dup(eEvent);
 	mydata->Cookie = cookie;
 	if (mydata->Event == NULL)
 	{
 		deliverUpnpCallbackError("Out of memory duplicating 'event' for UpnpEvent callback.", cookie);
+		free(mydata);
+		return 0;
+	}
+	ChangedVariablesCopy = copyIXMLdoc(ChangedVariables);
+	if (ChangedVariables != NULL && ChangedVariablesCopy == NULL)
+	{
+		ixmlNode_free((IXML_Node*)ChangedVariablesCopy);
+		deliverUpnpCallbackError("Out of memory duplicating 'event IXMLs' for UpnpEvent callback.", cookie);
+		UpnpEvent_delete((UpnpEvent *)mydata->Event);
 		free(mydata);
 		return 0;
 	}
@@ -317,6 +349,7 @@ static int deliverUpnpEvent(Upnp_EventType EventType, const UpnpEvent *eEvent, v
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpEvent callback.", cookie);
 		if (err != DSS_ERR_UDP_SEND_FAILED) // only in this case data is still delivered and shouldn't be released
 		{
+			ixmlNode_free((IXML_Node*)ChangedVariablesCopy);
 			UpnpEvent_delete((UpnpEvent *)mydata->Event);
 			free(mydata);
 		}
@@ -576,13 +609,10 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* utilid)
 		lua_pushstring(L, UpnpString_get_String(UpnpActionRequest_get_ServiceID(arEvent)));
 		lua_settable(L, -3);
 		lua_pushstring(L, "ActionRequest");
-		//TODO: should the IXML_document be copied, or can we use this instance? did copying the event already create a new IXML copy as well?
 		pushLuaDocument(L, UpnpActionRequest_get_ActionRequest(arEvent));
 		lua_pushstring(L, "ActionResult");
-		//TODO: should the IXML_document be copied, or can we use this instance? did copying the event already create a new IXML copy as well?
 		pushLuaDocument(L, UpnpActionRequest_get_ActionResult(arEvent));
 		lua_pushstring(L, "SoapHeader");
-		//TODO: should the IXML_document be copied, or can we use this instance? did copying the event already create a new IXML copy as well?
 		pushLuaDocument(L, UpnpActionRequest_get_SoapHeader(arEvent));
 		// TODO: add address info
 		//lua_pushstring(L, "CtrlCpIPAddr");
@@ -590,7 +620,6 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* utilid)
 		//lua_settable(L, -3);
 		result = 1;	// 1 return argument, the table
 	}
-	//TODO: if IXML docs don't get disposed by class destructor, then do it here!
 	UpnpActionRequest_delete(arEvent);
 	free(mydata);
 	return result;
@@ -600,18 +629,43 @@ static int deliverUpnpActionRequest(Upnp_EventType EventType, const UpnpActionRe
 {
 	int err = DSS_SUCCESS;
 	cbdelivery* mydata = (cbdelivery*)malloc(sizeof(cbdelivery));
+	IXML_Document* ActionRequest = NULL;
+	IXML_Document* ActionRequestCopy = NULL;
+	IXML_Document* ActionResult = NULL;
+	IXML_Document* ActionResultCopy = NULL;
+	IXML_Document* SoapHeader = NULL;
+	IXML_Document* SoapHeaderCopy = NULL;
 
 	if (mydata == NULL)
 	{
 		deliverUpnpCallbackError("Out of memory allocating 'mydata' for UpnpActionRequest callback.", cookie);
 		return 0;
 	}
+	ActionRequest = UpnpActionRequest_get_ActionRequest(arEvent);
+	ActionResult = UpnpActionRequest_get_ActionResult(arEvent);
+	SoapHeader = UpnpActionRequest_get_SoapHeader(arEvent);
 	mydata->EventType = EventType;
 	mydata->Event =  UpnpActionRequest_dup(arEvent);
 	mydata->Cookie = cookie;
 	if (mydata->Event == NULL)
 	{
 		deliverUpnpCallbackError("Out of memory duplicating 'event' for UpnpActionRequest callback.", cookie);
+		free(mydata);
+		return 0;
+	}
+	ActionRequestCopy = copyIXMLdoc(ActionRequest);
+	ActionResultCopy = copyIXMLdoc(ActionResult);
+	SoapHeaderCopy = copyIXMLdoc(SoapHeader);
+	if ((ActionRequest != NULL && ActionRequestCopy == NULL) || 
+		(ActionResult != NULL && ActionResultCopy == NULL) ||
+		(SoapHeader != NULL && SoapHeaderCopy == NULL))
+
+	{
+		deliverUpnpCallbackError("Out of memory duplicating 'event IXMLs' for UpnpActionRequest callback.", cookie);
+		ixmlNode_free((IXML_Node*)ActionRequestCopy);
+		ixmlNode_free((IXML_Node*)ActionResultCopy);
+		ixmlNode_free((IXML_Node*)SoapHeaderCopy);
+		UpnpActionRequest_delete((UpnpActionRequest *)mydata->Event);
 		free(mydata);
 		return 0;
 	}
@@ -622,6 +676,9 @@ static int deliverUpnpActionRequest(Upnp_EventType EventType, const UpnpActionRe
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpActionRequest callback.", cookie);
 		if (err != DSS_ERR_UDP_SEND_FAILED) // only in this case data is still delivered and shouldn't be released
 		{
+			ixmlNode_free((IXML_Node*)ActionRequestCopy);
+			ixmlNode_free((IXML_Node*)ActionResultCopy);
+			ixmlNode_free((IXML_Node*)SoapHeaderCopy);
 			UpnpActionRequest_delete((UpnpActionRequest *)mydata->Event);
 			free(mydata);
 		}
