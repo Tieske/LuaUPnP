@@ -74,7 +74,7 @@ static int decodeUpnpDiscovery(lua_State *L, void* pData, void* utilid)
 		lua_pushstring(L, "Ext");
 		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Ext(dEvent)));
 		lua_settable(L, -3);
-		// TODO: add address info
+		// TODO: add address info, check *NIX vs Win32 differences, and IPv4 vs IPv6
 		//lua_pushstring(L, "DestAddr");
 		//lua_pushstring(L, UpnpDiscovery_get_DestAddr(dEvent));
 		//lua_settable(L, -3);
@@ -527,7 +527,7 @@ static int decodeUpnpStateVarRequest(lua_State *L, void* pData, void* utilid)
 		lua_pushstring(L, "StateVarName");
 		lua_pushstring(L, UpnpString_get_String(UpnpStateVarRequest_get_StateVarName(svrEvent)));
 		lua_settable(L, -3);
-		// TODO: add address info
+		// TODO: add address info, check *NIX vs Win32 differences, and IPv4 vs IPv6
 		//lua_pushstring(L, "CtrlCpIPAddr");
 		//lua_pushstring(L, UpnpString_get_String(UpnpStateVarRequest_get_CtrlCpIPAddr(svrEvent)));
 		//lua_settable(L, -3);
@@ -614,7 +614,7 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* utilid)
 		pushLuaDocument(L, UpnpActionRequest_get_ActionResult(arEvent));
 		lua_pushstring(L, "SoapHeader");
 		pushLuaDocument(L, UpnpActionRequest_get_SoapHeader(arEvent));
-		// TODO: add address info
+		// TODO: add address info, check *NIX vs Wid32 differences, and IPv4 vs IPv6
 		//lua_pushstring(L, "CtrlCpIPAddr");
 		//lua_pushstring(L, UpnpString_get_String(UpnpActionRequest_get_CtrlCpIPAddr(arEvent)));
 		//lua_settable(L, -3);
