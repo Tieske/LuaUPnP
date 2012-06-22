@@ -55,6 +55,7 @@ static void DSS_initialize(lua_State *L, DSS_cancel_1v0_t pCancel)
 			case DSS_ERR_NOT_STARTED: luaL_error(L, "DSS was not started, or already stopped again.");
 			case DSS_ERR_NO_CANCEL_PROVIDED: luaL_error(L, "No proper cancel method was provided when initializing DSS.");
 			case DSS_ERR_OUT_OF_MEMORY: luaL_error(L, "Memory allocation error while initializing DSS");
+			case DSS_ERR_ALREADY_REGISTERED: luaL_error(L, "Library already registered with DSS for this LuaState");
 			default: luaL_error(L, "An unknown error occured while initializing DSS.");
 		}
 	}
@@ -104,6 +105,10 @@ static void DSS_shutdown(lua_State *L, void* utilid)
 {
 	if (DSSapi != NULL) 
 	{
+		if ((L == NULL) && ( utilid == NULL))
+		{
+			// TODO: must fail hard here
+		}
 		// If we got a Lua state, go lookup our utilid
 		if (L != NULL) utilid = DSSapi->getutilid(L, DSS_LibID, NULL);
 		// Unregister

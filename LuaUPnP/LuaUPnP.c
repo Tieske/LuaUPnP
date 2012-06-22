@@ -83,11 +83,22 @@ static int LuaCallback(Upnp_EventType EventType, const void *Event, void *Cookie
 ** ===============================================================
 */
 
+// Cancel method to be provide to DSS
+// when called, then DSS is shutting down, so we must also shut down
+void DSS_cancel(void* utilid, void* pData)
+{
+	UpnpFinish();					// stop UPnP threads
+	DSS_shutdown(NULL, utilid);		// unregister myself with DSS
+};
+
 static int L_UpnpInit(lua_State *L)
 {
 	const char* ipaddr = NULL;
 	unsigned short port = 0;
 	int result = UPNP_E_SUCCESS;
+
+	// first start DSS
+	DSS_initialize(L, &DSS_cancel);	// will not return on error.
 
 	if (lua_gettop(L) > 0) ipaddr = luaL_checkstring(L, 1);
 	if (lua_gettop(L) > 1) port = (unsigned short)luaL_checkint(L,2);
@@ -108,7 +119,9 @@ static int L_UpnpFinish(lua_State *L)
 {
 	int result = UPNP_E_SUCCESS;
 
-	result = UpnpFinish();
+	result = UpnpFinish();		// stop UPnP
+
+	DSS_shutdown(L,NULL);		// unregister from DSS
 
 	lua_checkstack(L,3);
 	if (result == UPNP_E_SUCCESS)	
@@ -907,17 +920,8 @@ static const struct luaL_Reg UPnPUtil[] = {
 	{NULL,NULL}
 };
 
-// Cancel method to be provide to DSS
-void DSScancel(void* utilid, void* pData)
-{
-	//TODO: unregister myself with DSS
-
-};
-
 LPNP_API	int luaopen_LuaUPnP(lua_State *L)
 {
-
-	DSS_initialize(L, &DSScancel);	// will not return on error.
 
 	/////////////////////////////////////////////
 	//  Initialize IXML part

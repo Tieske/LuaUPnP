@@ -58,5 +58,11 @@
     <None Include="IXMLtest.lua">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="install.bat">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="UPnPtest.lua">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
