@@ -6,3 +6,7 @@
 /ipch
 *.sdf
 *.opensdf
+/libupnp/libupnp.dll
+/libupnp/pthreadVC2.dll
+/LuaUPnP/IUpnpErrFile.txt
+/LuaUPnP/IUpnpInfoFile.txt
