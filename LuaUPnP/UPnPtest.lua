@@ -37,7 +37,12 @@ end
 --  Test functions, put main code here
 -- if a different interval to next test is required, return interval in seconds
 -----------------------------------------------------------------
-local cp        -- controlpoint id
+local cp        -- controlpoint
+local upnpcb = function(event)
+    print ("Received event:")
+    table.print(event)
+    print()
+end
 
 local testlist = {
     function()
@@ -48,7 +53,7 @@ local testlist = {
 
     function()
         print("starting UPnP")
-        upnp.Init()
+        upnp.Init(upnpcb)
     end,
 
     function()
@@ -60,7 +65,7 @@ local testlist = {
 
     function()
         print("Starting async search")
-        local result = { cp:SearchAsync(60,"hello") }
+        local result = { cp:SearchAsync(60,"ssdp:all") }
         cp = result[1]
         table.print(result);
         return 10   -- wait 10 seconds for next test

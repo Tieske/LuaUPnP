@@ -36,6 +36,8 @@ static int decodeUpnpDiscovery(lua_State *L, void* pData, void* utilid)
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L != NULL)
 	{
+		// Push the callback function first
+		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
 		lua_pushstring(L, "Event");
@@ -78,7 +80,7 @@ static int decodeUpnpDiscovery(lua_State *L, void* pData, void* utilid)
 		//lua_pushstring(L, "DestAddr");
 		//lua_pushstring(L, UpnpDiscovery_get_DestAddr(dEvent));
 		//lua_settable(L, -3);
-		result = 1;	// 1 return argument, the table
+		result = 2;	// 2 return arguments, callback + table
 	}
 	UpnpDiscovery_delete(dEvent);
 	free(mydata);
@@ -129,6 +131,8 @@ static int decodeUpnpActionComplete(lua_State *L, void* pData, void* utilid)
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L != NULL)
 	{
+		// Push the callback function first
+		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
 		lua_pushstring(L, "Event");
@@ -149,7 +153,7 @@ static int decodeUpnpActionComplete(lua_State *L, void* pData, void* utilid)
 		lua_pushstring(L, "ActionResult");
 		pushLuaDocument(L, UpnpActionComplete_get_ActionResult(acEvent));
 		lua_settable(L, -3);
-		result = 1;	// 1 return argument, the table
+		result = 2;	// 2 return arguments, callback + table
 	}
 	UpnpActionComplete_delete(acEvent);
 	free(mydata);
@@ -219,6 +223,8 @@ static int decodeUpnpStateVarComplete(lua_State *L, void* pData, void* utilid)
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L != NULL)
 	{
+		// Push the callback function first
+		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
 		lua_pushstring(L, "Event");
@@ -239,7 +245,7 @@ static int decodeUpnpStateVarComplete(lua_State *L, void* pData, void* utilid)
 		lua_pushstring(L, "CurrentVal");
 		lua_pushstring(L, UpnpStateVarComplete_get_CurrentVal(svcEvent));
 		lua_settable(L, -3);
-		result = 1;	// 1 return argument, the table
+		result = 2;	// 2 return arguments, callback + table
 	}
 	UpnpStateVarComplete_delete(svcEvent);
 	free(mydata);
@@ -290,6 +296,8 @@ static int decodeUpnpEvent(lua_State *L, void* pData, void* utilid)
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L != NULL)
 	{
+		// Push the callback function first
+		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
 		lua_pushstring(L, "Event");
@@ -304,7 +312,7 @@ static int decodeUpnpEvent(lua_State *L, void* pData, void* utilid)
 		lua_pushstring(L, "SID");
 		lua_pushstring(L, UpnpString_get_String(UpnpEvent_get_SID(eEvent)));
 		lua_settable(L, -3);
-		result = 1;	// 1 return argument, the table
+		result = 2;	// 2 return arguments, callback + table
 	}
 	UpnpEvent_delete(eEvent);
 	free(mydata);
@@ -368,6 +376,8 @@ static int decodeUpnpEventSubscribe(lua_State *L, void* pData, void* utilid)
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L != NULL)
 	{
+		// Push the callback function first
+		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
 		lua_pushstring(L, "Event");
@@ -388,7 +398,7 @@ static int decodeUpnpEventSubscribe(lua_State *L, void* pData, void* utilid)
 		lua_pushstring(L, "PublisherUrl");
 		lua_pushstring(L, UpnpString_get_String(UpnpEventSubscribe_get_PublisherUrl(esEvent)));
 		lua_settable(L, -3);
-		result = 1;	// 1 return argument, the table
+		result = 2;	// 2 return arguments, callback + table
 	}
 	UpnpEventSubscribe_delete(esEvent);
 	free(mydata);
@@ -439,6 +449,8 @@ static int decodeUpnpSubscriptionRequest(lua_State *L, void* pData, void* utilid
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L != NULL)
 	{
+		// Push the callback function first
+		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
 		lua_pushstring(L, "ServiceId");
@@ -450,7 +462,7 @@ static int decodeUpnpSubscriptionRequest(lua_State *L, void* pData, void* utilid
 		lua_pushstring(L, "SID");
 		lua_pushstring(L, UpnpString_get_String(UpnpSubscriptionRequest_get_SID(srEvent)));
 		lua_settable(L, -3);
-		result = 1;	// 1 return argument, the table
+		result = 2;	// 2 return arguments, callback + table
 	}
 	UpnpSubscriptionRequest_delete(srEvent);
 	free(mydata);
@@ -501,6 +513,8 @@ static int decodeUpnpStateVarRequest(lua_State *L, void* pData, void* utilid)
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L != NULL)
 	{
+		// Push the callback function first
+		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
 		lua_pushstring(L, "Event");
@@ -534,7 +548,7 @@ static int decodeUpnpStateVarRequest(lua_State *L, void* pData, void* utilid)
 		lua_pushstring(L, "CurrentVal");
 		lua_pushstring(L, UpnpStateVarRequest_get_CurrentVal(svrEvent));
 		lua_settable(L, -3);
-		result = 1;	// 1 return argument, the table
+		result = 2;	// 2 return arguments, callback + table
 	}
 	UpnpStateVarRequest_delete(svrEvent);
 	free(mydata);
@@ -585,6 +599,8 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* utilid)
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L != NULL)
 	{
+		// Push the callback function first
+		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
 		lua_pushstring(L, "Event");
@@ -618,7 +634,7 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* utilid)
 		//lua_pushstring(L, "CtrlCpIPAddr");
 		//lua_pushstring(L, UpnpString_get_String(UpnpActionRequest_get_CtrlCpIPAddr(arEvent)));
 		//lua_settable(L, -3);
-		result = 1;	// 1 return argument, the table
+		result = 2;	// 2 return arguments, callback + table
 	}
 	UpnpActionRequest_delete(arEvent);
 	free(mydata);

@@ -97,8 +97,14 @@ static int L_UpnpInit(lua_State *L)
 	unsigned short port = 0;
 	int result = UPNP_E_SUCCESS;
 
-	if (lua_gettop(L) > 0) ipaddr = luaL_checkstring(L, 1);
-	if (lua_gettop(L) > 1) port = (unsigned short)luaL_checkint(L,2);
+	// Check parameters
+	luaL_checktype(L, 1, LUA_TFUNCTION);
+	if (lua_gettop(L) > 1) ipaddr = luaL_checkstring(L, 2);
+	if (lua_gettop(L) > 2) port = (unsigned short)luaL_checkint(L,3);
+
+	// Store the callback function
+	lua_settop(L, 1);
+	lua_setfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 
 	result = UpnpInit(ipaddr, port);
 
@@ -121,6 +127,10 @@ static int L_UpnpFinish(lua_State *L)
 	lua_checkstack(L,3);
 	if (result == UPNP_E_SUCCESS)	
 	{
+		// clear callback function
+		lua_pushnil(L);
+		lua_setfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
+
 		lua_pushinteger(L, 1);	// push 1 as positive result
 		return 1;
 	}

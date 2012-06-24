@@ -13,6 +13,9 @@
 	#define LPNP_API extern
 #endif
 
+// Callback name in the registry
+#define UPNPCALLBACK "LuaUPnP.callback"
+
 // Metatable names to define objects
 #define LPNP_LIBRARY_UD "LuaUPnP.LibUserData"	
 #define LPNP_LIBRARY_MT "LuaUPnP.LibUserData.MT"	
