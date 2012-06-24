@@ -97,9 +97,6 @@ static int L_UpnpInit(lua_State *L)
 	unsigned short port = 0;
 	int result = UPNP_E_SUCCESS;
 
-	// first start DSS
-	DSS_initialize(L, &DSS_cancel);	// will not return on error.
-
 	if (lua_gettop(L) > 0) ipaddr = luaL_checkstring(L, 1);
 	if (lua_gettop(L) > 1) port = (unsigned short)luaL_checkint(L,2);
 
@@ -120,8 +117,6 @@ static int L_UpnpFinish(lua_State *L)
 	int result = UPNP_E_SUCCESS;
 
 	result = UpnpFinish();		// stop UPnP
-
-	DSS_shutdown(L,NULL);		// unregister from DSS
 
 	lua_checkstack(L,3);
 	if (result == UPNP_E_SUCCESS)	
@@ -778,7 +773,7 @@ static int L_UpnpCreatePropertySet(lua_State *L)
 
 /*
 ** ===============================================================
-** Library initialization
+** Library initialization / shutdown
 ** ===============================================================
 */
 
@@ -920,8 +915,37 @@ static const struct luaL_Reg UPnPUtil[] = {
 	{NULL,NULL}
 };
 
+
+// Close method called when Lua shutsdown the library
+// Note: check Lua os.exit() function for exceptions,
+// it will not always be called!
+static int L_closeLib(lua_State *L) {
+	// stop UPnP
+	UpnpFinish();
+	// shutdown DSS
+	DSS_shutdown(L, NULL);
+	return 0;
+}
+
 LPNP_API	int luaopen_LuaUPnP(lua_State *L)
 {
+
+	/////////////////////////////////////////////
+	//  Create lib close userdata
+	/////////////////////////////////////////////
+
+	// first register with DSS
+	DSS_initialize(L, &DSS_cancel);	// will not return on error.
+
+	// Setup a close method to unregister from DSS
+	lua_newuserdata(L, sizeof(void*));
+	luaL_newmetatable(L, LPNP_LIBRARY_MT);	// Create a new metatable
+	lua_pushstring(L, "__gc");
+	lua_pushcfunction(L, L_closeLib);
+	lua_settable(L, -3);					// Add GC metamethod
+	lua_setmetatable(L, -2);				// Attach metatable to userdata
+	lua_setfield(L, LUA_REGISTRYINDEX, LPNP_LIBRARY_UD);	// store userdata in registry
+
 
 	/////////////////////////////////////////////
 	//  Initialize IXML part

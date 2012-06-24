@@ -14,6 +14,8 @@
 #endif
 
 // Metatable names to define objects
+#define LPNP_LIBRARY_UD "LuaUPnP.LibUserData"	
+#define LPNP_LIBRARY_MT "LuaUPnP.LibUserData.MT"	
 #define LPNP_DEVICE_MT "LuaUPnP.Device"	
 #define LPNP_CLIENT_MT "LuaUPnP.Client"	
 
@@ -31,7 +33,7 @@ typedef struct LuaDevRecord {
 // Typedefinition for a record that points to a UPnP client
 typedef struct LuaClientRecord *pLuaClient;
 typedef struct LuaClientRecord {
-	// if Device == NULL, the device is closed/unopened
+	// if Device == NULL, the client is closed/unopened
 	UpnpClient_Handle client;	
 } LuaClient;
 

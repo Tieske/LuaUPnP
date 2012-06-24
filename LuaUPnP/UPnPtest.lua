@@ -34,7 +34,8 @@ end
 
 
 -----------------------------------------------------------------
---  Test functions, put main code here.
+--  Test functions, put main code here
+-- if a different interval to next test is required, return interval in seconds
 -----------------------------------------------------------------
 local cp        -- controlpoint id
 
@@ -46,13 +47,23 @@ local testlist = {
     end,
 
     function()
-        cp = upnp.RegisterClient()
-        print(tostring(cp))
+        print("starting UPnP")
+        upnp.Init()
     end,
 
     function()
-        print("starting UPnP")
-        upnp.Init()
+        print("Registering controlpoint")
+        local result = { upnp.RegisterClient() }
+        cp = result[1]
+        table.print(result);
+    end,
+
+    function()
+        print("Starting async search")
+        local result = { cp:SearchAsync(60,"hello") }
+        cp = result[1]
+        table.print(result);
+        return 10   -- wait 10 seconds for next test
     end,
 
 
@@ -71,14 +82,24 @@ local testlist = {
 
 local timer
 local testcount = 1
+local testinterval = 1      -- seconds
 -- test function to run tests in a row
 local test = function()
 
     if testlist[testcount] then
         -- run next test
         print ("=========== starting test " .. testcount .. " ===========")
-        xpcall(testlist[testcount], errf)
+        local success, int = xpcall(testlist[testcount], errf)
+        if success then
+            int = int or testinterval
+        else
+            int = testinterval
+        end
+        timer:arm(int)
         testcount = testcount + 1
+        if int ~= testinterval then
+            print("(next test starts in " .. tostring(int) .. " seconds)")
+        end
     else
         -- we're done, exit
         print ("=========== tests completed ===========")
@@ -91,8 +112,9 @@ end
 
 wait ("Press enter to start...")
 
--- create timer for test function, every 0.5 second
-timer = copas.newtimer(test, test, nil, true, nil):arm(1)
+-- create timer for test function
+timer = copas.newtimer(nil, test, nil, true, nil)
+timer:arm(0)    -- run first test immediately
 
 copas.loop()
 
