@@ -23,7 +23,7 @@ static int decodeUpnpCallbackError(lua_State *L, void* pData, void* utilid)
 }
 static int deliverUpnpCallbackError(const char* msg, void* cookie)
 {
-	return DSS_deliver(cookie, &decodeUpnpCallbackError, (void*)msg);
+	return DSS_deliver(cookie, &decodeUpnpCallbackError, NULL, (void*)msg);
 }
 
 // =================== Discovery events ==========================
@@ -107,7 +107,7 @@ static int deliverUpnpDiscovery(Upnp_EventType EventType, const UpnpDiscovery *d
 		return 0;
 	}
 
-	err = DSS_deliver(cookie, &decodeUpnpDiscovery, mydata);
+	err = DSS_deliver(cookie, &decodeUpnpDiscovery, NULL, mydata);
 	if (err != DSS_SUCCESS)
 	{
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpDiscovery callback.", cookie);
@@ -197,7 +197,7 @@ static int deliverUpnpActionComplete(Upnp_EventType EventType, const UpnpActionC
 		return 0;
 	}
 
-	err = DSS_deliver(cookie, &decodeUpnpActionComplete, mydata);
+	err = DSS_deliver(cookie, &decodeUpnpActionComplete, NULL, mydata);
 	if (err != DSS_SUCCESS)
 	{
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpActionComplete callback.", cookie);
@@ -272,7 +272,7 @@ static int deliverUpnpStateVarComplete(Upnp_EventType EventType, const UpnpState
 		return 0;
 	}
 
-	err = DSS_deliver(cookie, &decodeUpnpStateVarComplete, mydata);
+	err = DSS_deliver(cookie, &decodeUpnpStateVarComplete, NULL, mydata);
 	if (err != DSS_SUCCESS)
 	{
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpStateVarComplete callback.", cookie);
@@ -351,7 +351,7 @@ static int deliverUpnpEvent(Upnp_EventType EventType, const UpnpEvent *eEvent, v
 		return 0;
 	}
 
-	err = DSS_deliver(cookie, &decodeUpnpEvent, mydata);
+	err = DSS_deliver(cookie, &decodeUpnpEvent, NULL, mydata);
 	if (err != DSS_SUCCESS)
 	{
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpEvent callback.", cookie);
@@ -425,7 +425,7 @@ static int deliverUpnpEventSubscribe(Upnp_EventType EventType, const UpnpEventSu
 		return 0;
 	}
 
-	err = DSS_deliver(cookie, &decodeUpnpEventSubscribe, mydata);
+	err = DSS_deliver(cookie, &decodeUpnpEventSubscribe, NULL, mydata);
 	if (err != DSS_SUCCESS)
 	{
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpEventSubscribe callback.", cookie);
@@ -489,7 +489,7 @@ static int deliverUpnpSubscriptionRequest(Upnp_EventType EventType, const UpnpSu
 		return 0;
 	}
 
-	err = DSS_deliver(cookie, &decodeUpnpSubscriptionRequest, mydata);
+	err = DSS_deliver(cookie, &decodeUpnpSubscriptionRequest, NULL, mydata);
 	if (err != DSS_SUCCESS)
 	{
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpSubscriptionRequest callback.", cookie);
@@ -575,7 +575,7 @@ static int deliverUpnpStateVarRequest(Upnp_EventType EventType, const UpnpStateV
 		return 0;
 	}
 
-	err = DSS_deliver(cookie, &decodeUpnpStateVarRequest, mydata);
+	err = DSS_deliver(cookie, &decodeUpnpStateVarRequest, NULL, mydata);
 	if (err != DSS_SUCCESS)
 	{
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpStateVarRequest callback.", cookie);
@@ -686,7 +686,7 @@ static int deliverUpnpActionRequest(Upnp_EventType EventType, const UpnpActionRe
 		return 0;
 	}
 
-	err = DSS_deliver(cookie, &decodeUpnpActionRequest, mydata);
+	err = DSS_deliver(cookie, &decodeUpnpActionRequest, NULL, mydata);
 	if (err != DSS_SUCCESS)
 	{
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpActionRequest callback.", cookie);
