@@ -40,6 +40,7 @@ local myxml = [[<?xml version="1.0" encoding="utf-8"?>
 </root>
 ]]
 
+local dss = require('dss')      -- load darksidesync module
 local upnp = require("LuaUPnP")
 local ixml = upnp.ixml
 

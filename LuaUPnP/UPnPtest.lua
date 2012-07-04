@@ -65,10 +65,10 @@ local testlist = {
 
     function()
         print("Starting async search")
-        local result = { cp:SearchAsync(60,"ssdp:all") }
+        local result = { cp:SearchAsync(10,"upnp:rootdevice") } -- "ssdp:all"
         cp = result[1]
         table.print(result);
-        return 10   -- wait 10 seconds for next test
+        return 15   -- wait 15 seconds for next test
     end,
 
 
