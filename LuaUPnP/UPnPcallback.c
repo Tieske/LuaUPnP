@@ -1,6 +1,7 @@
 #include "LuaUPnP.h"
 #include "upnp.h"
 #include "upnpdebug.h"
+#include "string.h"
 
 /*
 ** ===============================================================
@@ -25,8 +26,20 @@ static int deliverUpnpCallbackError(const char* msg, void* cookie)
 {
 	return DSS_deliver(cookie, &decodeUpnpCallbackError, NULL, (void*)msg);
 }
+// =================== Push string if not NULL ===================
+// requires table to add it to to be on top of the stack
+static void pushstringfield(lua_State *L, const char* key, const char* value)
+{
+	if (value != NULL && strlen(value) != 0 )
+	{
+		lua_pushstring(L, key);
+		lua_pushstring(L, value);
+		lua_settable(L, -3);
+	}
+}
 
 // =================== Discovery events ==========================
+// TODO: update others to only report string if non-null and errors if present
 static int decodeUpnpDiscovery(lua_State *L, void* pData, void* utilid)
 {
 	int result = 0;
@@ -40,42 +53,25 @@ static int decodeUpnpDiscovery(lua_State *L, void* pData, void* utilid)
 		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
-		lua_pushstring(L, "Event");
-		lua_pushstring(L, UpnpGetEventType(mydata->EventType));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ErrCode");
-		lua_pushinteger(L, UpnpDiscovery_get_ErrCode(dEvent));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Error");
-		lua_pushstring(L, UpnpGetErrorMessage(UpnpDiscovery_get_ErrCode(dEvent)));
-		lua_settable(L, -3);
+		pushstringfield(L, "Event", UpnpGetEventType(mydata->EventType));
+		if (UpnpDiscovery_get_ErrCode(dEvent) != UPNP_E_SUCCESS)
+		{
+			lua_pushstring(L, "ErrCode");
+			lua_pushinteger(L, UpnpDiscovery_get_ErrCode(dEvent));
+			lua_settable(L, -3);
+			pushstringfield(L, "Error", UpnpGetErrorMessage(UpnpDiscovery_get_ErrCode(dEvent)));
+		}
 		lua_pushstring(L, "Expires");
 		lua_pushinteger(L, UpnpDiscovery_get_Expires(dEvent));
 		lua_settable(L, -3);
-		lua_pushstring(L, "DeviceID");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_DeviceID(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "DeviceType");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_DeviceType(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceType");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceType(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceVer");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_ServiceVer(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Location");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Location(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Os");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Os(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Date");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Date(dEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Ext");
-		lua_pushstring(L, UpnpString_get_String(UpnpDiscovery_get_Ext(dEvent)));
-		lua_settable(L, -3);
+		pushstringfield(L, "DeviceID", UpnpString_get_String(UpnpDiscovery_get_DeviceID(dEvent)));
+		pushstringfield(L, "DeviceType", UpnpString_get_String(UpnpDiscovery_get_DeviceType(dEvent)));
+		pushstringfield(L, "ServiceType", UpnpString_get_String(UpnpDiscovery_get_ServiceType(dEvent)));
+		pushstringfield(L, "ServiceVer", UpnpString_get_String(UpnpDiscovery_get_ServiceVer(dEvent)));
+		pushstringfield(L, "Location", UpnpString_get_String(UpnpDiscovery_get_Location(dEvent)));
+		pushstringfield(L, "Os", UpnpString_get_String(UpnpDiscovery_get_Os(dEvent)));
+		pushstringfield(L, "Date", UpnpString_get_String(UpnpDiscovery_get_Date(dEvent)));
+		pushstringfield(L, "Ext", UpnpString_get_String(UpnpDiscovery_get_Ext(dEvent)));
 		// TODO: add address info, check *NIX vs Win32 differences, and IPv4 vs IPv6
 		//lua_pushstring(L, "DestAddr");
 		//lua_pushstring(L, UpnpDiscovery_get_DestAddr(dEvent));
@@ -135,18 +131,15 @@ static int decodeUpnpActionComplete(lua_State *L, void* pData, void* utilid)
 		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
-		lua_pushstring(L, "Event");
-		lua_pushstring(L, UpnpGetEventType(mydata->EventType));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ErrCode");
-		lua_pushinteger(L, UpnpActionComplete_get_ErrCode(acEvent));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Error");
-		lua_pushstring(L, UpnpGetErrorMessage(UpnpActionComplete_get_ErrCode(acEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "CtrlUrl");
-		lua_pushstring(L, UpnpString_get_String(UpnpActionComplete_get_CtrlUrl(acEvent)));
-		lua_settable(L, -3);
+		pushstringfield(L, "Event", UpnpGetEventType(mydata->EventType));
+		if (UpnpActionComplete_get_ErrCode(acEvent) != UPNP_E_SUCCESS)
+		{
+			lua_pushstring(L, "ErrCode");
+			lua_pushinteger(L, UpnpActionComplete_get_ErrCode(acEvent));
+			lua_settable(L, -3);
+			pushstringfield(L, "Error", UpnpGetErrorMessage(UpnpActionComplete_get_ErrCode(acEvent)));
+		}
+		pushstringfield(L, "CtrlUrl", UpnpString_get_String(UpnpActionComplete_get_CtrlUrl(acEvent)));
 		lua_pushstring(L, "ActionRequest");
 		pushLuaDocument(L, UpnpActionComplete_get_ActionRequest(acEvent));
 		lua_settable(L, -3);
@@ -227,24 +220,17 @@ static int decodeUpnpStateVarComplete(lua_State *L, void* pData, void* utilid)
 		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
-		lua_pushstring(L, "Event");
-		lua_pushstring(L, UpnpGetEventType(mydata->EventType));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ErrCode");
-		lua_pushinteger(L, UpnpStateVarComplete_get_ErrCode(svcEvent));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Error");
-		lua_pushstring(L, UpnpGetErrorMessage(UpnpStateVarComplete_get_ErrCode(svcEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "CtrlUrl");
-		lua_pushstring(L, UpnpString_get_String(UpnpStateVarComplete_get_CtrlUrl(svcEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "StateVarName");
-		lua_pushstring(L, UpnpString_get_String(UpnpStateVarComplete_get_StateVarName(svcEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "CurrentVal");
-		lua_pushstring(L, UpnpStateVarComplete_get_CurrentVal(svcEvent));
-		lua_settable(L, -3);
+		pushstringfield(L, "Event", UpnpGetEventType(mydata->EventType));
+		if (UpnpStateVarComplete_get_ErrCode(svcEvent) != UPNP_E_SUCCESS)
+		{
+			lua_pushstring(L, "ErrCode");
+			lua_pushinteger(L, UpnpStateVarComplete_get_ErrCode(svcEvent));
+			lua_settable(L, -3);
+			pushstringfield(L, "Error", UpnpGetErrorMessage(UpnpStateVarComplete_get_ErrCode(svcEvent)));
+		}
+		pushstringfield(L, "CtrlUrl", UpnpString_get_String(UpnpStateVarComplete_get_CtrlUrl(svcEvent)));
+		pushstringfield(L, "StateVarName", UpnpString_get_String(UpnpStateVarComplete_get_StateVarName(svcEvent)));
+		pushstringfield(L, "CurrentVal", UpnpStateVarComplete_get_CurrentVal(svcEvent));
 		result = 2;	// 2 return arguments, callback + table
 	}
 	UpnpStateVarComplete_delete(svcEvent);
@@ -300,18 +286,14 @@ static int decodeUpnpEvent(lua_State *L, void* pData, void* utilid)
 		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
-		lua_pushstring(L, "Event");
-		lua_pushstring(L, UpnpGetEventType(mydata->EventType));
-		lua_settable(L, -3);
+		pushstringfield(L, "Event", UpnpGetEventType(mydata->EventType));
 		lua_pushstring(L, "EventKey");
 		lua_pushinteger(L, UpnpEvent_get_EventKey(eEvent));
 		lua_settable(L, -3);
 		lua_pushstring(L, "ChangedVariables");
 		pushLuaDocument(L, UpnpEvent_get_ChangedVariables(eEvent));
 		lua_settable(L, -3);
-		lua_pushstring(L, "SID");
-		lua_pushstring(L, UpnpString_get_String(UpnpEvent_get_SID(eEvent)));
-		lua_settable(L, -3);
+		pushstringfield(L, "SID", UpnpString_get_String(UpnpEvent_get_SID(eEvent)));
 		result = 2;	// 2 return arguments, callback + table
 	}
 	UpnpEvent_delete(eEvent);
@@ -383,21 +365,18 @@ static int decodeUpnpEventSubscribe(lua_State *L, void* pData, void* utilid)
 		lua_pushstring(L, "Event");
 		lua_pushstring(L, UpnpGetEventType(mydata->EventType));
 		lua_settable(L, -3);
-		lua_pushstring(L, "ErrCode");
-		lua_pushinteger(L, UpnpEventSubscribe_get_ErrCode(esEvent));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Error");
-		lua_pushstring(L, UpnpGetErrorMessage(UpnpEventSubscribe_get_ErrCode(esEvent)));
-		lua_settable(L, -3);
+		if (UpnpEventSubscribe_get_ErrCode(esEvent) != UPNP_E_SUCCESS)
+		{
+			lua_pushstring(L, "ErrCode");
+			lua_pushinteger(L, UpnpEventSubscribe_get_ErrCode(esEvent));
+			lua_settable(L, -3);
+			pushstringfield(L, "Error", UpnpGetErrorMessage(UpnpEventSubscribe_get_ErrCode(esEvent)));
+		}
 		lua_pushstring(L, "TimeOut");
 		lua_pushinteger(L, UpnpEventSubscribe_get_TimeOut(esEvent));
 		lua_settable(L, -3);
-		lua_pushstring(L, "SID");
-		lua_pushstring(L, UpnpString_get_String(UpnpEventSubscribe_get_SID(esEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "PublisherUrl");
-		lua_pushstring(L, UpnpString_get_String(UpnpEventSubscribe_get_PublisherUrl(esEvent)));
-		lua_settable(L, -3);
+		pushstringfield(L, "SID", UpnpString_get_String(UpnpEventSubscribe_get_SID(esEvent)));
+		pushstringfield(L, "PublisherUrl", UpnpString_get_String(UpnpEventSubscribe_get_PublisherUrl(esEvent)));
 		result = 2;	// 2 return arguments, callback + table
 	}
 	UpnpEventSubscribe_delete(esEvent);
@@ -453,15 +432,9 @@ static int decodeUpnpSubscriptionRequest(lua_State *L, void* pData, void* utilid
 		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
-		lua_pushstring(L, "ServiceId");
-		lua_pushstring(L, UpnpString_get_String(UpnpSubscriptionRequest_get_ServiceId(srEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "UDN");
-		lua_pushstring(L, UpnpString_get_String(UpnpSubscriptionRequest_get_UDN(srEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "SID");
-		lua_pushstring(L, UpnpString_get_String(UpnpSubscriptionRequest_get_SID(srEvent)));
-		lua_settable(L, -3);
+		pushstringfield(L, "ServiceId", UpnpString_get_String(UpnpSubscriptionRequest_get_ServiceId(srEvent)));
+		pushstringfield(L, "UDN", UpnpString_get_String(UpnpSubscriptionRequest_get_UDN(srEvent)));
+		pushstringfield(L, "SID", UpnpString_get_String(UpnpSubscriptionRequest_get_SID(srEvent)));
 		result = 2;	// 2 return arguments, callback + table
 	}
 	UpnpSubscriptionRequest_delete(srEvent);
@@ -517,37 +490,26 @@ static int decodeUpnpStateVarRequest(lua_State *L, void* pData, void* utilid)
 		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
-		lua_pushstring(L, "Event");
-		lua_pushstring(L, UpnpGetEventType(mydata->EventType));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ErrCode");
-		lua_pushinteger(L, UpnpStateVarRequest_get_ErrCode(svrEvent));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Error");
-		lua_pushstring(L, UpnpGetErrorMessage(UpnpStateVarRequest_get_ErrCode(svrEvent)));
-		lua_settable(L, -3);
+		pushstringfield(L, "Event", UpnpGetEventType(mydata->EventType));
+		if (UpnpStateVarRequest_get_ErrCode(svrEvent) != UPNP_E_SUCCESS)
+		{
+			lua_pushstring(L, "ErrCode");
+			lua_pushinteger(L, UpnpStateVarRequest_get_ErrCode(svrEvent));
+			lua_settable(L, -3);
+			pushstringfield(L, "Error", UpnpGetErrorMessage(UpnpStateVarRequest_get_ErrCode(svrEvent)));
+		}
 		lua_pushstring(L, "Socket");
 		lua_pushinteger(L, UpnpStateVarRequest_get_Socket(svrEvent));
 		lua_settable(L, -3);
-		lua_pushstring(L, "ErrStr");
-		lua_pushstring(L, UpnpString_get_String(UpnpStateVarRequest_get_ErrStr(svrEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "DevUDN");
-		lua_pushstring(L, UpnpString_get_String(UpnpStateVarRequest_get_DevUDN(svrEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceID");
-		lua_pushstring(L, UpnpString_get_String(UpnpStateVarRequest_get_ServiceID(svrEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "StateVarName");
-		lua_pushstring(L, UpnpString_get_String(UpnpStateVarRequest_get_StateVarName(svrEvent)));
-		lua_settable(L, -3);
+		pushstringfield(L, "ErrStr", UpnpString_get_String(UpnpStateVarRequest_get_ErrStr(svrEvent)));
+		pushstringfield(L, "DevUDN", UpnpString_get_String(UpnpStateVarRequest_get_DevUDN(svrEvent)));
+		pushstringfield(L, "ServiceID", UpnpString_get_String(UpnpStateVarRequest_get_ServiceID(svrEvent)));
+		pushstringfield(L, "StateVarName", UpnpString_get_String(UpnpStateVarRequest_get_StateVarName(svrEvent)));
 		// TODO: add address info, check *NIX vs Win32 differences, and IPv4 vs IPv6
 		//lua_pushstring(L, "CtrlCpIPAddr");
 		//lua_pushstring(L, UpnpString_get_String(UpnpStateVarRequest_get_CtrlCpIPAddr(svrEvent)));
 		//lua_settable(L, -3);
-		lua_pushstring(L, "CurrentVal");
-		lua_pushstring(L, UpnpStateVarRequest_get_CurrentVal(svrEvent));
-		lua_settable(L, -3);
+		pushstringfield(L, "CurrentVal", UpnpStateVarRequest_get_CurrentVal(svrEvent));
 		result = 2;	// 2 return arguments, callback + table
 	}
 	UpnpStateVarRequest_delete(svrEvent);
@@ -603,27 +565,20 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* utilid)
 		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
-		lua_pushstring(L, "Event");
-		lua_pushstring(L, UpnpGetEventType(mydata->EventType));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ErrCode");
-		lua_pushinteger(L, UpnpActionRequest_get_ErrCode(arEvent));
-		lua_settable(L, -3);
-		lua_pushstring(L, "Error");
-		lua_pushstring(L, UpnpGetErrorMessage(UpnpActionRequest_get_ErrCode(arEvent)));
-		lua_settable(L, -3);
+		pushstringfield(L, "Event", UpnpGetEventType(mydata->EventType));
+		if (UpnpActionRequest_get_ErrCode(arEvent) != UPNP_E_SUCCESS)
+		{
+			lua_pushstring(L, "ErrCode");
+			lua_pushinteger(L, UpnpActionRequest_get_ErrCode(arEvent));
+			lua_settable(L, -3);
+			pushstringfield(L, "Error", UpnpGetErrorMessage(UpnpActionRequest_get_ErrCode(arEvent)));
+		}
 		lua_pushstring(L, "Socket");
 		lua_pushinteger(L, UpnpActionRequest_get_Socket(arEvent));
 		lua_settable(L, -3);
-		lua_pushstring(L, "ErrStr");
-		lua_pushstring(L, UpnpString_get_String(UpnpActionRequest_get_ErrStr(arEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "DevUDN");
-		lua_pushstring(L, UpnpString_get_String(UpnpActionRequest_get_DevUDN(arEvent)));
-		lua_settable(L, -3);
-		lua_pushstring(L, "ServiceID");
-		lua_pushstring(L, UpnpString_get_String(UpnpActionRequest_get_ServiceID(arEvent)));
-		lua_settable(L, -3);
+		pushstringfield(L, "ErrStr", UpnpString_get_String(UpnpActionRequest_get_ErrStr(arEvent)));
+		pushstringfield(L, "DevUDN", UpnpString_get_String(UpnpActionRequest_get_DevUDN(arEvent)));
+		pushstringfield(L, "ServiceID", UpnpString_get_String(UpnpActionRequest_get_ServiceID(arEvent)));
 		lua_pushstring(L, "ActionRequest");
 		pushLuaDocument(L, UpnpActionRequest_get_ActionRequest(arEvent));
 		lua_pushstring(L, "ActionResult");
