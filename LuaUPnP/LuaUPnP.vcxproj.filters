@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="TestDevice">
+      <UniqueIdentifier>{4c39ca41-90bb-43e8-aa5d-515f84017448}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TestDevice\web">
+      <UniqueIdentifier>{87091467-514c-480d-92b4-73e62e2f3c3b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LuaIXML.c">
@@ -63,6 +69,18 @@
     </None>
     <None Include="UPnPtest.lua">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="TestDevice\NetworkLight.lua">
+      <Filter>TestDevice</Filter>
+    </None>
+    <None Include="TestDevice\web\DimmableLight_dcp.xml">
+      <Filter>TestDevice\web</Filter>
+    </None>
+    <None Include="TestDevice\web\SwitchPower_0001_scpd.xml">
+      <Filter>TestDevice\web</Filter>
+    </None>
+    <None Include="TestDevice\web\DimmingService_0001_scpd.xml">
+      <Filter>TestDevice\web</Filter>
     </None>
   </ItemGroup>
 </Project>

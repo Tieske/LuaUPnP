@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+   <specVersion>
+      <major>1</major>
+      <minor>0</minor>
+   </specVersion>
+   <device>
+      <deviceType>urn:schemas-upnp-org:device:DimmableLight:1</deviceType>
+      <presentationURL>WebUI/index.html</presentationURL>
+      <friendlyName>Network Light (THIJS-TOSH)</friendlyName>
+      <manufacturer>OpenSource</manufacturer>
+      <manufacturerURL>http://www.sourceforge.org</manufacturerURL>
+      <modelDescription>Software Emulated Light Bulb, Visual Basic version</modelDescription>
+      <modelName>Network Light Bulb</modelName>
+      <modelNumber>XPC-L1</modelNumber>
+      <modelURL>http://www.sourceforge.org/</modelURL>
+      <UDN>uuid:e186c1ff-8277-49cb-885a-f28a8c3aaeb4</UDN>
+      <iconList>
+         <icon>
+            <mimetype>image/png</mimetype>
+            <width>16</width>
+            <height>16</height>
+            <depth>32</depth>
+            <url>/icon.png</url>
+         </icon>
+         <icon>
+            <mimetype>image/jpg</mimetype>
+            <width>16</width>
+            <height>16</height>
+            <depth>32</depth>
+            <url>/icon.jpg</url>
+         </icon>
+      </iconList>
+      <serviceList>
+         <service>
+            <serviceType>urn:schemas-upnp-org:service:DimmingService:1</serviceType>
+            <serviceId>urn:upnp-org:serviceId:DimmingService.0001</serviceId>
+            <SCPDURL>_urn:upnp-org:serviceId:DimmingService.0001_scpd.xml</SCPDURL>
+            <controlURL>_urn:upnp-org:serviceId:DimmingService.0001_control</controlURL>
+            <eventSubURL>_urn:upnp-org:serviceId:DimmingService.0001_event</eventSubURL>
+         </service>
+         <service>
+            <serviceType>urn:schemas-upnp-org:service:SwitchPower:1</serviceType>
+            <serviceId>urn:upnp-org:serviceId:SwitchPower.0001</serviceId>
+            <SCPDURL>_urn:upnp-org:serviceId:SwitchPower.0001_scpd.xml</SCPDURL>
+            <controlURL>_urn:upnp-org:serviceId:SwitchPower.0001_control</controlURL>
+            <eventSubURL>_urn:upnp-org:serviceId:SwitchPower.0001_event</eventSubURL>
+         </service>
+      </serviceList>
+   </device>
+</root>
