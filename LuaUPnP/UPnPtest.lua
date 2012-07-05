@@ -38,10 +38,17 @@ end
 -- if a different interval to next test is required, return interval in seconds
 -----------------------------------------------------------------
 local cp        -- controlpoint
-local upnpcb = function(event)
-    print ("Received event:")
-    table.print(event)
-    print()
+local upnpcb = function(event, err)
+    if event then
+        print ("Received event:")
+        table.print(event)
+        print()
+    else
+        -- an error occured
+        print ("LuaUPnP error:")
+        print(err)
+        print()
+    end
 end
 
 local testlist = {
@@ -65,7 +72,9 @@ local testlist = {
 
     function()
         print("Starting async search")
-        local result = { cp:SearchAsync(10,"upnp:rootdevice") } -- "ssdp:all"
+        --local result = { cp:SearchAsync(10,"ssdp:all") }
+        --local result = { cp:SearchAsync(10,"upnp:rootdevice") }
+        local result = { cp:SearchAsync(10,"urn:schemas-upnp-org:device:DimmableLight:1") }
         cp = result[1]
         table.print(result);
         return 15   -- wait 15 seconds for next test

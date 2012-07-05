@@ -105,7 +105,7 @@ static int deliverUpnpDiscovery(Upnp_EventType EventType, const UpnpDiscovery *d
 		mydata->Event = NULL;
 	}
 	mydata->Cookie = cookie;
-	if (mydata->Event == NULL)
+	if (mydata->Event == NULL && dEvent != NULL)
 	{
 		deliverUpnpCallbackError("Out of memory duplicating 'event' for UpnpDiscovery callback.", cookie);
 		free(mydata);
