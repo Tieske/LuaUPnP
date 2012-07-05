@@ -18,9 +18,11 @@ static IXML_Document* copyIXMLdoc(IXML_Document* inputDoc)
 // =================== Error reporting ===========================
 static int decodeUpnpCallbackError(lua_State *L, void* pData, void* utilid)
 {
+	// Push the callback function first
+	lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 	lua_pushnil(L);
 	lua_pushstring(L, (char*)pData);
-	return 2;
+	return 3;
 }
 static int deliverUpnpCallbackError(const char* msg, void* cookie)
 {
@@ -54,31 +56,34 @@ static int decodeUpnpDiscovery(lua_State *L, void* pData, void* utilid)
 		// Create and fill the event table for Lua
 		lua_newtable(L);
 		pushstringfield(L, "Event", UpnpGetEventType(mydata->EventType));
-		if (UpnpDiscovery_get_ErrCode(dEvent) != UPNP_E_SUCCESS)
+		if (dEvent != NULL)
 		{
-			lua_pushstring(L, "ErrCode");
-			lua_pushinteger(L, UpnpDiscovery_get_ErrCode(dEvent));
+			if (UpnpDiscovery_get_ErrCode(dEvent) != UPNP_E_SUCCESS)
+			{
+				lua_pushstring(L, "ErrCode");
+				lua_pushinteger(L, UpnpDiscovery_get_ErrCode(dEvent));
+				lua_settable(L, -3);
+				pushstringfield(L, "Error", UpnpGetErrorMessage(UpnpDiscovery_get_ErrCode(dEvent)));
+			}
+			lua_pushstring(L, "Expires");
+			lua_pushinteger(L, UpnpDiscovery_get_Expires(dEvent));
 			lua_settable(L, -3);
-			pushstringfield(L, "Error", UpnpGetErrorMessage(UpnpDiscovery_get_ErrCode(dEvent)));
+			pushstringfield(L, "DeviceID", UpnpString_get_String(UpnpDiscovery_get_DeviceID(dEvent)));
+			pushstringfield(L, "DeviceType", UpnpString_get_String(UpnpDiscovery_get_DeviceType(dEvent)));
+			pushstringfield(L, "ServiceType", UpnpString_get_String(UpnpDiscovery_get_ServiceType(dEvent)));
+			pushstringfield(L, "ServiceVer", UpnpString_get_String(UpnpDiscovery_get_ServiceVer(dEvent)));
+			pushstringfield(L, "Location", UpnpString_get_String(UpnpDiscovery_get_Location(dEvent)));
+			pushstringfield(L, "Os", UpnpString_get_String(UpnpDiscovery_get_Os(dEvent)));
+			pushstringfield(L, "Date", UpnpString_get_String(UpnpDiscovery_get_Date(dEvent)));
+			pushstringfield(L, "Ext", UpnpString_get_String(UpnpDiscovery_get_Ext(dEvent)));
+			// TODO: add address info, check *NIX vs Win32 differences, and IPv4 vs IPv6
+			//lua_pushstring(L, "DestAddr");
+			//lua_pushstring(L, UpnpDiscovery_get_DestAddr(dEvent));
+			//lua_settable(L, -3);
 		}
-		lua_pushstring(L, "Expires");
-		lua_pushinteger(L, UpnpDiscovery_get_Expires(dEvent));
-		lua_settable(L, -3);
-		pushstringfield(L, "DeviceID", UpnpString_get_String(UpnpDiscovery_get_DeviceID(dEvent)));
-		pushstringfield(L, "DeviceType", UpnpString_get_String(UpnpDiscovery_get_DeviceType(dEvent)));
-		pushstringfield(L, "ServiceType", UpnpString_get_String(UpnpDiscovery_get_ServiceType(dEvent)));
-		pushstringfield(L, "ServiceVer", UpnpString_get_String(UpnpDiscovery_get_ServiceVer(dEvent)));
-		pushstringfield(L, "Location", UpnpString_get_String(UpnpDiscovery_get_Location(dEvent)));
-		pushstringfield(L, "Os", UpnpString_get_String(UpnpDiscovery_get_Os(dEvent)));
-		pushstringfield(L, "Date", UpnpString_get_String(UpnpDiscovery_get_Date(dEvent)));
-		pushstringfield(L, "Ext", UpnpString_get_String(UpnpDiscovery_get_Ext(dEvent)));
-		// TODO: add address info, check *NIX vs Win32 differences, and IPv4 vs IPv6
-		//lua_pushstring(L, "DestAddr");
-		//lua_pushstring(L, UpnpDiscovery_get_DestAddr(dEvent));
-		//lua_settable(L, -3);
 		result = 2;	// 2 return arguments, callback + table
 	}
-	UpnpDiscovery_delete(dEvent);
+	if (dEvent != NULL) UpnpDiscovery_delete(dEvent);
 	free(mydata);
 	return result;
 }
@@ -94,7 +99,11 @@ static int deliverUpnpDiscovery(Upnp_EventType EventType, const UpnpDiscovery *d
 		return 0;
 	}
 	mydata->EventType = EventType;
-	mydata->Event =  UpnpDiscovery_dup(dEvent);
+	if (dEvent != NULL) {	// in case of UPNP_DISCOVERY_SEARCH_TIMEOUT event == NULL
+		mydata->Event =  UpnpDiscovery_dup(dEvent);
+	} else {
+		mydata->Event = NULL;
+	}
 	mydata->Cookie = cookie;
 	if (mydata->Event == NULL)
 	{
