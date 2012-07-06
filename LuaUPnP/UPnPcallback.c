@@ -371,9 +371,7 @@ static int decodeUpnpEventSubscribe(lua_State *L, void* pData, void* utilid)
 		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
-		lua_pushstring(L, "Event");
-		lua_pushstring(L, UpnpGetEventType(mydata->EventType));
-		lua_settable(L, -3);
+		pushstringfield(L, "Event", UpnpGetEventType(mydata->EventType));
 		if (UpnpEventSubscribe_get_ErrCode(esEvent) != UPNP_E_SUCCESS)
 		{
 			lua_pushstring(L, "ErrCode");
@@ -441,6 +439,7 @@ static int decodeUpnpSubscriptionRequest(lua_State *L, void* pData, void* utilid
 		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 		// Create and fill the event table for Lua
 		lua_newtable(L);
+		pushstringfield(L, "Event", UpnpGetEventType(mydata->EventType));
 		pushstringfield(L, "ServiceId", UpnpString_get_String(UpnpSubscriptionRequest_get_ServiceId(srEvent)));
 		pushstringfield(L, "UDN", UpnpString_get_String(UpnpSubscriptionRequest_get_UDN(srEvent)));
 		pushstringfield(L, "SID", UpnpString_get_String(UpnpSubscriptionRequest_get_SID(srEvent)));

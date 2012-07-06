@@ -7,8 +7,9 @@ REM ===================================================
 SET T_LUAPATH=C:\Users\Public\lua\5.1
 
 echo Copying upnp dll's
-copy "..\libupnp\*.dll" "%T_LUAPATH%\clibs"
+copy "..\libupnp\pthread*.*" "%T_LUAPATH%\clibs"
+copy "..\libupnp\libupnp.*" "%T_LUAPATH%\clibs"
 
-echo Copying file 'LuaUPnP.dll'
-copy "..\Debug\LuaUPnP.dll" "%T_LUAPATH%\clibs"
+echo Copying file 'LuaUPnP.*'
+copy "..\Debug\LuaUPnP.*" "%T_LUAPATH%\clibs"
 

@@ -10,3 +10,8 @@
 /libupnp/pthreadVC2.dll
 /LuaUPnP/IUpnpErrFile.txt
 /LuaUPnP/IUpnpInfoFile.txt
+/LuaUPnP/TestDevice/IUpnpErrFile.txt
+/LuaUPnP/TestDevice/IUpnpInfoFile.txt
+/libupnp/libupnp.exp
+/libupnp/libupnp.lib
+/libupnp/libupnp.pdb

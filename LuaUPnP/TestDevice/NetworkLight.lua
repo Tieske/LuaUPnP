@@ -33,13 +33,12 @@ local errf = function(msg)
 end
 
 -----------------------------------------------------------------
---  UPnP xml descriptions
------------------------------------------------------------------
------------------------------------------------------------------
 --  Test functions, put main code here
 -- if a different interval to next test is required, return interval in seconds
 -----------------------------------------------------------------
 local device        -- UPnP device handle
+local webroot = "./web"
+local baseurl
 local upnpcb = function(event, err)
     if event then
         print ("Received event:")
@@ -57,31 +56,35 @@ local testlist = {
     function()
         print("starting UPnP")
         upnp.Init(upnpcb)
+        baseurl = "http://" .. upnp.GetServerIpAddress() .. ":" .. upnp.GetServerPort() .. "/";
+        print ("BaseURL:", baseurl)
     end,
 
     function()
         print("Setting webserver root")
-        print (upnp.web.SetRootDir("./web"))
+        print (upnp.web.SetRootDir(webroot))
     end,
 
     function()
         print("Registering device")
-        local result = { upnp.RegisterRootDevice("DimmableLight_dcp.xml") }
+        local result = { upnp.RegisterRootDevice(baseurl .. "DimmableLight_dcp.xml") }
         device = result[1]
         table.print(result);
+        return
     end,
 
     function()
-        print("Starting async search")
-        --local result = { cp:SearchAsync(10,"ssdp:all") }
-        --local result = { cp:SearchAsync(10,"upnp:rootdevice") }
-        local result = { cp:SearchAsync(10,"urn:schemas-upnp-org:device:DimmableLight:1") }
-        cp = result[1]
+        print("Advertising device")
+        local result = { device:SendAdvertisement(100) }
         table.print(result);
-        return 15   -- wait 15 seconds for next test
+        return 60
     end,
 
-
+    function()
+        print("Unregistering device")
+        local result = { device:UnRegisterRootDevice() }
+        table.print(result);
+    end,
 
     function()
         print("stopping UPnP")
@@ -97,7 +100,7 @@ local testlist = {
 
 local timer
 local testcount = 1
-local testinterval = 1      -- seconds
+local testinterval = 1/2      -- seconds
 -- test function to run tests in a row
 local test = function()
 

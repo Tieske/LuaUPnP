@@ -65,7 +65,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>lua51.lib;libupnp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\pupnp\build\vc10\out.vc10.Win32\Debug\lib\ixml;$(SolutionDir)..\pupnp\build\vc10\out.vc10.Win32\Debug\bin;C:\Users\Public\Lua\5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)libupnp;C:\Users\Public\Lua\5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>

@@ -528,8 +528,10 @@ static int L_UpnpDownloadXmlDoc(lua_State *L)
 
 static int L_UpnpSetWebServerRootDir(lua_State *L)
 {
-	// TODO: implement, not now
-	return luaL_error(L, "method not implemented yet!");
+	int result = UpnpSetWebServerRootDir(luaL_checkstring(L,1));
+	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 static int L_UpnpSetVirtualDirCallbacks(lua_State *L)
