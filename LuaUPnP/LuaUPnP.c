@@ -88,6 +88,7 @@ static int LuaCallback(Upnp_EventType EventType, const void *Event, void *Cookie
 void DSS_cancel(void* utilid, void* pData)
 {
 	UpnpFinish();					// stop UPnP threads
+	UPnPStarted = FALSE;
 	DSS_shutdown(NULL, utilid);		// unregister myself with DSS
 };
 
@@ -112,6 +113,7 @@ static int L_UpnpInit(lua_State *L)
 	if (result == UPNP_E_SUCCESS)	
 	{
 		lua_pushinteger(L, 1);	// push 1 as positive result
+		UPnPStarted = TRUE;
 		return 1;
 	}
 	// report error
@@ -132,6 +134,7 @@ static int L_UpnpFinish(lua_State *L)
 		lua_setfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
 
 		lua_pushinteger(L, 1);	// push 1 as positive result
+		UPnPStarted = FALSE;
 		return 1;
 	}
 	// report error
@@ -934,6 +937,7 @@ static const struct luaL_Reg UPnPUtil[] = {
 static int L_closeLib(lua_State *L) {
 	// stop UPnP
 	UpnpFinish();
+	UPnPStarted = FALSE;
 	// shutdown DSS
 	DSS_shutdown(L, NULL);
 	return 0;
@@ -945,6 +949,9 @@ LPNP_API	int luaopen_LuaUPnP(lua_State *L)
 	/////////////////////////////////////////////
 	//  Create lib close userdata
 	/////////////////////////////////////////////
+
+	// tracker for library being started or not
+	UPnPStarted = FALSE;	// TODO: dangerous if lib gets loaded more than once, should also have a counter to inc/dec upon init/shutdown to prevent shutting down other Lua state
 
 	// first register with DSS
 	DSS_initialize(L, &DSS_cancel);	// will not return on error.

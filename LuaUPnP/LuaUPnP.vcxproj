@@ -132,7 +132,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </None>
     <None Include="TestDevice\NetworkLight.lua" />
-    <None Include="TestDevice\web\DimmableLight_dcp.xml" />
+    <None Include="TestDevice\web\DimmableLight_dcp.xml">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="TestDevice\web\DimmingService_0001_scpd.xml" />
     <None Include="TestDevice\web\SwitchPower_0001_scpd.xml" />
     <None Include="UPnPtest.lua" />

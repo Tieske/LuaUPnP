@@ -124,6 +124,7 @@ static UpnpDevice_Handle checkdevice(lua_State *L, int idx)
 {
 	pLuaDevice dev;
 	luaL_checkudata(L, idx, LPNP_DEVICE_MT);
+	if (! UPnPStarted) luaL_error(L, UpnpGetErrorMessage(UPNP_E_FINISH));
 	dev = (pLuaDevice)lua_touserdata(L, idx);
 	return dev->device;
 }
@@ -135,6 +136,7 @@ static UpnpClient_Handle checkclient(lua_State *L, int idx)
 {
 	pLuaClient client;
 	luaL_checkudata(L, idx, LPNP_CLIENT_MT);
+	if (! UPnPStarted) luaL_error(L,  UpnpGetErrorMessage(UPNP_E_FINISH));
 	client = (pLuaClient)lua_touserdata(L, idx);
 	return client->client;
 }
@@ -396,8 +398,7 @@ int L_clienttostring(lua_State *L)
 static int L_DestroyDevice(lua_State *L)
 {
 	pLuaDevice dev = (pLuaDevice)lua_touserdata(L, 1);
-	//if (dev->device != NULL)
-	UpnpUnRegisterRootDevice(dev->device);
+	if (UPnPStarted)	UpnpUnRegisterRootDevice(dev->device);
 	return 0;
 }
 
@@ -405,7 +406,6 @@ static int L_DestroyDevice(lua_State *L)
 static int L_DestroyClient(lua_State *L)
 {
 	pLuaClient client = (pLuaClient)lua_touserdata(L, 1);
-	//if (client->client != NULL)
-	UpnpUnRegisterClient(client->client);
+	if (UPnPStarted)	UpnpUnRegisterClient(client->client);
 	return 0;
 }

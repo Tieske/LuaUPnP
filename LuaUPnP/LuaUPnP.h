@@ -40,7 +40,8 @@ typedef struct LuaClientRecord {
 	UpnpClient_Handle client;	
 } LuaClient;
 
-
+// tracker for library being started or not
+static int UPnPStarted;
 
 struct _EventTypes {
 	/*! Error code. */

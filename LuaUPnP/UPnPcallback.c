@@ -41,7 +41,6 @@ static void pushstringfield(lua_State *L, const char* key, const char* value)
 }
 
 // =================== Discovery events ==========================
-// TODO: update others to only report string if non-null and errors if present
 static int decodeUpnpDiscovery(lua_State *L, void* pData, void* utilid)
 {
 	int result = 0;

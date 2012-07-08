@@ -39,11 +39,21 @@ end
 local device        -- UPnP device handle
 local webroot = "./web"
 local baseurl
-local upnpcb = function(event, err)
+local upnpcb = function(wt, event)
+    local err
+    if type(wt) ~= "userdata" then
+        err = event
+        event = wt
+        wt = nil
+    end
     if event then
         print ("Received event:")
         table.print(event)
         print()
+        if event.Event == "UPNP_EVENT_SUBSCRIPTION_REQUEST" then
+            -- let's accept the subscription
+
+        end
     else
         -- an error occured
         print ("LuaUPnP error:")
