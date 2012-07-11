@@ -72,6 +72,8 @@ typedef struct _cbdelivery {
 	Upnp_EventType EventType;
 	void* Event;
 	void* Cookie;
+	void* Extra;	// just an extra pointer
+	int handle;			// either client or device handle
 } cbdelivery;
 
 

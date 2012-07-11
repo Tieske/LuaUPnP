@@ -129,6 +129,15 @@ static UpnpDevice_Handle checkdevice(lua_State *L, int idx)
 	return dev->device;
 }
 
+// Get the requested index from the stack and verify it being a proper Device
+// returns -1 if it is not a valid device (either no device, or already NULL)
+// SOFT ERROR
+static UpnpDevice_Handle getdevice(lua_State *L, int idx)
+{
+	// TODO: implement properly, as soft error!!
+	return checkdevice(L, idx);
+}
+
 // Get the requested index from the stack and verify it being a proper Client
 // throws an error if it fails.
 // HARD ERROR
@@ -141,9 +150,18 @@ static UpnpClient_Handle checkclient(lua_State *L, int idx)
 	return client->client;
 }
 
+// Get the requested index from the stack and verify it being a proper Client
+// returns -1 if it is not a valid client (either no client, or already NULL)
+// SOFT ERROR
+static UpnpClient_Handle getclient(lua_State *L, int idx)
+{
+	return checkclient(L, idx);
+}
+
 // Get the Upnp_DescType from Lua
 static Upnp_DescType checkUpnp_DescType(lua_State *L, int idx)
 {
+// TODO: replace this code with the OPTION CHECKs lua provides
 	const char* etype = NULL;
 	etype = luaL_checkstring(L, idx);
 	lua_checkstack(L,1);
@@ -186,162 +204,7 @@ int pushUPnPerror(lua_State *L, int err, IXML_Document* respdoc)
 	lua_checkstack(L,3);
 	lua_pushnil(L);
 	lua_pushstring(L, UpnpGetErrorMessage(err));
-/*	switch (err) {
-		case UPNP_E_SUCCESS: 
-			lua_pushstring(L, "UPNP_E_SUCCESS");
-			break;
-		case UPNP_E_INVALID_HANDLE: 
-			lua_pushstring(L, "UPNP_E_INVALID_HANDLE");
-			break;
-		case UPNP_E_INVALID_PARAM: 
-			lua_pushstring(L, "UPNP_E_INVALID_PARAM");
-			break;
-		case UPNP_E_OUTOF_HANDLE: 
-			lua_pushstring(L, "UPNP_E_OUTOF_HANDLE");
-			break;
-		case UPNP_E_OUTOF_CONTEXT: 
-			lua_pushstring(L, "UPNP_E_OUTOF_CONTEXT");
-			break;
-		case UPNP_E_OUTOF_MEMORY: 
-			lua_pushstring(L, "UPNP_E_OUTOF_MEMORY");
-			break;
-		case UPNP_E_INIT: 
-			lua_pushstring(L, "UPNP_E_INIT");
-			break;
-		case UPNP_E_BUFFER_TOO_SMALL: 
-			lua_pushstring(L, "UPNP_E_BUFFER_TOO_SMALL");
-			break;
-		case UPNP_E_INVALID_DESC: 
-			lua_pushstring(L, "UPNP_E_INVALID_DESC");
-			break;
-		case UPNP_E_INVALID_URL: 
-			lua_pushstring(L, "UPNP_E_INVALID_URL");
-			break;
-		case UPNP_E_INVALID_SID: 
-			lua_pushstring(L, "UPNP_E_INVALID_SID");
-			break;
-		case UPNP_E_INVALID_DEVICE: 
-			lua_pushstring(L, "UPNP_E_INVALID_DEVICE");
-			break;
-		case UPNP_E_INVALID_SERVICE: 
-			lua_pushstring(L, "UPNP_E_INVALID_SERVICE");
-			break;
-		case UPNP_E_BAD_RESPONSE: 
-			lua_pushstring(L, "UPNP_E_BAD_RESPONSE");
-			break;
-		case UPNP_E_BAD_REQUEST: 
-			lua_pushstring(L, "UPNP_E_BAD_REQUEST");
-			break;
-		case UPNP_E_INVALID_ACTION: 
-			lua_pushstring(L, "UPNP_E_INVALID_ACTION");
-			break;
-		case UPNP_E_FINISH: 
-			lua_pushstring(L, "UPNP_E_FINISH");
-			break;
-		case UPNP_E_INIT_FAILED: 
-			lua_pushstring(L, "UPNP_E_INIT_FAILED");
-			break;
-		case UPNP_E_URL_TOO_BIG: 
-			lua_pushstring(L, "UPNP_E_URL_TOO_BIG");
-			break;
-		case UPNP_E_BAD_HTTPMSG: 
-			lua_pushstring(L, "UPNP_E_BAD_HTTPMSG");
-			break;
-		case UPNP_E_ALREADY_REGISTERED: 
-			lua_pushstring(L, "UPNP_E_ALREADY_REGISTERED");
-			break;
-		case UPNP_E_INVALID_INTERFACE: 
-			lua_pushstring(L, "UPNP_E_INVALID_INTERFACE");
-			break;
-		case UPNP_E_NETWORK_ERROR: 
-			lua_pushstring(L, "UPNP_E_NETWORK_ERROR");
-			break;
-		case UPNP_E_SOCKET_WRITE: 
-			lua_pushstring(L, "UPNP_E_SOCKET_WRITE");
-			break;
-		case UPNP_E_SOCKET_READ: 
-			lua_pushstring(L, "UPNP_E_SOCKET_READ");
-			break;
-		case UPNP_E_SOCKET_BIND: 
-			lua_pushstring(L, "UPNP_E_SOCKET_BIND");
-			break;
-		case UPNP_E_SOCKET_CONNECT: 
-			lua_pushstring(L, "UPNP_E_SOCKET_CONNECT");
-			break;
-		case UPNP_E_OUTOF_SOCKET: 
-			lua_pushstring(L, "UPNP_E_OUTOF_SOCKET");
-			break;
-		case UPNP_E_LISTEN: 
-			lua_pushstring(L, "UPNP_E_LISTEN");
-			break;
-		case UPNP_E_TIMEDOUT: 
-			lua_pushstring(L, "UPNP_E_TIMEDOUT");
-			break;
-		case UPNP_E_SOCKET_ERROR: 
-			lua_pushstring(L, "UPNP_E_SOCKET_ERROR");
-			break;
-		case UPNP_E_FILE_WRITE_ERROR: 
-			lua_pushstring(L, "UPNP_E_FILE_WRITE_ERROR");
-			break;
-		case UPNP_E_CANCELED: 
-			lua_pushstring(L, "UPNP_E_CANCELED");
-			break;
-		case UPNP_E_EVENT_PROTOCOL: 
-			lua_pushstring(L, "UPNP_E_EVENT_PROTOCOL");
-			break;
-		case UPNP_E_SUBSCRIBE_UNACCEPTED: 
-			lua_pushstring(L, "UPNP_E_SUBSCRIBE_UNACCEPTED");
-			break;
-		case UPNP_E_UNSUBSCRIBE_UNACCEPTED: 
-			lua_pushstring(L, "UPNP_E_UNSUBSCRIBE_UNACCEPTED");
-			break;
-		case UPNP_E_NOTIFY_UNACCEPTED: 
-			lua_pushstring(L, "UPNP_E_NOTIFY_UNACCEPTED");
-			break;
-		case UPNP_E_INVALID_ARGUMENT: 
-			lua_pushstring(L, "UPNP_E_INVALID_ARGUMENT");
-			break;
-		case UPNP_E_FILE_NOT_FOUND: 
-			lua_pushstring(L, "UPNP_E_FILE_NOT_FOUND");
-			break;
-		case UPNP_E_FILE_READ_ERROR: 
-			lua_pushstring(L, "UPNP_E_FILE_READ_ERROR");
-			break;
-		case UPNP_E_EXT_NOT_XML: 
-			lua_pushstring(L, "UPNP_E_EXT_NOT_XML");
-			break;
-		case UPNP_E_NO_WEB_SERVER: 
-			lua_pushstring(L, "UPNP_E_NO_WEB_SERVER");
-			break;
-		case UPNP_E_OUTOF_BOUNDS: 
-			lua_pushstring(L, "UPNP_E_OUTOF_BOUNDS");
-			break;
-		case UPNP_E_NOT_FOUND: 
-			lua_pushstring(L, "UPNP_E_NOT_FOUND");
-			break;
-		case UPNP_E_INTERNAL_ERROR: 
-			lua_pushstring(L, "UPNP_E_INTERNAL_ERROR");
-			break;
-		case UPNP_SOAP_E_INVALID_ACTION: 
-			lua_pushstring(L, "UPNP_SOAP_E_INVALID_ACTION");
-			break;
-		case UPNP_SOAP_E_INVALID_ARGS: 
-			lua_pushstring(L, "UPNP_SOAP_E_INVALID_ARGS");
-			break;
-		case UPNP_SOAP_E_OUT_OF_SYNC: 
-			lua_pushstring(L, "UPNP_SOAP_E_OUT_OF_SYNC");
-			break;
-		case UPNP_SOAP_E_INVALID_VAR: 
-			lua_pushstring(L, "UPNP_SOAP_E_INVALID_VAR");
-			break;
-		case UPNP_SOAP_E_ACTION_FAILED: 
-			lua_pushstring(L, "UPNP_SOAP_E_ACTION_FAILED");
-			break;
-		default:
-			lua_pushstring(L, "UPNP_UNKNOWN_ERROR");
-			break;
-	}
-*/	lua_pushinteger(L, err);
+	lua_pushinteger(L, err);
 	if (err > 0)	// SOAP error, also add document containing error
 	{
 		pushLuaDocument(L, respdoc);

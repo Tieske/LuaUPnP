@@ -444,9 +444,60 @@ static int decodeUpnpSubscriptionRequest(lua_State *L, void* pData, void* pUtilD
 		pushstringfield(L, "SID", UpnpString_get_String(UpnpSubscriptionRequest_get_SID(srEvent)));
 		result = 2;	// 2 return arguments, callback + table
 	}
-	UpnpSubscriptionRequest_delete(srEvent);
-	free(mydata);
+	//UpnpSubscriptionRequest_delete(srEvent);  do not release resources, the 'return' call still needs them
+	//free(mydata);
 	return result;
+}
+
+
+// the return function should provide 2 parameters;
+//   1) the deviceobject (userdata)
+//   2) a table with statevariable name/value pairs.
+// The table MUST be present, but may be empty
+// Returns; 1, or nil + errormsg
+static int returnUpnpSubscriptionRequest(lua_State *L, void* pData, void* pUtilData, void* utilid, int garbage)
+{
+	int err = 0;
+	cbdelivery* mydata = (cbdelivery*)pData;
+	UpnpSubscriptionRequest* srEvent = (UpnpSubscriptionRequest*)mydata->Event;
+	IXML_Document* VarList = NULL;
+
+	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
+	if (L != NULL)
+	{
+		if (garbage) return;
+
+		if (lua_gettop(L) < 2 || getdevice(L,1) == -1 || !lua_istable(L,2))
+		{
+			lua_pushnil(L);
+			lua_pushstring(L, "Error: expected a Device and a table (with variable names and values) as parameters");
+			return;
+		}
+
+		lua_settop(L,2);	// clear remainder of stack
+		// iterate over provided table
+		lua_pushnil(L);
+		while (lua_next(L,2) != 0)
+		{
+			lua_pushvalue(L, -2);	// duplicate the key, to prevent confusing 'next()'
+			err = UpnpAddToPropertySet(&VarList, lua_tostring(L, -1), lua_tostring(L, -2));
+			lua_pop(L,2);	// remove copy of key and value
+			if (err != UPNP_E_SUCCESS)
+			{
+				// error with the table contents, invalid
+				if (VarList != NULL) ixmlDocument_free(VarList);
+				lua_pushnil(L);
+				lua_pushstring(L, "Error: Invalid data in StateVariable table provided to SubscriptionRequest");
+				return;
+			}
+		}
+		//succeeded, store results
+		mydata->handle = getdevice(L,1);
+		mydata->Extra = VarList;
+		//report success
+		lua_pushinteger(L, 1);
+		return 1;
+	}
 }
 
 static int deliverUpnpSubscriptionRequest(Upnp_EventType EventType, const UpnpSubscriptionRequest *srEvent, void* cookie)
@@ -460,26 +511,38 @@ static int deliverUpnpSubscriptionRequest(Upnp_EventType EventType, const UpnpSu
 		return 0;
 	}
 	mydata->EventType = EventType;
-	mydata->Event =  UpnpSubscriptionRequest_dup(srEvent);
+	mydata->Event =  (void*)srEvent; //UpnpSubscriptionRequest_dup(srEvent); we'll be waiting, so no duplicate
 	mydata->Cookie = cookie;
-	if (mydata->Event == NULL)
+	mydata->Extra = NULL;
+	mydata->handle = -1;
+	//if (mydata->Event == NULL)
+	//{
+	//	deliverUpnpCallbackError("Out of memory duplicating 'event' for UpnpSubscriptionRequest callback.", cookie);
+	//	free(mydata);
+	//	return 0;
+	//}
+
+	// This call will block until all callbacks have been completed
+	err = DSS_deliver(cookie, &decodeUpnpSubscriptionRequest, &returnUpnpSubscriptionRequest, mydata);
+
+	// report error if any
+	if (err != DSS_SUCCESS)	deliverUpnpCallbackError("Error delivering 'event' for UpnpSubscriptionRequest callback.", cookie);
+	
+	// Actually handle the subscription
+	if (mydata->Extra != NULL) 
 	{
-		deliverUpnpCallbackError("Out of memory duplicating 'event' for UpnpSubscriptionRequest callback.", cookie);
-		free(mydata);
-		return 0;
+		UpnpAcceptSubscriptionExt(
+				mydata->handle, 
+				UpnpSubscriptionRequest_get_UDN_cstr(srEvent),
+				UpnpString_get_String(UpnpSubscriptionRequest_get_ServiceId(srEvent)), 
+				(IXML_Document*)mydata->Extra,
+				UpnpSubscriptionRequest_get_SID_cstr(srEvent));
+
+		// Cleanup
+		ixmlDocument_free((IXML_Document*)mydata->Extra);
 	}
 
-	err = DSS_deliver(cookie, &decodeUpnpSubscriptionRequest, NULL, mydata);
-	if (err != DSS_SUCCESS)
-	{
-		deliverUpnpCallbackError("Error delivering 'event' for UpnpSubscriptionRequest callback.", cookie);
-		if (err != DSS_ERR_UDP_SEND_FAILED) // only in this case data is still delivered and shouldn't be released
-		{
-			UpnpSubscriptionRequest_delete((UpnpSubscriptionRequest *)mydata->Event);
-			free(mydata);
-		}
-		return 0;
-	}
+	free(mydata);
 	return 0;
 }
 
