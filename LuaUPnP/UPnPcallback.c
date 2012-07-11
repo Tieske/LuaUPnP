@@ -16,7 +16,7 @@ static IXML_Document* copyIXMLdoc(IXML_Document* inputDoc)
 }
 
 // =================== Error reporting ===========================
-static int decodeUpnpCallbackError(lua_State *L, void* pData, void* utilid)
+static int decodeUpnpCallbackError(lua_State *L, void* pData, void* pUtilData, void* utilid)
 {
 	// Push the callback function first
 	lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
@@ -41,7 +41,7 @@ static void pushstringfield(lua_State *L, const char* key, const char* value)
 }
 
 // =================== Discovery events ==========================
-static int decodeUpnpDiscovery(lua_State *L, void* pData, void* utilid)
+static int decodeUpnpDiscovery(lua_State *L, void* pData, void* pUtilData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
@@ -126,7 +126,7 @@ static int deliverUpnpDiscovery(Upnp_EventType EventType, const UpnpDiscovery *d
 }
 
 // =================== Action Complete events ==========================
-static int decodeUpnpActionComplete(lua_State *L, void* pData, void* utilid)
+static int decodeUpnpActionComplete(lua_State *L, void* pData, void* pUtilData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
@@ -215,7 +215,7 @@ static int deliverUpnpActionComplete(Upnp_EventType EventType, const UpnpActionC
 }
 
 // =================== StateVar Complete events ==========================
-static int decodeUpnpStateVarComplete(lua_State *L, void* pData, void* utilid)
+static int decodeUpnpStateVarComplete(lua_State *L, void* pData, void* pUtilData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
@@ -281,7 +281,7 @@ static int deliverUpnpStateVarComplete(Upnp_EventType EventType, const UpnpState
 }
 
 // =================== Event events ==========================
-static int decodeUpnpEvent(lua_State *L, void* pData, void* utilid)
+static int decodeUpnpEvent(lua_State *L, void* pData, void* pUtilData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
@@ -357,7 +357,7 @@ static int deliverUpnpEvent(Upnp_EventType EventType, const UpnpEvent *eEvent, v
 }
 
 // =================== Event Subscribe events ==========================
-static int decodeUpnpEventSubscribe(lua_State *L, void* pData, void* utilid)
+static int decodeUpnpEventSubscribe(lua_State *L, void* pData, void* pUtilData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
@@ -425,7 +425,7 @@ static int deliverUpnpEventSubscribe(Upnp_EventType EventType, const UpnpEventSu
 }
 
 // =================== Subscription Request events ==========================
-static int decodeUpnpSubscriptionRequest(lua_State *L, void* pData, void* utilid)
+static int decodeUpnpSubscriptionRequest(lua_State *L, void* pData, void* pUtilData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
@@ -484,7 +484,7 @@ static int deliverUpnpSubscriptionRequest(Upnp_EventType EventType, const UpnpSu
 }
 
 // =================== StateVar request events ==========================
-static int decodeUpnpStateVarRequest(lua_State *L, void* pData, void* utilid)
+static int decodeUpnpStateVarRequest(lua_State *L, void* pData, void* pUtilData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
@@ -559,7 +559,7 @@ static int deliverUpnpStateVarRequest(Upnp_EventType EventType, const UpnpStateV
 }
 
 // =================== Action request events ==========================
-static int decodeUpnpActionRequest(lua_State *L, void* pData, void* utilid)
+static int decodeUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
