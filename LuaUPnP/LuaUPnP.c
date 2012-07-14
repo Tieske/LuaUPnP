@@ -103,6 +103,9 @@ static int L_UpnpInit(lua_State *L)
 	if (lua_gettop(L) > 1) ipaddr = luaL_checkstring(L, 2);
 	if (lua_gettop(L) > 2) port = (unsigned short)luaL_checkint(L,3);
 
+	// first register with DSS
+	DSS_initialize(L, &DSS_cancel);	// will not return on error.
+
 	// Store the callback function
 	lua_settop(L, 1);
 	lua_setfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
@@ -117,12 +120,15 @@ static int L_UpnpInit(lua_State *L)
 		return 1;
 	}
 	// report error
+	DSS_shutdown(L, NULL);		// shutdown DSS again
 	return pushUPnPerror(L, result, NULL);
 }
 
 static int L_UpnpFinish(lua_State *L)
 {
 	int result = UPNP_E_SUCCESS;
+
+	DSS_shutdown(L, NULL);		// unregister first to release all waiting threads
 
 	result = UpnpFinish();		// stop UPnP
 
@@ -935,11 +941,11 @@ static const struct luaL_Reg UPnPUtil[] = {
 // Note: check Lua os.exit() function for exceptions,
 // it will not always be called!
 static int L_closeLib(lua_State *L) {
+	// shutdown DSS first to cancel all waiting threads and release them
+	DSS_shutdown(L, NULL);
 	// stop UPnP
 	UpnpFinish();
 	UPnPStarted = FALSE;
-	// shutdown DSS
-	DSS_shutdown(L, NULL);
 	return 0;
 }
 
@@ -954,7 +960,7 @@ LPNP_API	int luaopen_LuaUPnP(lua_State *L)
 	UPnPStarted = FALSE;	// TODO: dangerous if lib gets loaded more than once, should also have a counter to inc/dec upon init/shutdown to prevent shutting down other Lua state
 
 	// first register with DSS
-	DSS_initialize(L, &DSS_cancel);	// will not return on error.
+	//DSS_initialize(L, &DSS_cancel);	// will not return on error.   --> will be done upon starting UPnP
 
 	// Setup a close method to unregister from DSS
 	lua_newuserdata(L, sizeof(void*));

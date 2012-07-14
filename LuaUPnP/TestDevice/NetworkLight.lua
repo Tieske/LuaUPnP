@@ -39,7 +39,8 @@ end
 local device        -- UPnP device handle
 local webroot = "./web"
 local baseurl
-local upnpcb = function(wt, event)
+local upnpcb = function(wt, event) -- wt = waiting thread
+    print ("callback received")
     local err
     if type(wt) ~= "userdata" then
         err = event
@@ -48,10 +49,20 @@ local upnpcb = function(wt, event)
     end
     if event then
         print ("Received event:")
+        if wt then print("thread: ", wt) end
         table.print(event)
         print()
         if event.Event == "UPNP_EVENT_SUBSCRIPTION_REQUEST" then
             -- let's accept the subscription
+            wt:setresult(device, { ["Status"] = 1 })
+        elseif event.Event == "UPNP_CONTROL_ACTION_REQUEST" then
+            -- print action xml
+            print (event.ActionRequest)
+            print(upnp.ixml.PrintDocument(event.ActionRequest))
+            print("nodename:", event.ActionRequest:getFirstChild():getNodeName())
+            print("namespace:", event.ActionRequest:getFirstChild():getNamespaceURI())
+            print("prefix:", event.ActionRequest:getFirstChild():getPrefix())
+            print("localname:", event.ActionRequest:getFirstChild():getLocalName())
 
         end
     else
@@ -87,7 +98,7 @@ local testlist = {
         print("Advertising device")
         local result = { device:SendAdvertisement(100) }
         table.print(result);
-        return 60
+        return 600
     end,
 
     function()
