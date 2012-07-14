@@ -116,7 +116,7 @@ static int deliverUpnpDiscovery(Upnp_EventType EventType, const UpnpDiscovery *d
 	if (err != DSS_SUCCESS)
 	{
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpDiscovery callback.", cookie);
-		if (err != DSS_ERR_UDP_SEND_FAILED) // only in this case data is still delivered and shouldn't be released
+		if (err > DSS_SUCCESS) // it's a warning; in this case data is still delivered and shouldn't be released
 		{
 			UpnpDiscovery_delete((UpnpDiscovery *)mydata->Event);
 			free(mydata);
@@ -203,7 +203,7 @@ static int deliverUpnpActionComplete(Upnp_EventType EventType, const UpnpActionC
 	if (err != DSS_SUCCESS)
 	{
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpActionComplete callback.", cookie);
-		if (err != DSS_ERR_UDP_SEND_FAILED) // only in this case data is still delivered and shouldn't be released
+		if (err > DSS_SUCCESS) // it's a warning; in this case data is still delivered and shouldn't be released
 		{
 			ixmlNode_free((IXML_Node*)ActionRequestCopy);
 			ixmlNode_free((IXML_Node*)ActionResultCopy);
@@ -271,7 +271,7 @@ static int deliverUpnpStateVarComplete(Upnp_EventType EventType, const UpnpState
 	if (err != DSS_SUCCESS)
 	{
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpStateVarComplete callback.", cookie);
-		if (err != DSS_ERR_UDP_SEND_FAILED) // only in this case data is still delivered and shouldn't be released
+		if (err > DSS_SUCCESS) // it's a warning; in this case data is still delivered and shouldn't be released
 		{
 			UpnpStateVarComplete_delete((UpnpStateVarComplete *)mydata->Event);
 			free(mydata);
@@ -346,7 +346,7 @@ static int deliverUpnpEvent(Upnp_EventType EventType, const UpnpEvent *eEvent, v
 	if (err != DSS_SUCCESS)
 	{
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpEvent callback.", cookie);
-		if (err != DSS_ERR_UDP_SEND_FAILED) // only in this case data is still delivered and shouldn't be released
+		if (err > DSS_SUCCESS) // it's a warning; in this case data is still delivered and shouldn't be released
 		{
 			ixmlNode_free((IXML_Node*)ChangedVariablesCopy);
 			UpnpEvent_delete((UpnpEvent *)mydata->Event);
@@ -415,7 +415,7 @@ static int deliverUpnpEventSubscribe(Upnp_EventType EventType, const UpnpEventSu
 	if (err != DSS_SUCCESS)
 	{
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpEventSubscribe callback.", cookie);
-		if (err != DSS_ERR_UDP_SEND_FAILED) // only in this case data is still delivered and shouldn't be released
+		if (err > DSS_SUCCESS) // it's a warning; in this case data is still delivered and shouldn't be released
 		{
 			UpnpEventSubscribe_delete((UpnpEventSubscribe *)mydata->Event);
 			free(mydata);
@@ -553,84 +553,14 @@ static int deliverUpnpSubscriptionRequest(Upnp_EventType EventType, const UpnpSu
 }
 
 // =================== StateVar request events ==========================
-//static int decodeUpnpStateVarRequest(lua_State *L, void* pData, void* pUtilData, void* utilid)
-//{
-//	int result = 0;
-//	cbdelivery* mydata = (cbdelivery*)pData;
-//	UpnpStateVarRequest* svrEvent = (UpnpStateVarRequest*)mydata->Event;
-//
-//	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
-//	if (L != NULL)
-//	{
-//		// Push the callback function first
-//		lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
-//		// Create and fill the event table for Lua
-//		lua_newtable(L);
-//		pushstringfield(L, "Event", UpnpGetEventType(mydata->EventType));
-//		if (UpnpStateVarRequest_get_ErrCode(svrEvent) != UPNP_E_SUCCESS)
-//		{
-//			lua_pushstring(L, "ErrCode");
-//			lua_pushinteger(L, UpnpStateVarRequest_get_ErrCode(svrEvent));
-//			lua_settable(L, -3);
-//			pushstringfield(L, "Error", UpnpGetErrorMessage(UpnpStateVarRequest_get_ErrCode(svrEvent)));
-//		}
-//		lua_pushstring(L, "Socket");
-//		lua_pushinteger(L, UpnpStateVarRequest_get_Socket(svrEvent));
-//		lua_settable(L, -3);
-//		pushstringfield(L, "ErrStr", UpnpString_get_String(UpnpStateVarRequest_get_ErrStr(svrEvent)));
-//		pushstringfield(L, "DevUDN", UpnpString_get_String(UpnpStateVarRequest_get_DevUDN(svrEvent)));
-//		pushstringfield(L, "ServiceID", UpnpString_get_String(UpnpStateVarRequest_get_ServiceID(svrEvent)));
-//		pushstringfield(L, "StateVarName", UpnpString_get_String(UpnpStateVarRequest_get_StateVarName(svrEvent)));
-//		// TODO: add address info, check *NIX vs Win32 differences, and IPv4 vs IPv6
-//		//lua_pushstring(L, "CtrlCpIPAddr");
-//		//lua_pushstring(L, UpnpString_get_String(UpnpStateVarRequest_get_CtrlCpIPAddr(svrEvent)));
-//		//lua_settable(L, -3);
-//		pushstringfield(L, "CurrentVal", UpnpStateVarRequest_get_CurrentVal(svrEvent));
-//		result = 2;	// 2 return arguments, callback + table
-//	}
-//	UpnpStateVarRequest_delete(svrEvent);
-//	free(mydata);
-//	return result;
-//}
 
-// see UPnP architecture 1.0, section 3.3.2 Control: Query: Response, 
+// Method is optional and has been deprecated.
 static int deliverUpnpStateVarRequest(Upnp_EventType EventType, const UpnpStateVarRequest *svrEvent, void* cookie)
 {
 	// set response for not-implemented as per UPnP architecture 1.0, section 3.3.2 Control: Query: Response
 	UpnpStateVarRequest_set_ErrCode((UpnpStateVarRequest *)svrEvent, 401);
 	UpnpStateVarRequest_strcpy_ErrStr((UpnpStateVarRequest *)svrEvent, "Invalid Action");
 	return 0;
-
-	//int err = DSS_SUCCESS;
-	//cbdelivery* mydata = (cbdelivery*)malloc(sizeof(cbdelivery));
-
-	//if (mydata == NULL)
-	//{
-	//	deliverUpnpCallbackError("Out of memory allocating 'mydata' for UpnpStateVarRequest callback.", cookie);
-	//	return 0;
-	//}
-	//mydata->EventType = EventType;
-	//mydata->Event =  UpnpStateVarRequest_dup(svrEvent);
-	//mydata->Cookie = cookie;
-	//if (mydata->Event == NULL)
-	//{
-	//	deliverUpnpCallbackError("Out of memory duplicating 'event' for UpnpStateVarRequest callback.", cookie);
-	//	free(mydata);
-	//	return 0;
-	//}
-
-	//err = DSS_deliver(cookie, &decodeUpnpStateVarRequest, NULL, mydata);
-	//if (err != DSS_SUCCESS)
-	//{
-	//	deliverUpnpCallbackError("Error delivering 'event' for UpnpStateVarRequest callback.", cookie);
-	//	if (err != DSS_ERR_UDP_SEND_FAILED) // only in this case data is still delivered and shouldn't be released
-	//	{
-	//		UpnpStateVarRequest_delete((UpnpStateVarRequest *)mydata->Event);
-	//		free(mydata);
-	//	}
-	//	return 0;
-	//}
-	//return 0;
 }
 
 // =================== Action request events ==========================
@@ -655,9 +585,10 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 			lua_settable(L, -3);
 			pushstringfield(L, "Error", UpnpGetErrorMessage(UpnpActionRequest_get_ErrCode(arEvent)));
 		}
-		lua_pushstring(L, "Socket");
-		lua_pushinteger(L, UpnpActionRequest_get_Socket(arEvent));
-		lua_settable(L, -3);
+		
+		//lua_pushstring(L, "Socket");			Lua has no business with this info.
+		//lua_pushinteger(L, UpnpActionRequest_get_Socket(arEvent));
+		//lua_settable(L, -3);
 		pushstringfield(L, "ErrStr", UpnpString_get_String(UpnpActionRequest_get_ErrStr(arEvent)));
 		pushstringfield(L, "DevUDN", UpnpString_get_String(UpnpActionRequest_get_DevUDN(arEvent)));
 		pushstringfield(L, "ServiceID", UpnpString_get_String(UpnpActionRequest_get_ServiceID(arEvent)));
@@ -677,9 +608,39 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 		//lua_settable(L, -3);
 		result = 2;	// 2 return arguments, callback + table
 	}
-	UpnpActionRequest_delete(arEvent);
-	free(mydata);
+	//UpnpActionRequest_delete(arEvent);  do not release resources, the 'return' call still needs them
+	//free(mydata);
 	return result;
+
+
+		IXML_Document* ActionRequestCopy = NULL;
+	IXML_Document* ActionResultCopy = NULL;
+	IXML_Document* SoapHeaderCopy = NULL;
+	ActionRequest = UpnpActionRequest_get_ActionRequest(arEvent);
+	ActionResult = UpnpActionRequest_get_ActionResult(arEvent);
+	SoapHeader = UpnpActionRequest_get_SoapHeader(arEvent);
+	ActionRequestCopy = copyIXMLdoc(ActionRequest);
+	ActionResultCopy = copyIXMLdoc(ActionResult);
+	SoapHeaderCopy = copyIXMLdoc(SoapHeader);
+	if ((ActionRequest != NULL && ActionRequestCopy == NULL) || 
+		(ActionResult != NULL && ActionResultCopy == NULL) ||
+		(SoapHeader != NULL && SoapHeaderCopy == NULL))
+
+	{
+		deliverUpnpCallbackError("Out of memory duplicating 'event IXMLs' for UpnpActionRequest callback.", cookie);
+		ixmlNode_free((IXML_Node*)ActionRequestCopy);
+		ixmlNode_free((IXML_Node*)ActionResultCopy);
+		ixmlNode_free((IXML_Node*)SoapHeaderCopy);
+		UpnpActionRequest_delete((UpnpActionRequest *)mydata->Event);
+		free(mydata);
+		return 0;
+	}
+
+				ixmlNode_free((IXML_Node*)ActionRequestCopy);
+			ixmlNode_free((IXML_Node*)ActionResultCopy);
+			ixmlNode_free((IXML_Node*)SoapHeaderCopy);
+			UpnpActionRequest_delete((UpnpActionRequest *)mydata->Event);
+
 }
 
 // the return function should provide 2 parameters;
@@ -699,7 +660,7 @@ static int returnUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 	cbdelivery* mydata = (cbdelivery*)pData;
 	UpnpActionRequest* arEvent = (UpnpActionRequest*)mydata->Event;
 	IXML_Document* RetList = NULL;
-
+// TODO: this 'return' function needs to release the resources!! double check
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L == NULL)
 	{
@@ -778,61 +739,34 @@ static int deliverUpnpActionRequest(Upnp_EventType EventType, const UpnpActionRe
 {
 	int err = DSS_SUCCESS;
 	cbdelivery* mydata = (cbdelivery*)malloc(sizeof(cbdelivery));
-	IXML_Document* ActionRequest = NULL;
-	IXML_Document* ActionRequestCopy = NULL;
-	IXML_Document* ActionResult = NULL;
-	IXML_Document* ActionResultCopy = NULL;
-	IXML_Document* SoapHeader = NULL;
-	IXML_Document* SoapHeaderCopy = NULL;
 
 	if (mydata == NULL)
 	{
+		UpnpActionRequest_set_ActionResult((UpnpActionRequest *)arEvent, NULL);
+		UpnpActionRequest_set_ErrCode((UpnpActionRequest *)arEvent, 603);
+		UpnpActionRequest_strcpy_ErrStr((UpnpActionRequest *)arEvent, "Out of Memory");
 		deliverUpnpCallbackError("Out of memory allocating 'mydata' for UpnpActionRequest callback.", cookie);
 		return 0;
 	}
-	ActionRequest = UpnpActionRequest_get_ActionRequest(arEvent);
-	ActionResult = UpnpActionRequest_get_ActionResult(arEvent);
-	SoapHeader = UpnpActionRequest_get_SoapHeader(arEvent);
+
+	// Fill the data
 	mydata->EventType = EventType;
-	mydata->Event =  UpnpActionRequest_dup(arEvent);
+	mydata->Event = (void*)arEvent;
 	mydata->Cookie = cookie;
-	if (mydata->Event == NULL)
-	{
-		deliverUpnpCallbackError("Out of memory duplicating 'event' for UpnpActionRequest callback.", cookie);
-		free(mydata);
-		return 0;
-	}
-	ActionRequestCopy = copyIXMLdoc(ActionRequest);
-	ActionResultCopy = copyIXMLdoc(ActionResult);
-	SoapHeaderCopy = copyIXMLdoc(SoapHeader);
-	if ((ActionRequest != NULL && ActionRequestCopy == NULL) || 
-		(ActionResult != NULL && ActionResultCopy == NULL) ||
-		(SoapHeader != NULL && SoapHeaderCopy == NULL))
 
-	{
-		deliverUpnpCallbackError("Out of memory duplicating 'event IXMLs' for UpnpActionRequest callback.", cookie);
-		ixmlNode_free((IXML_Node*)ActionRequestCopy);
-		ixmlNode_free((IXML_Node*)ActionResultCopy);
-		ixmlNode_free((IXML_Node*)SoapHeaderCopy);
-		UpnpActionRequest_delete((UpnpActionRequest *)mydata->Event);
-		free(mydata);
-		return 0;
-	}
+	// Deliver it, blocks until finished
+	err = DSS_deliver(cookie, &decodeUpnpActionRequest, &returnUpnpActionRequest, mydata);
 
-	err = DSS_deliver(cookie, &decodeUpnpActionRequest, NULL, mydata);
 	if (err != DSS_SUCCESS)
 	{
 		deliverUpnpCallbackError("Error delivering 'event' for UpnpActionRequest callback.", cookie);
-		if (err != DSS_ERR_UDP_SEND_FAILED) // only in this case data is still delivered and shouldn't be released
+		if (err > DSS_SUCCESS) // it's a warning; in this case data is still delivered and shouldn't be released
 		{
-			ixmlNode_free((IXML_Node*)ActionRequestCopy);
-			ixmlNode_free((IXML_Node*)ActionResultCopy);
-			ixmlNode_free((IXML_Node*)SoapHeaderCopy);
-			UpnpActionRequest_delete((UpnpActionRequest *)mydata->Event);
-			free(mydata);
+			UpnpActionRequest_set_ErrCode((UpnpActionRequest *)arEvent, 501);
+			UpnpActionRequest_strcpy_ErrStr((UpnpActionRequest *)arEvent, "Action Failed");
 		}
-		return 0;
 	}
+	free(mydata);
 	return 0;
 }
 

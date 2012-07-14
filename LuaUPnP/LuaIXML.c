@@ -1,4 +1,5 @@
 #include "LuaIXML.h"
+// TODO: locking on IXML objects needs to be done, might get modified or freed by UPnP lib !! or just make copies... always
 
 /*
 ** ===============================================================
