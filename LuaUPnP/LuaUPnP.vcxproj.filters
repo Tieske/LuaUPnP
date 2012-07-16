@@ -82,5 +82,8 @@
     <None Include="TestDevice\testcode.lua">
       <Filter>TestDevice</Filter>
     </None>
+    <None Include="TestDevice\NetworkLight.lua">
+      <Filter>TestDevice</Filter>
+    </None>
   </ItemGroup>
 </Project>
