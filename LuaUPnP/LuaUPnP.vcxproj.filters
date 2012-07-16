@@ -70,9 +70,6 @@
     <None Include="UPnPtest.lua">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="TestDevice\NetworkLight.lua">
-      <Filter>TestDevice</Filter>
-    </None>
     <None Include="TestDevice\web\DimmableLight_dcp.xml">
       <Filter>TestDevice\web</Filter>
     </None>
@@ -81,6 +78,9 @@
     </None>
     <None Include="TestDevice\web\DimmingService_0001_scpd.xml">
       <Filter>TestDevice\web</Filter>
+    </None>
+    <None Include="TestDevice\testcode.lua">
+      <Filter>TestDevice</Filter>
     </None>
   </ItemGroup>
 </Project>
