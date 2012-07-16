@@ -40,7 +40,6 @@ local device        -- UPnP device handle
 local webroot = "./web"
 local baseurl
 local upnpcb = function(wt, event) -- wt = waiting thread
-    print ("callback received")
     local err
     if type(wt) ~= "userdata" then
         err = event
@@ -57,13 +56,14 @@ local upnpcb = function(wt, event) -- wt = waiting thread
             wt:setresult(device, { ["Status"] = 1 })
         elseif event.Event == "UPNP_CONTROL_ACTION_REQUEST" then
             -- print action xml
-            print (event.ActionRequest)
             print(upnp.ixml.PrintDocument(event.ActionRequest))
-            print("nodename:", event.ActionRequest:getFirstChild():getNodeName())
-            print("namespace:", event.ActionRequest:getFirstChild():getNamespaceURI())
-            print("prefix:", event.ActionRequest:getFirstChild():getPrefix())
-            print("localname:", event.ActionRequest:getFirstChild():getLocalName())
-
+            print("ActionResponse");
+            local a, b = wt:setresult({[1] = "RetLoadLevelStatus"}, {[1] = 50})
+            if a then
+                print(upnp.ixml.PrintDocument(a))
+            else
+                print(a, b)
+            end
         end
     else
         -- an error occured

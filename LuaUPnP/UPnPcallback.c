@@ -1,6 +1,7 @@
 #include "LuaUPnP.h"
 #include "upnp.h"
 #include "upnpdebug.h"
+//#include "lauxlib.h"
 #include "string.h"
 
 /*
@@ -498,7 +499,7 @@ static int returnUpnpSubscriptionRequest(lua_State *L, void* pData, void* pUtilD
 			}
 		}
 		//succeeded, store results
-		mydata->handle = getdevice(L,1);
+		mydata->handle = getdevice(L,1);  // TODO: check on error returned and handle it properly
 		mydata->Extra = VarList;
 		//report success
 		lua_pushinteger(L, 1);
@@ -612,7 +613,7 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 	//free(mydata);
 	return result;
 
-
+	/*
 		IXML_Document* ActionRequestCopy = NULL;
 	IXML_Document* ActionResultCopy = NULL;
 	IXML_Document* SoapHeaderCopy = NULL;
@@ -640,19 +641,21 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 			ixmlNode_free((IXML_Node*)ActionResultCopy);
 			ixmlNode_free((IXML_Node*)SoapHeaderCopy);
 			UpnpActionRequest_delete((UpnpActionRequest *)mydata->Event);
-
+*/
 }
 
 // the return function should provide 2 parameters;
-//   1) the deviceobject/handle (userdata)
-//   2) an array (numbered table) with argument names
-//   3) an array (numbered table) with the corresponding return values
+//   1) an array (numbered table) with argument names
+//   2) an array (numbered table) with the corresponding return values
 // The tables may be present, and may be empty. 
-// To return an error, the following must be returned instead of the tables
-//   2) error number
-//   3) error string
-// Possible return errors; see ErrorCode table in UPnP architecture 1.0, section 3.2.2 Control: Action: Response. 
-// Returns; 1, or nil + errormsg
+// To return a UPnP error, the following must be returned instead of the tables
+//   1) error number
+//   2) error string
+// Possible UPnP return errors; see ErrorCode table in UPnP architecture 1.0, section 3.2.2 Control: Action: Response. 
+//
+// Returns;
+//   Lua: 1, or nil + errormsg
+//   C  : number of Lua args on stack
 static int returnUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, void* utilid, int garbage)
 {
 	int err = 0;
@@ -660,7 +663,12 @@ static int returnUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 	cbdelivery* mydata = (cbdelivery*)pData;
 	UpnpActionRequest* arEvent = (UpnpActionRequest*)mydata->Event;
 	IXML_Document* RetList = NULL;
-// TODO: this 'return' function needs to release the resources!! double check
+	IXML_Document* ActionRequest = NULL;
+	IXML_Node* ActionNameNode = NULL;
+	const DOMString ServiceType = NULL;
+	const char* paramName = NULL;
+	const char* paramValue = NULL;
+	
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L == NULL)
 	{
@@ -673,62 +681,84 @@ static int returnUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 	}
 	else
 	{
+		// Check arguments
+		lua_checkstack(L, 6);
 		if (garbage) return 0;
-		if (lua_gettop(L) == 1) lua_newtable(L);	// push an empty table as second argument
-		if (lua_gettop(L) == 2) lua_newtable(L);	// push an empty table as third argument
-		if (lua_gettop(L) < 3 || getdevice(L,1) == -1 || !lua_istable(L,2) || !lua_istable(L,3))
+		if (lua_gettop(L) == 0) lua_newtable(L);	// push an empty table as second argument
+		if (lua_gettop(L) == 1) lua_newtable(L);	// push an empty table as third argument
+		if (lua_gettop(L) < 2 || !lua_istable(L,1) || !lua_istable(L,2))
 		{
 			UpnpActionRequest_set_ActionResult(arEvent, NULL);
 			UpnpActionRequest_set_ErrCode(arEvent, 501);
 			UpnpActionRequest_strcpy_ErrStr(arEvent, "Action Failed");
 			lua_pushnil(L);
-			lua_pushstring(L, "Error: expected a Device and 2 tables (argument names and values) as parameters");
+			lua_pushstring(L, "Error: expected 2 tables (argument names and values) as parameters");
 			return 2;
 		}
 
-		lua_settop(L,3);	// clear remainder of stack
+		// Get the ServiceType from the ActionRequest XML
+		ActionRequest = UpnpActionRequest_get_ActionRequest(arEvent);
+		if (ActionRequest != NULL)
+		{
+			ActionNameNode = ixmlNode_getFirstChild((IXML_Node*)ActionRequest);
+			if (ActionNameNode != NULL) 
+			{
+				ServiceType = ixmlNode_getNamespaceURI(ActionNameNode);
+			}
+		}
+
+		lua_settop(L,2);	// clear remainder of stack
 		// iterate over provided tables
 		while (1)
 		{
 			lua_pushinteger(L, i);
-			lua_gettable(L, 2); // gets the argname at pos 4
+			lua_gettable(L, 1); // gets the argname at pos 3
 			if (lua_isnil(L,-1))
 			{
 				// we're done
-				lua_settop(L, 3);
+				lua_settop(L, 2);
+				if (RetList == NULL)
+				{
+					// No return arguments? create empty
+					UpnpAddToActionResponse(&RetList, 
+						UpnpString_get_String(UpnpActionRequest_get_ActionName(arEvent)),
+					    ServiceType,
+					    NULL,
+					    NULL);
+				}
 				break;
 			}
 			lua_pushinteger(L, i);
-			lua_gettable(L, 3); // gets the argvalue at pos 5
+			lua_gettable(L, 2); // gets the argvalue at pos 4
+			// duplicate the key, to prevent auto string conversion
+			lua_pushvalue(L, 3);	// copy at pos 5
+			lua_pushvalue(L, 4);	// copy at pos 6
+			paramName = lua_tolstring(L, 5, NULL);
+			paramValue = lua_tolstring(L, 6, NULL);
 
-			//if (UpnpAddToActionResponse(&RetList, actionname,
-			//		    TvServiceType[TV_SERVICE_CONTROL],
-			//		    luaL_tolstring(L, 4, NULL),
-			//		    luaL_tolstring(L, 5, NULL)) != UPNP_E_SUCCESS)
-			//{
-			//	// error adding element
-			//	(*out) = NULL;
-			//	(*errorString) = "Internal Error";
-			//	free(value);
-			//	return UPNP_E_INTERNAL_ERROR;
-			//}
-
-			lua_pushvalue(L, -2);	// duplicate the key, to prevent confusing 'next()'
-			err = UpnpAddToPropertySet(&RetList, lua_tostring(L, -1), lua_tostring(L, -2));
-			lua_pop(L,2);	// remove copy of key and value
-			if (err != UPNP_E_SUCCESS)
+			// Add to (and create if necessary) actionresponse
+			if (UpnpAddToActionResponse(&RetList, 
+						UpnpString_get_String(UpnpActionRequest_get_ActionName(arEvent)),
+					    ServiceType,
+					    paramName,
+					    paramValue) != UPNP_E_SUCCESS)
 			{
-				// error with the table contents, invalid
+				// error adding element
+				lua_settop(L,2);	
 				if (RetList != NULL) ixmlDocument_free(RetList);
+				UpnpActionRequest_set_ActionResult(arEvent, NULL);
+				UpnpActionRequest_set_ErrCode(arEvent, 501);
+				UpnpActionRequest_strcpy_ErrStr(arEvent, "Action Failed");
 				lua_pushnil(L);
-				lua_pushstring(L, "Error: Invalid data in StateVariable table provided to SubscriptionRequest");
+				lua_pushstring(L, "Error: Invalid data in name/value table provided to ActionRequest");
 				return 2;
 			}
+			// remove copy of key and value from stack and proceed to next one
+			lua_settop(L,2);	
 			i += 1;
 		}
 		//succeeded, store results
-		mydata->handle = getdevice(L,1);
-		mydata->Extra = RetList;
+		UpnpActionRequest_set_ActionResult(arEvent, RetList);
 		//report success
 		lua_pushinteger(L, 1);
 		return 1;
@@ -739,6 +769,7 @@ static int deliverUpnpActionRequest(Upnp_EventType EventType, const UpnpActionRe
 {
 	int err = DSS_SUCCESS;
 	cbdelivery* mydata = (cbdelivery*)malloc(sizeof(cbdelivery));
+	IXML_Document* idoc = NULL;
 
 	if (mydata == NULL)
 	{
@@ -766,6 +797,15 @@ static int deliverUpnpActionRequest(Upnp_EventType EventType, const UpnpActionRe
 			UpnpActionRequest_strcpy_ErrStr((UpnpActionRequest *)arEvent, "Action Failed");
 		}
 	}
+
+	// clear the IXML docs from Lua, to prevent further Lua access (about to be destroyed by another thread)
+	idoc = UpnpActionRequest_get_ActionRequest(arEvent);
+	if (idoc != NULL) clearLuaNode((IXML_Node*)idoc);
+	idoc = UpnpActionRequest_get_ActionResult(arEvent);
+	if (idoc != NULL) clearLuaNode((IXML_Node*)idoc);
+	idoc = UpnpActionRequest_get_SoapHeader(arEvent);
+	if (idoc != NULL) clearLuaNode((IXML_Node*)idoc);
+
 	free(mydata);
 	return 0;
 }

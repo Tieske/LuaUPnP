@@ -14,6 +14,23 @@
 ** ===============================================================
 */
 
+// Removes the Lua side reference to an IXML node
+static void clearLuaNode(IXML_Node *node)
+{
+	pLuaNode ln = NULL;
+
+	if (node != NULL)
+	{
+		ln = (pLuaNode)ixmlNode_getCTag(node);
+		if (ln != NULL)
+		{
+			// remove cross references
+			ln->node = NULL;
+			ixmlNode_setCTag(node, NULL);
+		}
+	}
+}
+
 // Pushes the node as a userdata on the stack, or nil if the node is NULL
 // returns the userdata, or NULL.
 static pLuaNode pushLuaNode(lua_State *L, IXML_Node *node)
