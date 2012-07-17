@@ -452,17 +452,21 @@ static int decodeUpnpSubscriptionRequest(lua_State *L, void* pData, void* pUtilD
 }
 
 
-// the return function should provide 2 parameters;
+// the return function should provide 3 parameters;
 //   1) the deviceobject/handle (userdata)
-//   2) a table with statevariable name/value pairs.
+//   2) a table with statevariable names
+//   3) a table with the corresponding statevariable values
 // The table is optional, and may be empty
 // Returns; 1, or nil + errormsg
 static int returnUpnpSubscriptionRequest(lua_State *L, void* pData, void* pUtilData, void* utilid, int garbage)
 {
 	int err = 0;
+	int i = 1;
 	cbdelivery* mydata = (cbdelivery*)pData;
 	UpnpSubscriptionRequest* srEvent = (UpnpSubscriptionRequest*)mydata->Event;
 	IXML_Document* VarList = NULL;
+	const char* varName = NULL;
+	const char* varValue = NULL;
 
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L == NULL)
@@ -472,31 +476,52 @@ static int returnUpnpSubscriptionRequest(lua_State *L, void* pData, void* pUtilD
 	}
 	else
 	{
-		if (garbage) return 0;
+		if (garbage) return 0;	// exit, calling thread will cleanup ('deliver' function)
 		if (lua_gettop(L) == 1) lua_newtable(L);	// push an empty table as second argument
-		if (lua_gettop(L) < 2 || getdevice(L,1) == -1 || !lua_istable(L,2))
+		if (lua_gettop(L) == 2) lua_newtable(L);	// push an empty table as third argument
+		if (lua_gettop(L) < 2 || getdevice(L,1) == -1 || !lua_istable(L,2) || !lua_istable(L,3))
 		{
 			lua_pushnil(L);
-			lua_pushstring(L, "Error: expected a Device and a table (with variable names and values) as parameters");
+			lua_pushstring(L, "Error: expected a Device and 2 tables (with variable names and values) as parameters");
 			return 2;
 		}
 
-		lua_settop(L,2);	// clear remainder of stack
+		lua_settop(L,3);	// clear remainder of stack
+		lua_checkstack(L, 7);
 		// iterate over provided table
-		lua_pushnil(L);
-		while (lua_next(L,2) != 0)
+		while (1)
 		{
-			lua_pushvalue(L, -2);	// duplicate the key, to prevent confusing 'next()'
-			err = UpnpAddToPropertySet(&VarList, lua_tostring(L, -1), lua_tostring(L, -2));
-			lua_pop(L,2);	// remove copy of key and value
+			lua_pushinteger(L, i);
+			lua_gettable(L,2);		// get the varname at pos 4
+			if (lua_isnil(L,-1))
+			{
+				// we've reached the end, exit
+				lua_settop(L, 3);
+				if (VarList == NULL)
+				{
+					// no return arguments, so try create an empty list
+					UpnpAddToPropertySet(&VarList, NULL, NULL);
+				}
+				break;
+
+			}
+			lua_pushinteger(L, i);
+			lua_gettable(L,3);		// get the varvalue at pos 5
+			lua_pushvalue(L, 4);	// duplicate the name, at pos 6
+			lua_pushvalue(L, 5);    // duplicate the value, at pos 7
+			varName = lua_tolstring(L, 6, NULL);
+			varValue = lua_tolstring(L, 7, NULL);
+			err = UpnpAddToPropertySet(&VarList, varName, varValue);
+			lua_settop(L,3);	// remove all values added
 			if (err != UPNP_E_SUCCESS)
 			{
 				// error with the table contents, invalid
 				if (VarList != NULL) ixmlDocument_free(VarList);
 				lua_pushnil(L);
-				lua_pushstring(L, "Error: Invalid data in StateVariable table provided to SubscriptionRequest");
+				lua_pushstring(L, "Error: Invalid data in StateVariable tables provided to SubscriptionRequest");
 				return 2;
 			}
+			i += 1;
 		}
 		//succeeded, store results
 		mydata->handle = getdevice(L,1);  // TODO: check on error returned and handle it properly
@@ -518,16 +543,10 @@ static int deliverUpnpSubscriptionRequest(Upnp_EventType EventType, const UpnpSu
 		return 0;
 	}
 	mydata->EventType = EventType;
-	mydata->Event =  (void*)srEvent; //UpnpSubscriptionRequest_dup(srEvent); we'll be waiting, so no duplicate
+	mydata->Event =  (void*)srEvent; 
 	mydata->Cookie = cookie;
 	mydata->Extra = NULL;
 	mydata->handle = -1;
-	//if (mydata->Event == NULL)
-	//{
-	//	deliverUpnpCallbackError("Out of memory duplicating 'event' for UpnpSubscriptionRequest callback.", cookie);
-	//	free(mydata);
-	//	return 0;
-	//}
 
 	// This call will block until all callbacks have been completed
 	err = DSS_deliver(cookie, &decodeUpnpSubscriptionRequest, &returnUpnpSubscriptionRequest, mydata);
@@ -617,7 +636,7 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 // the return function should provide 2 parameters;
 //   1) an array (numbered table) with argument names
 //   2) an array (numbered table) with the corresponding return values
-// The tables may be present, and may be empty. 
+// The tables may be present, and may be empty. IMPORTANT: order MUST be as specified in service description!!
 // To return a UPnP error, the following must be returned instead of the tables
 //   1) error number
 //   2) error string

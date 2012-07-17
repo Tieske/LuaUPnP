@@ -53,7 +53,7 @@ local upnpcb = function(wt, event) -- wt = waiting thread
         print()
         if event.Event == "UPNP_EVENT_SUBSCRIPTION_REQUEST" then
             -- let's accept the subscription
-            wt:setresult(device, { ["Status"] = 1 })
+            wt:setresult(device, { [1]="Status"}, { [1] = 1} )
         elseif event.Event == "UPNP_CONTROL_ACTION_REQUEST" then
             -- print action xml
             print(upnp.ixml.PrintDocument(event.ActionRequest))
