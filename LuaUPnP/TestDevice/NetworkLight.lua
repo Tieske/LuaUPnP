@@ -7,6 +7,10 @@ local eventer = require('copas.eventer')
 local dss = require('dss')      -- load darksidesync module
 local upnp = require("LuaUPnP")
 
+-- webserver setup
+local webroot = "./web"     -- web root directory
+local baseurl               -- base url pointing to webroot directory
+
 -- Link Copas to DSS;
 -- the darksidesync lib has a Lua side piece of code that listens to the UDP signal whenever
 -- a background lib has delivered something.
@@ -24,7 +28,7 @@ copas.addserver(dss.getsocket(), function(skt)
 
 local errf = function(msg)
 	print (debug.traceback(msg or "Stacktrace:"))
-    copas.exitloop()
+    --copas.exitloop()
 end
 
 
@@ -126,130 +130,83 @@ local UPnPCallback = function (wt, event)
     end
 end
 
------------------------------------------------------------------
---  Test functions, put main code here
--- if a different interval to next test is required, return interval in seconds
------------------------------------------------------------------
-local device        -- UPnP device handle
-local webroot = "./web"
-local baseurl
-local upnpcb = function(wt, event) -- wt = waiting thread
-    local err
-    if type(wt) ~= "userdata" then
-        err = event
-        event = wt
-        wt = nil
-    end
-    if event then
-        print ("Received event:")
-        if wt then print("thread: ", wt) end
-        table.print(event)
-        print()
-        if event.Event == "UPNP_EVENT_SUBSCRIPTION_REQUEST" then
-            -- let's accept the subscription
-            wt:setresult(device, { ["Status"] = 1 })
-        elseif event.Event == "UPNP_CONTROL_ACTION_REQUEST" then
-            -- print action xml
-            print(upnp.ixml.PrintDocument(event.ActionRequest))
-            print("ActionResponse");
-            local a, b = wt:setresult({[1] = "RetLoadLevelStatus"}, {[1] = 50})
-            if a then
-                print(upnp.ixml.PrintDocument(a))
-            else
-                print(a, b)
-            end
-        end
-    else
-        -- an error occured
-        print ("LuaUPnP error:")
-        print(err)
-        print()
-    end
-end
-
-local testlist = {
-    function()
-        print("starting UPnP")
-        upnp.Init(upnpcb)
-        baseurl = "http://" .. upnp.GetServerIpAddress() .. ":" .. upnp.GetServerPort() .. "/";
-        print ("BaseURL:", baseurl)
-    end,
-
-    function()
-        print("Setting webserver root")
-        print (upnp.web.SetRootDir(webroot))
-    end,
-
-    function()
-        print("Registering device")
-        local result = { upnp.RegisterRootDevice(baseurl .. "DimmableLight_dcp.xml") }
-        device = result[1]
-        table.print(result);
+-- Event handler to handle Copas start/stop events
+local CopasEventHandler = function(self, sender, event)
+    if sender ~= copas then
         return
-    end,
-
-    function()
-        print("Advertising device")
-        local result = { device:SendAdvertisement(100) }
-        table.print(result);
-        return 600
-    end,
-
-    function()
-        print("Unregistering device")
-        local result = { device:UnRegisterRootDevice() }
-        table.print(result);
-    end,
-
-    function()
-        print("stopping UPnP")
-        upnp.Finish()
-    end,
-
-}
-
-
------------------------------------------------------------------
---  Generic test functionality to start and trace errors
------------------------------------------------------------------
-
-local timer
-local testcount = 1
-local testinterval = 1/2      -- seconds
--- test function to run tests in a row
-local test = function()
-
-    if testlist[testcount] then
-        -- run next test
-        print ("=========== starting test " .. testcount .. " ===========")
-        local success, int = xpcall(testlist[testcount], errf)
-        if success then
-            int = int or testinterval
-        else
-            int = testinterval
-        end
-        timer:arm(int)
-        testcount = testcount + 1
-        if int ~= testinterval then
-            print("(next test starts in " .. tostring(int) .. " seconds)")
-        end
-    else
-        -- we're done, exit
-        print ("=========== tests completed ===========")
-        timer:cancel()
-        copas.exitloop()
     end
 
+    if event == "loopstarted" then
+        -- Copas startup is complete, now start UPnP
+        local et = self:dispatch("UPnPstarting")
+        et:waitfor()    -- wait for event completion
+        -- do initialization
+        upnp.Init(UPnPCallback)         -- start, attach event handler for UPnP events
+        upnp.web.SetRootDir(webroot)    -- setup the webserver
+        baseurl = "http://" .. upnp.GetServerIpAddress() .. ":" .. upnp.GetServerPort() .. "/";
+        -- raise event done
+        self:dispatch("UPnPstarted")
+    elseif event == "loopstopping" then
+        -- Copas is stopping
+        local et = self:dispatch("UPnPstopping")
+        et:waitfor()    -- wait for event completion
+        upnp.Finish()
+        -- raise event done
+        self:dispatch("UPnPstopped")
+    end
 end
 
 
-wait ("Press enter to start...")
+local subscribe, unsubscribe, events        -- make local trick LuaDoc
+---------------------------------------------------------------------------------
+-- Subscribe to events of xpllistener.
+-- @usage# function xpldevice:eventhandler(sender, event, msg, ...)
+--     -- do your stuff with the message
+-- end
+-- &nbsp
+-- function xpldevice:initialize()
+--     -- subscribe to events of listener for new messages
+--     xpl.listener:subscribe(self, self.eventhandler, xpl.listener.events.newmessage)
+-- end
+-- @see copas.eventer
+-- @see events
+subscribe = function()
+end
+subscribe = nil
+---------------------------------------------------------------------------------
+-- Unsubscribe from events of xpllistener.
+-- @see copas.eventer
+-- @see events
+unsubscribe = function()
+end
+unsubscribe = nil
+---------------------------------------------------------------------------------
+-- Events generated by xpllistener. There is only one event, for additional events
+-- the start and stop events of the <code>copas</code> scheduler may be used (see
+-- 'CopasTimer' and specifically the <code>copas.eventer</code> module).
+-- @see subscribe
+-- @see unsubscribe
+-- @class table
+-- @name events
+-- @field newmessage event to indicate a new message has arrived. The message will
+-- be passed as an argument to the event handler.
+-- @field networkchange event to indicate that the newtork state changed (ip address,
+-- connectio lost/restored, etc.). The <code>newState</code> and <code>oldState</code>
+-- will be passed as arguments to the event handler (see 'NetCheck' documentation for
+-- details on the <code>xxxState</code> format)
+-- @see subscribe
+events = { "UPnPstarting", "UPnPstarted", "UPnPstopping", "UPnPstopped" }
 
--- create timer for test function
-timer = copas.newtimer(nil, test, nil, true, nil)
-timer:arm(0)    -- run first test immediately
+-- add event capability
+copas.eventer.decorate(upnp, events)
 
-copas.loop()
+-- subscribe to copas events
+copas:subscribe(upnp, CopasEventHandler)
+
+-- return the upnp table as module table
+return upnp
+
+--copas.loop()
 
 --wait ("Press enter to exit...")
 
