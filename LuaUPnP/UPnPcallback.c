@@ -612,36 +612,6 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 	//UpnpActionRequest_delete(arEvent);  do not release resources, the 'return' call still needs them
 	//free(mydata);
 	return result;
-
-	/*
-		IXML_Document* ActionRequestCopy = NULL;
-	IXML_Document* ActionResultCopy = NULL;
-	IXML_Document* SoapHeaderCopy = NULL;
-	ActionRequest = UpnpActionRequest_get_ActionRequest(arEvent);
-	ActionResult = UpnpActionRequest_get_ActionResult(arEvent);
-	SoapHeader = UpnpActionRequest_get_SoapHeader(arEvent);
-	ActionRequestCopy = copyIXMLdoc(ActionRequest);
-	ActionResultCopy = copyIXMLdoc(ActionResult);
-	SoapHeaderCopy = copyIXMLdoc(SoapHeader);
-	if ((ActionRequest != NULL && ActionRequestCopy == NULL) || 
-		(ActionResult != NULL && ActionResultCopy == NULL) ||
-		(SoapHeader != NULL && SoapHeaderCopy == NULL))
-
-	{
-		deliverUpnpCallbackError("Out of memory duplicating 'event IXMLs' for UpnpActionRequest callback.", cookie);
-		ixmlNode_free((IXML_Node*)ActionRequestCopy);
-		ixmlNode_free((IXML_Node*)ActionResultCopy);
-		ixmlNode_free((IXML_Node*)SoapHeaderCopy);
-		UpnpActionRequest_delete((UpnpActionRequest *)mydata->Event);
-		free(mydata);
-		return 0;
-	}
-
-				ixmlNode_free((IXML_Node*)ActionRequestCopy);
-			ixmlNode_free((IXML_Node*)ActionResultCopy);
-			ixmlNode_free((IXML_Node*)SoapHeaderCopy);
-			UpnpActionRequest_delete((UpnpActionRequest *)mydata->Event);
-*/
 }
 
 // the return function should provide 2 parameters;
@@ -682,17 +652,25 @@ static int returnUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 	else
 	{
 		// Check arguments
+		if (garbage) return 0;		// exit immediately, calling thread ('deliver' function) will cleanup
 		lua_checkstack(L, 6);
-		if (garbage) return 0;
-		if (lua_gettop(L) == 0) lua_newtable(L);	// push an empty table as second argument
-		if (lua_gettop(L) == 1) lua_newtable(L);	// push an empty table as third argument
+		if (lua_gettop(L) == 2 && lua_isnumber(L,1) && lua_isstring(L,2))
+		{
+			// An error was returned, hand it over to the UPnP event and exit
+			UpnpActionRequest_set_ActionResult(arEvent, NULL);
+			UpnpActionRequest_set_ErrCode(arEvent, lua_tointeger(L,1));
+			UpnpActionRequest_strcpy_ErrStr(arEvent, lua_tostring(L,2));
+			return 0;
+		}
+		if (lua_gettop(L) == 0) lua_newtable(L);	// push an empty table as first argument
+		if (lua_gettop(L) == 1) lua_newtable(L);	// push an empty table as second argument
 		if (lua_gettop(L) < 2 || !lua_istable(L,1) || !lua_istable(L,2))
 		{
 			UpnpActionRequest_set_ActionResult(arEvent, NULL);
 			UpnpActionRequest_set_ErrCode(arEvent, 501);
 			UpnpActionRequest_strcpy_ErrStr(arEvent, "Action Failed");
 			lua_pushnil(L);
-			lua_pushstring(L, "Error: expected 2 tables (argument names and values) as parameters");
+			lua_pushstring(L, "Error: expected 2 tables (argument names and values) as parameters, or errornumber and errorstring");
 			return 2;
 		}
 
@@ -719,7 +697,7 @@ static int returnUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 				lua_settop(L, 2);
 				if (RetList == NULL)
 				{
-					// No return arguments? create empty
+					// No return arguments? create empty to prevent the upnplib from returning an error
 					UpnpAddToActionResponse(&RetList, 
 						UpnpString_get_String(UpnpActionRequest_get_ActionName(arEvent)),
 					    ServiceType,
