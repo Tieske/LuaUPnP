@@ -362,8 +362,15 @@ static int L_UpnpAcceptSubscriptionExt(lua_State *L)
 
 static int L_UpnpNotify(lua_State *L)
 {
-	return luaL_error(L, "Not implemented, use the 'Ext' version");
-	// TODO: implement, not now
+	UpnpDevice_Handle dev = checkdevice(L,1);
+	const char* udn = luaL_checkstring(L,2);
+	const char* service = luaL_checkstring(L,3);
+	const char* name = luaL_checkstring(L,4);
+	const char* value = luaL_checkstring(L,5);
+	int result = UpnpNotify(dev, udn, service, (const char**)&name, (const char**)&value, 1);
+	if (result != UPNP_E_SUCCESS)	return pushUPnPerror(L, result, NULL);
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 static int L_UpnpNotifyExt(lua_State *L)
