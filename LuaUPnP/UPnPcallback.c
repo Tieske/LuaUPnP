@@ -479,7 +479,7 @@ static int returnUpnpSubscriptionRequest(lua_State *L, void* pData, void* pUtilD
 		if (garbage) return 0;	// exit, calling thread will cleanup ('deliver' function)
 		if (lua_gettop(L) == 1) lua_newtable(L);	// push an empty table as second argument
 		if (lua_gettop(L) == 2) lua_newtable(L);	// push an empty table as third argument
-		if (lua_gettop(L) < 2 || getdevice(L,1) == -1 || !lua_istable(L,2) || !lua_istable(L,3))
+		if (lua_gettop(L) < 3 || getdevice(L,1) == -1 || !lua_istable(L,2) || !lua_istable(L,3))
 		{
 			lua_pushnil(L);
 			lua_pushstring(L, "Error: expected a Device and 2 tables (with variable names and values) as parameters");
@@ -589,6 +589,8 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
 	UpnpActionRequest* arEvent = (UpnpActionRequest*)mydata->Event;
+	IXML_Node* node = NULL;
+	IXML_Node* child = NULL;
 
 	// if L == NULL; DSS is unregistering the UPNP lib and we can't access Lua
 	if (L != NULL)
@@ -622,6 +624,39 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 		lua_pushstring(L, "SoapHeader");
 		pushLuaDocument(L, UpnpActionRequest_get_SoapHeader(arEvent));
 		lua_settable(L, -3);
+		// as a bonus add the parameter values keyed by their names
+		// Get the child (first parameter) of the child (Action element) of the document (actionrequest)
+		node = ixmlNode_getFirstChild(ixmlNode_getFirstChild((IXML_Node*)UpnpActionRequest_get_ActionRequest(arEvent)));
+		if (node != NULL) {
+			// we've got at least 1 parameter
+			lua_pushstring(L, "Params");
+			lua_newtable(L);
+			while (node != NULL)
+			{
+				// store param name
+				lua_pushstring(L, ixmlNode_getNodeName(node));
+				// go look for value
+				child = ixmlNode_getFirstChild(node);
+				while (child != NULL && ixmlNode_getNodeType(child) != eTEXT_NODE)
+					child = ixmlNode_getNextSibling(child);
+				if (!ixmlNode_hasAttributes(node) && child != NULL)
+				{
+					// element just has a textnode, no attributes, so add text
+					lua_pushstring(L, ixmlNode_getNodeValue(child));
+				}
+				else
+				{
+					// its more complex, so add the IXML node
+					pushLuaNode(L, node);
+				}
+				// push value in param table and commence with next
+				lua_settable(L, -3);
+				node = ixmlNode_getNextSibling(node);
+			}
+			// param table was filled, now store it
+			lua_settable(L, -3);
+		}
+
 		// TODO: add address info, check *NIX vs Wid32 differences, and IPv4 vs IPv6
 		//lua_pushstring(L, "CtrlCpIPAddr");
 		//lua_pushstring(L, UpnpString_get_String(UpnpActionRequest_get_CtrlCpIPAddr(arEvent)));
