@@ -1060,7 +1060,7 @@ LPNP_API	int luaopen_LuaUPnP(lua_State *L)
 	lua_setfield(L, LUA_REGISTRYINDEX, LPNP_WTABLE_UPNP);	// store in registry
 
 	// Register UPnP functions
-	luaL_register(L,"LuaUPnP",UPnPfunctions);
+	luaL_register(L, NULL, UPnPfunctions);
 
 	/////////////////////////////////////////////
 	//  Register Webserver, HTTP and util functions
