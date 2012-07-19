@@ -441,7 +441,7 @@ static int decodeUpnpSubscriptionRequest(lua_State *L, void* pData, void* pUtilD
 		// Create and fill the event table for Lua
 		lua_newtable(L);
 		pushstringfield(L, "Event", UpnpGetEventType(mydata->EventType));
-		pushstringfield(L, "ServiceId", UpnpString_get_String(UpnpSubscriptionRequest_get_ServiceId(srEvent)));
+		pushstringfield(L, "ServiceID", UpnpString_get_String(UpnpSubscriptionRequest_get_ServiceId(srEvent)));
 		pushstringfield(L, "UDN", UpnpString_get_String(UpnpSubscriptionRequest_get_UDN(srEvent)));
 		pushstringfield(L, "SID", UpnpString_get_String(UpnpSubscriptionRequest_get_SID(srEvent)));
 		result = 2;	// 2 return arguments, callback + table
