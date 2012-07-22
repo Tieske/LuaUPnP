@@ -8,10 +8,11 @@
 *.opensdf
 /libupnp/libupnp.dll
 /libupnp/pthreadVC2.dll
-/LuaUPnP/IUpnpErrFile.txt
-/LuaUPnP/IUpnpInfoFile.txt
-/LuaUPnP/TestDevice/IUpnpErrFile.txt
-/LuaUPnP/TestDevice/IUpnpInfoFile.txt
+/lib_src/IUpnpErrFile.txt
+/lib_src/IUpnpInfoFile.txt
+/lib_src/TestDevice/IUpnpErrFile.txt
+/lib_src/TestDevice/IUpnpInfoFile.txt
 /libupnp/libupnp.exp
 /libupnp/libupnp.lib
 /libupnp/libupnp.pdb
+Debug
