@@ -54,7 +54,9 @@ function upnpbase:getservice()
         if self.classname == "argument" then
             -- parameter is one level further, so special case here
             r = self:getaction()
-            if r then r = r.parent
+            if r then
+                r = r.parent
+            end
         end
         if self.classname == "service" then
             -- silly, requesting ourselves...

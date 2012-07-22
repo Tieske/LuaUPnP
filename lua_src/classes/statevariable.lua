@@ -32,7 +32,7 @@ local datatypes = {
     r4              = "number",
     r8              = "number",
     number          = "number",
-    fixed.14.4      = "number",
+    ["fixed.14.4"]  = "number",
     float           = "number",
     char            = "string",
     ["string"]      = "string",
@@ -60,17 +60,17 @@ local integertypes = {
 -- boolean conversion;
 local boolconversion = {
     -- trues
-    "true" = true,
-    "yes" = true,
-    "1" = true,
-    [1] = true,
-    [true] = true,
+    ["true"]  = true,
+    ["yes"]   = true,
+    ["1"]     = true,
+    [1]       = true,
+    [true]    = true,
     -- falses
-    "false" = false,
-    "no" = false,
-    "0" = false,
-    [0] = false,
-    [false] = false,
+    ["false"] = false,
+    ["no"]    = false,
+    ["0"]     = false,
+    [0]       = false,
+    [false]   = false,
 }
 
 -- round a number to nearest integer
@@ -90,7 +90,7 @@ end
 -- @field evented indicator for the variable to be an evented statevariable
 -- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
 -- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
-local statevariable = upnp.classes.base:subclass({
+local statevariable = upnp.classes.upnpbase:subclass({
     name = "",                      -- statevariable name
     defaultvalue = "",              -- default value for statevariable
     evented = true,                 -- is the variable evented or not
@@ -154,11 +154,11 @@ function statevariable:getupnp(value)
     local t = datatypes[self._datatype]
     if t == "number" then
         return tostring(value)
-    elseif t = "string" then
+    elseif t == "string" then
         return tostring(value)
-    elseif t = "boolean" then
+    elseif t == "boolean" then
         if value then return "1" else return "0" end
-    elseif t = "date" then
+    elseif t == "date" then
 -- TODO to be done
         return tostring(value)
     else
@@ -183,7 +183,7 @@ function statevariable:check(value)
         -- convert to number, check integer, check min/max/step
         result = tonumber(value)
         if result then
-            if integertypes[self._datatype) then
+            if integertypes[self._datatype] then
                 -- make sure its an integer
                 result = round(result)
             end

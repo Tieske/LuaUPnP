@@ -14,11 +14,12 @@
 -- @release Version 0.1, LuaxPL framework.
 
 -- set the proper classname here, this should match the filename without the '.lua' extension
-local classname = "argument"
+local classname = "service"
 
 -----------------
 -- LOCAL STUFF --
 -----------------
+
 
 --------------------------
 -- CLASS IMPLEMENTATION --
@@ -32,50 +33,53 @@ local classname = "argument"
 -- @field evented indicator for the variable to be an evented statevariable
 -- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
 -- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
-local argument = upnp.classes.upnpbase:subclass({
-    name = "",                      -- argument name
-    statevariable = nil,            -- related statevariable object
-    direction = "in",               -- in/out going argument, either "in" or "out"
-    position = 0,                   -- position in the actions argument list
-    parent = nil,                   -- owning UPnP action of this argument
+local service = upnp.classes.upnpbase:subclass({
+    servicetype = nil,              -- service type
+    serviceid = nil,                -- service id
+    parent = nil,                   -- owning UPnP device of this service
+    actionlist = nil,               -- table with actions, indexed by name
+    statetable = nil,               -- table with statevariables, indexed by name
 })
 
 -----------------------------------------------------------------------------------------
--- Initializes the argument object.
+-- Initializes the statevariable object.
 -- Will be called upon instantiation of an object, override this method to set default
 -- values for all properties.
-function argument:initialize()
+function service:initialize()
     -- initialize ancestor object
     super.initialize(self)
     -- update classname
     self.classname = classname
+    -- set defaults
+
 end
 
 
 -----------------------------------------------------------------------------------------
--- Formats the argument value in upnp format.
--- @returns The value in UPnP format as a Lua string.
-function statevariable:getupnp(value)
-    assert(self.statevariable, "No statevariable has been set")
-    assert(value ~= nil, "Expected value, got nil")
-
-    return self.statevariable:getupnp(value)
+-- Adds a statevariable to the service statetable.
+-- @param statevar statevariable object to add
+function service:addstatevariable(statevar)
+    assert(type(statevar) ~= "table", "Expected statevariable table, got nil")
+    assert(statevar.name, "Statevariable name not set, can't add to service")
+    -- add to list
+    self.statetable = self.statetable or {}
+    self.statetable[statevar.name] = statevar
+    -- update statevariable
+    statevar.parent = self
 end
 
 -----------------------------------------------------------------------------------------
--- Check a value against the arguments related statevariable.
--- will coerce booleans and numbers, including min/max/step values.  Only
--- values not convertable will return an error.
--- @param value the argument value
--- @returns value (in corresponding lua type) on success, nil on failure
--- @returns error string, if failure
--- @returns error number, if failure
-function argument:check(value)
-    assert(self.statevariable, "No statevariable has been set")
-    assert(value ~= nil, "Expected value, got nil")
-
-    return self.statevariable:check(value)
+-- Adds an action to the service actionlist.
+-- @param action action object to add
+function service:addaction(action)
+    assert(type(action) ~= "table", "Expected action table, got nil")
+    assert(action.name, "Action name not set, can't add to service")
+    -- add to list
+    self.actionlist = self.actionlist or {}
+    self.actionlist[action.name] = action
+    -- update action
+    action.parent = self
 end
 
 
-return argument
+return service

@@ -32,7 +32,7 @@ local classname = "action"
 -- @field evented indicator for the variable to be an evented statevariable
 -- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
 -- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
-local action = upnp.classes.base:subclass({
+local action = upnp.classes.upnpbase:subclass({
     name = "",                      -- action name
     parent = nil,                   -- owning UPnP service of this variable
     argumentlist = nil,             -- list of arguments, each indexed both by name and number (position)
@@ -54,7 +54,7 @@ end
 
 
 -----------------------------------------------------------------------------------------
--- Adds and argument to the actions argument list.
+-- Adds an argument to the actions argument list.
 -- This will append an argument, so adding must be done in proper UPnP order!
 function action:addargument(argument)
     assert(type(argument) ~= "table", "Expected argument table, got nil")
