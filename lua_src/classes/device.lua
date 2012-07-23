@@ -14,7 +14,7 @@
 -- @release Version 0.1, LuaxPL framework.
 
 -- set the proper classname here, this should match the filename without the '.lua' extension
-local classname = "service"
+local classname = "device"
 
 -----------------
 -- LOCAL STUFF --
@@ -33,83 +33,84 @@ local classname = "service"
 -- @field evented indicator for the variable to be an evented statevariable
 -- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
 -- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
-local service = upnp.classes.upnpbase:subclass({
-    servicetype = nil,              -- service type
-    serviceid = nil,                -- service id
+local device = upnp.classes.upnpbase:subclass({
+    devicetype = nil,               -- device type
+    --_udn = nil,                      -- device udn (unique device name; UUID)
     parent = nil,                   -- owning UPnP device of this service
-    actionlist = nil,               -- table with actions, indexed by name
-    statetable = nil,               -- table with statevariables, indexed by name
+    servicelist = nil,              -- table with services, indexed by serviceid
+    devicelist = nil,               -- table with sub-devices, indexed by udn
 })
 
 -----------------------------------------------------------------------------------------
 -- Initializes the statevariable object.
 -- Will be called upon instantiation of an object, override this method to set default
 -- values for all properties.
-function service:initialize()
+function device:initialize()
     -- initialize ancestor object
     super.initialize(self)
     -- update classname
     self.classname = classname
     -- set defaults
-
+    _udn = nil
 end
 
 -----------------------------------------------------------------------------------------
--- Adds a statevariable to the service statetable.
--- @param statevar statevariable object to add
-function service:addstatevariable(statevar)
-    assert(type(statevar) ~= "table", "Expected statevariable table, got nil")
-    assert(statevar.name, "Statevariable name not set, can't add to service")
-    -- add to list
-    self.statetable = self.statetable or {}
-    self.statetable[statevar.name] = statevar
-    -- update statevariable
-    statevar.parent = self
+-- Gets the udn (unique device name; UUID) of the device.
+-- @returns udn of the device
+function device:setudn()
+    return self._udn
 end
 
 -----------------------------------------------------------------------------------------
--- Adds an action to the service actionlist.
--- @param action action object to add
-function service:addaction(action)
-    assert(type(action) ~= "table", "Expected action table, got nil")
-    assert(action.name, "Action name not set, can't add to service")
-    -- add to list
-    self.actionlist = self.actionlist or {}
-    self.actionlist[action.name] = action
-    -- update action
-    action.parent = self
-end
+-- Sets the udn (unique device name; UUID) of the device.
+-- @param newudn New udn for the device
+function device:setudn(newudn)
+    assert(type(newudn) == "string", "Expected UDN as string, got nil")
 
------------------------------------------------------------------------------------------
--- Execute an action of the service.
--- @param actionname (string) name of action to execute
--- @param params (table) table of parameter values, keyed by parameter names
--- @returns 2 lists (names and values) of the 'out' arguments (in proper order), or nil, errormsg, errornumber upon failure
-function service:executeaction(actionname, params)
-    params = params or {}
-    actionname = tostring(actionname or "")
-    local action = (self.actionlist or {})[actionname]
-    if action then
-        -- found, execute it
-        return action:execute(params)
-    else
-        -- not found, error out
-        return nil, "Invalid Action; no action by name '" .. actionname .. "'", 401
+    if self._udn then
+        -- already set, go clear existing stuff
+        if self.parent then
+            -- remove from parents device list
+            self.parent.devicelist[self._udn] = nil
+        end
+        -- remove from global list
+        upnp.devices[self._udn] = nil
     end
+    -- set new values
+    self._udn = newudn
+    if self.parent then
+        -- update parent list
+        self.parent.devicelist[self._udn] = self
+    end
+    -- update global list
+    upnp.devices[self._udn] = self
 end
 
 -----------------------------------------------------------------------------------------
--- Creates a list of all variables and values, to be provided when a subscription is accepted
--- @returns list with variablenames
--- @returns list with variablevalues (order matching the name list)
-function service:getupnpvalues()
-    local names = {}
-    local values = {}
-    for _, v in pairs(self.statetable) do
-        table.insert(names, v.name)
-        table.insert(values, v:getupnp())
-    end
-    return names, values
+-- Adds a service to the device.
+-- @param service service object to add
+function device:addservice(service)
+    assert(type(service) ~= "table", "Expected service table, got nil")
+    assert(service.serviceid, "ServiceId not set, can't add to device")
+    -- add to list
+    self.servicelist = self.servicelist or {}
+    self.servicelist[service.serviceid] = service
+    -- update service
+    service.parent = self
 end
 
-return service
+-----------------------------------------------------------------------------------------
+-- Adds a sub-device to the device.
+-- @param device device object to add
+function device:adddevice(device)
+    assert(type(device) ~= "table", "Expected device table, got nil")
+    assert(device._udn, "Sub-device udn (unique device name; UUID) not set, can't add to device")
+    -- add to list
+    self.devicelist = self.devicelist or {}
+    self.devicelist[device._udn] = device
+    -- update device
+    device.parent = self
+end
+
+
+return device

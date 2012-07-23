@@ -19,6 +19,10 @@ local classname = "action"
 -----------------
 -- LOCAL STUFF --
 -----------------
+-- default function when the execute function for an action hasn't been set
+local defaultfunction = function(self, params)
+    return nil, "Optional Action Not Implemented; " .. tostring(self.name), 602
+end
 
 --------------------------
 -- CLASS IMPLEMENTATION --
@@ -49,7 +53,7 @@ function action:initialize()
     -- update classname
     self.classname = classname
     -- set defaults
-
+    self._function = defaultfunction    -- by default return error; optional not implemented action
 end
 
 
@@ -58,6 +62,7 @@ end
 -- This will append an argument, so adding must be done in proper UPnP order!
 function action:addargument(argument)
     assert(type(argument) ~= "table", "Expected argument table, got nil")
+    assert(argument.direction == "in" or argument.direction == "out", "Direction must be either 'in' or 'out', not; " .. tostring(argument.direction))
     assert(self.argumentcount > 0 and argument.direction == "in" and
            self.argumentlist[self.argumentcount] ~= "in", "All 'in' arguments must preceed the 'out' arguments")
     -- increase count
@@ -75,7 +80,8 @@ end
 -- The function set will be called with two arguments; 1) the action object from which it is called
 -- (to be used as 'self'), and 2) a table with named arguments (each argument indexed
 -- by its name). Before calling the arguments will have been checked, converted and counted.
--- The function should return a table with named return values (each indexed by its name)
+-- The function should return a table with named return values (each indexed by its name). The
+-- returned values can be the Lua types, will be converted to UPnP types before sending.
 -- Upon an error the function should return; nil, errorstring, errornumber (see
 -- the 6xx error codes in the UPnP 1.0 architecture document, section 3.2.2)
 -- @param f the function to execute when the action gets called
@@ -122,20 +128,43 @@ end
 -----------------------------------------------------------------------------------------
 -- Executes the action. Parameter values may be in either UPnP or Lua format.
 -- @param params table with argument values, indexed by argument name.
--- @returns table with named 'out' arguments, or nil, errormsg, errornumber upon failure
+-- @returns 2 lists (names and values) of the 'out' arguments (in proper order), or nil, errormsg, errornumber upon failure
 function action:execute(params)
-    local result
+    local result, names, values
     local result, err, errnr = checkparams(params)
-    if result then
-        success, result, err, errnr = pcall(self._function, self, params)
-        if not success then
-            -- pcall error...
-            errnr = 501
-            err = "Action Failed. Internal error; " .. tostring(result)
-            result = nil
+    if not result then
+        -- parameter check failed
+        return result, err, errnr
+    end
+
+    success, result, err, errnr = pcall(self._function, self, params)
+    if not success then
+        -- pcall error...
+        errnr = 501
+        err = "Action Failed. Internal error; " .. tostring(result)
+        result = nil
+    end
+    if not result then
+        -- execution failed
+        return result, err, errnr
+    end
+    -- transform result in 2 lists, names and values
+    -- proper order, and UPnP typed values
+    names = {}
+    values = {}
+    local i = 1
+    for n, arg in ipairs(self._argumentlist or {}) do
+        if arg.direction == "out" then
+            names[i] = arg.name
+            if not result[arg.name] then
+                return nil, "Action Failed; device internal error, argument '" .. tostring(arg.name) .. "' is missing from the results", 501
+            end
+            values[i] = arg.getupnp(result[arg.name])
+            i = i + 1
         end
     end
-    return result, err, errnr
+
+    return names, values
 end
 
 return action

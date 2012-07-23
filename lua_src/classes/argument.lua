@@ -54,8 +54,10 @@ end
 
 -----------------------------------------------------------------------------------------
 -- Formats the argument value in upnp format.
+-- @param value the Lua typed value to be formatted as UPnP type, according to the UPnP type set
+-- in the related statevariable for this argument
 -- @returns The value in UPnP format as a Lua string.
-function statevariable:getupnp(value)
+function argument:getupnp(value)
     assert(self.statevariable, "No statevariable has been set")
     assert(value ~= nil, "Expected value, got nil")
 

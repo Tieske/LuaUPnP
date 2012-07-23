@@ -12,11 +12,12 @@ local lib = require("LuaUPnP")              -- load UPnP core module (C code)
 
 -- create a global table
 upnp = export   -- create a global table
-upnp.classes = upnp.classes or {}
-upnp.classes.base = require("upnp.classes.base")
-upnp.classes.upnpbase = require("upnp.classes.upnpbase")
+upnp.classes               = upnp.classes or {}
+upnp.classes.base          = require("upnp.classes.base")
+upnp.classes.upnpbase      = require("upnp.classes.upnpbase")
 upnp.classes.statevariable = require("upnp.classes.statevariable")
-upnp.classes.argument = require("upnp.classes.argument")
+upnp.classes.argument      = require("upnp.classes.argument")
+upnp.devices = {}   -- global list of UPnP devices, by their UDN
 
 -- webserver setup
 export.webroot = "./web"    -- web root directory
@@ -229,24 +230,42 @@ local EventTypeHandlers = {
     DEVICE = function(event, wt)
         if event.Event == "UPNP_EVENT_SUBSCRIPTION_REQUEST" then
             -- simply accept everything
-            local names = {}
-            local values = {}
-            for n, v in pairs(VarList) do
-                table.insert(names, n)
-                table.insert(values, v:get())
-            end
-            wt:setresult(device, names, values)
-            print()
-            print("Added a subscription for service:", event.ServiceID)
-            print()
-        elseif event.Event == "UPNP_CONTROL_ACTION_REQUEST" then
-            if ActionList[event.ActionName] == nil then
-                print ("ActionRequest received for an unknown action;", event.ActionName)
+            local device = upnp.devices[event.UDN or ""]
+            local service = (device.servicelist or {})[event.ServiceID]
+            if service then
+                wt:setresult(device, service:getupnpvalues())   -- getupnpvalues returns 2 tables!!
+                print()
+                print("Added a subscription for service:", event.ServiceID)
+                print()
             else
-                print ("Now executing; ", event.ActionName)
-                ActionList[event.ActionName](event, wt)
-                print ("Action completed")
-                printstatus()
+                print()
+                print("Invalid subscription request for service:", event.ServiceID)
+                print()
+            end
+        elseif event.Event == "UPNP_CONTROL_ACTION_REQUEST" then
+            -- lookup device and service
+            local device = upnp.devices[event.UDN or ""]
+            local service = (device.servicelist or {})[event.ServiceID]
+            local errstr, errnr, names, values = nil, nil, nil, nil
+            if not service then
+                errstr = "Action Failed; unknown ServiceId"
+                errnr = 501
+            else
+                -- execute it
+                names, values, errnr = service:executeaction(event.ActionName, event.Params)
+                if not names then
+                    -- failed, switch variables
+                    errstr = values
+                    values = nil
+                end
+            end
+            -- return results
+            if errnr then
+                -- error
+                wt:setresult(errnr, errstr)
+            else
+                -- success
+                wt:setresult(names, values)
             end
         end
     end,

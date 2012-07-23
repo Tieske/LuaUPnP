@@ -612,7 +612,7 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 		//lua_pushinteger(L, UpnpActionRequest_get_Socket(arEvent));
 		//lua_settable(L, -3);
 		pushstringfield(L, "ErrStr", UpnpString_get_String(UpnpActionRequest_get_ErrStr(arEvent)));
-		pushstringfield(L, "DevUDN", UpnpString_get_String(UpnpActionRequest_get_DevUDN(arEvent)));
+		pushstringfield(L, "UDN", UpnpString_get_String(UpnpActionRequest_get_DevUDN(arEvent)));
 		pushstringfield(L, "ServiceID", UpnpString_get_String(UpnpActionRequest_get_ServiceID(arEvent)));
 		pushstringfield(L, "ActionName", UpnpString_get_String(UpnpActionRequest_get_ActionName(arEvent)));
 		lua_pushstring(L, "ActionRequest");
