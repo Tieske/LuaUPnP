@@ -103,127 +103,6 @@ for k,v in pairs(UPnPEvents) do
     v.name = k
 end
 
---[[local VarGetter = function(self) return self.value end
-local VarGetPair = function(self, tables) -- 2 values; name and value returned, in tables if set
-    if tables then
-        return {self.name}, {self.value}  -- return in tables
-    end
-    return self.name, self.value          -- return as values
-end
-local VarSetter = function(self, newval, event)
-    if self.value == newval then return end  -- nothing to do
-    self.value = newval
-    if self.evented then
-        print("'" .. tostring(self.name) .. "' was updated to: " .. tostring(newval) .. "  (update event send)")
-        if event then
-            -- raise event for statevariable
-            device:Notify(event.DevUDN, event.ServiceID, self.name, tostring(newval))
-        else
-            print("No eventdata provided to raise event for statevariable ", self.name)
-        end
-    else
-        print("'" .. tostring(self.name) .. "' was updated to: " .. tostring(newval))
-    end
-end
-local VarList = {
-    Status = { value = 0, evented = true },
-    Target = { value = 0, evented = false },
-    LoadLevelStatus = { value = 100, evented = true },
-    LoadLevelTarget = { value = 100, evented = false },
-    StepDelta = { value = 20, evented = false },
-}
--- Append get/set functions for each variable and a name field
-for var, tbl in pairs(VarList) do
-    tbl.name = var  -- add a name field to the variable table
-    tbl.get = VarGetter
-    tbl.getpair = VarGetPair
-    tbl.set = VarSetter
-end
-
-local printstatus = function()
-    s = "ON "
-    if VarList.Status:get() == 0 then
-        s = "OFF"
-    end
-    print ("+---------------------------------------------+")
-    print (string.format("|    Device is %s at %03d%%                    |", s, VarList.LoadLevelStatus:get()))
-    print ("+---------------------------------------------+")
-    print()
-end
-
-
-local ActionList = {
-    GetStatus = function(event, wt)
-        wt:setresult({"ResultStatus"}, {VarList.Status:get()})
-    end,
-    SetTarget = function(event, wt)
-        local t = string.upper(event.Params.newTargetValue)
-        if t == "1" or t == "ON" or t == "TRUE" then
-            t = 1
-        elseif t == "0" or t == "OFF" or t == "FALSE" then
-            t = 0
-        else
-            wt:setresult(600, "Argument Value Invalid")
-            return
-        end
-        wt:setresult()
-        VarList.Target:set(t, event)
-        VarList.Status:set(t, event)
-    end,
-    GetTarget = function(event, wt)
-        wt:setresult({"RetTargetValue"},{VarList.Target:get()})
-    end,
-    SetLoadLevelTarget = function(event, wt)
-        local t = tonumber(event.Params.NewLoadLevelTarget)
-        if not t then
-            wt:setresult(600, "Argument Value Invalid")
-        else
-            if t >= 0 and t<=100 then
-                wt:setresult()
-                VarList.LoadLevelTarget:set(t, event)
-                VarList.LoadLevelStatus:set(t, event)
-            else
-            wt:setresult(600, "Argument Value Out of Range")
-            end
-        end
-    end,
-    GetLoadLevelStatus = function(event, wt)
-        wt:setresult({"RetLoadLevelStatus"}, {VarList.LoadLevelStatus:get()})
-    end,
-    GetStepDelta = function(event, wt)
-        wt:setresult({"RetStepDelta"},{VarList.StepDelta:get()})
-    end,
-    SetStepDelta = function(event, wt)
-        local t = tonumber(event.Params.NewStepDelta)
-        if not t then
-            wt:setresult(600, "Argument Value Invalid")
-        else
-            if t >= 0 and t<=100 then
-                VarList.StepDelta:set(t, event)
-                wt:setresult()
-            else
-            wt:setresult(600, "Argument Value Out of Range")
-            end
-        end
-    end,
-    StepDown = function(event, wt)
-        wt:setresult()
-        local ll = VarList.LoadLevelStatus:get()
-        ll = ll - VarList.StepDelta:get()
-        if ll<0 then ll = 0 end
-        VarList.LoadLevelTarget:set(ll, event)
-        VarList.LoadLevelStatus:set(ll, event)
-    end,
-    StepUp = function(event, wt)
-        wt:setresult()
-        local ll = VarList.LoadLevelStatus:get()
-        ll = ll + VarList.StepDelta:get()
-        if ll>100 then ll = 100 end
-        VarList.LoadLevelTarget:set(ll, event)
-        VarList.LoadLevelStatus:set(ll, event)
-    end,
-}
-]]--
 
 -- Eventhandlers per event type
 local EventTypeHandlers = {
@@ -315,9 +194,9 @@ local CopasEventHandler = function(self, sender, event)
         return
     end
 
-    if event == "loopstarted" then
+    if event == copas.events.loopstarted then
         -- Copas startup is complete, now start UPnP
-        local et = self:dispatch("UPnPstarting")
+        local et = self:dispatch(upnp.events.UPnPstarting)
         et:waitfor()    -- wait for event completion
         -- do initialization
         print("Starting UPnP library...")
@@ -325,15 +204,15 @@ local CopasEventHandler = function(self, sender, event)
         lib.web.SetRootDir(webroot)    -- setup the webserver
         baseurl = "http://" .. lib.GetServerIpAddress() .. ":" .. lib.GetServerPort() .. "/";
         -- raise event done
-        self:dispatch("UPnPstarted")
+        self:dispatch(upnp.events.UPnPstarted)
         print("UPnP library started, WebRoot = '" .. webroot .. "', BaseURL = '" .. baseurl .. "'.")
-    elseif event == "loopstopping" then
+    elseif event == copas.events.loopstopping then
         -- Copas is stopping
-        local et = self:dispatch("UPnPstopping")
+        local et = self:dispatch(upnp.events.UPnPstopping)
         et:waitfor()    -- wait for event completion
         lib.Finish()
         -- raise event done
-        self:dispatch("UPnPstopped")
+        self:dispatch(upnp.events.UPnPstopped)
     end
 end
 

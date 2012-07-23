@@ -112,5 +112,34 @@ function device:adddevice(device)
     device.parent = self
 end
 
+-----------------------------------------------------------------------------------------
+-- Startup handler. Called for the event <code>upnp.events.UPnPstarted</code> (event
+-- through the Copas Timer eventer mechanism)
+-- When called it will call the <code>start()</code> method on all sub-devices. Override
+-- in child classes to add specific startup functionality (starting hardware comms for example)
+-- See also <code>upnpbase:start()</code>
+function device:start()
+    -- start ancestor object
+    super.start(self)
+    -- start all sub-devices
+    for _, dev in pairs(self.devicelist) do
+        dev:start()
+    end
+end
+
+-----------------------------------------------------------------------------------------
+-- Shutdown handler. Called for the event <code>upnp.events.UPnPstopping</code> (event
+-- through the Copas Timer eventer mechanism)
+-- When called it will call the <code>stop()</code> method on all sub-devices. Override
+-- in child classes to add specific shutdown functionality (stopping hardware comms for example)
+-- See also <code>upnpbase:stop()</code>
+function device:stop()
+    -- stop all sub-devices
+    for _, dev in pairs(self.devicelist) do
+        dev:stop()
+    end
+    -- stop ancestor object
+    super.stop(self)
+end
 
 return device

@@ -9,6 +9,39 @@
 -- set the proper classname here, this should match the filename without the '.lua' extension
 local classname = "upnpbase"
 
+-----------------
+-- LOCAL STUFF --
+-----------------
+
+-- Event handler for the startup/shutdown events (through Copas Timer)
+-- Only if an object is parent-less, the methods will be called
+-- Each object is supposed to call its own children if required
+local cteventhandler = function(self, sender, event)
+    if not self.parent and sender = upnp then
+        -- only deal with upnp events
+        if event == upnp.events.UPnPstarting then
+            -- do nothing here
+        elseif event == upnp.events.UPnPstarted then
+            if self.start then
+                self:start()
+            end
+        elseif event == upnp.events.UPnPstopping then
+            if self.stop then
+                self:stop()
+            end
+        elseif event == upnp.events.UPnPstopped then
+            -- do nothing here
+        else
+            -- unknown event, do nothing
+        end
+    end
+end
+
+--------------------------
+-- CLASS IMPLEMENTATION --
+--------------------------
+
+
 -----------------------------------------------------------------------------------------
 -- Members of the upnpbase object.
 -- @class table
@@ -26,6 +59,9 @@ local upnpbase = upnp.classes.base:subclass({})
 function upnpbase:initialize()
     self.classname = classname
     -- override in child classes
+
+    -- subscribe to UPnP library events to detect starting/stopping the application
+    upnp:subscribe(self, cteventhandler)
 end
 
 -----------------------------------------------------------------------------------------
@@ -116,5 +152,24 @@ function upnpbase:gethandle()
     return self._handle or getit()
 end
 
+-----------------------------------------------------------------------------------------
+-- Startup handler. Called for the event <code>upnp.events.UPnPstarted</code> (event
+-- through the Copas Timer eventer mechanism)
+-- This method will only be called on objects WITHOUT a parent (root devices). If an object has children,
+-- it should call the <code>start</code> method on its children if required, they will not
+-- be called automatically.
+function upnpbase:start()
+    -- override in descendant classes
+end
+
+-----------------------------------------------------------------------------------------
+-- Shutdown handler. Called for the event <code>upnp.events.UPnPstopping</code> (event
+-- through the Copas Timer eventer mechanism)
+-- This method will only be called on objects WITHOUT a parent (root devices). If an object has children,
+-- it should call the <code>stop</code> method on its children if required, they will not
+-- be called automatically.
+function upnpbase:stop()
+    -- override in descendant classes
+end
 
 return upnpbase
