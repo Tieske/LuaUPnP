@@ -246,6 +246,24 @@ function statevariable:check(value)
     end
 end
 
+-----------------------------------------------------------------------------------------
+-- Handler called before the new value is set. The newvalue will have been checked and converted
+-- before this handler is called.
+-- Override in descendant classes to implement device behaviour.
+-- @param newval the new value to be set (this handler has the opportunity to change the value being set!)
+-- @returns newval to be set (Lua type) or nil, error message, error number upon failure
+function statevariable:beforeset(newval)
+    return newval
+end
+
+-----------------------------------------------------------------------------------------
+-- Handler called after the new value has been set. The newvalue will have been checked and converted
+-- before this handler is called. NOTE: this will only be called when the value has actually changed!
+-- Override in descendant classes to implement device behaviour.
+-- @param oldval the previous value of the statevariable
+-- @returns nothing
+function statevariable:afterset(oldval)
+end
 
 -----------------------------------------------------------------------------------------
 -- Sets the statevariable value.
@@ -257,11 +275,19 @@ end
 -- @returns error string, if failure
 -- @returns error number, if failure
 function statevariable:set(value, noevent)
+    -- check provided values
     local newval, errstr, errnr = self:check(value)
     if newval == nil then
         return newval, errstr, errnr
     end
+    -- call before handler
+    newval, errstr, errnr = self:beforeset(newval)
+    if newval == nil then
+        return newval, errstr, errnr
+    end
+
     if self._value ~= newval then
+        local oldval = self._value
         if datatypes[self._datatype] == "date" then
             -- always create a new date table/object to prevent unintended changes
             newval = newval:copy()
@@ -273,6 +299,8 @@ function statevariable:set(value, noevent)
                 handle:Notify(event.DevUDN, event.ServiceID, self.name, newval)
             end
         end
+        -- call the after handler
+        self:afterset(oldval)
     end
     return newval
 end
