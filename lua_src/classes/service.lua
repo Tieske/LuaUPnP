@@ -91,7 +91,7 @@ function service:executeaction(actionname, params)
     local action = (self.actionlist or {})[actionname]
     if action then
         -- found, execute it
-        return action:execute(params)
+        return action:_execute(params)
     else
         -- not found, error out
         return nil, "Invalid Action; no action by name '" .. actionname .. "'", 401

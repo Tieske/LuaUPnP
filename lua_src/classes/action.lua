@@ -19,10 +19,6 @@ local classname = "action"
 -----------------
 -- LOCAL STUFF --
 -----------------
--- default function when the execute function for an action hasn't been set
-local defaultfunction = function(self, params)
-    return nil, "Optional Action Not Implemented; " .. tostring(self.name), 602
-end
 
 --------------------------
 -- CLASS IMPLEMENTATION --
@@ -53,7 +49,6 @@ function action:initialize()
     -- update classname
     self.classname = classname
     -- set defaults
-    self._function = defaultfunction    -- by default return error; optional not implemented action
 end
 
 
@@ -73,21 +68,6 @@ function action:addargument(argument)
     -- update argument
     argument.parent = self
     argument.position = self.argumentcount
-end
-
------------------------------------------------------------------------------------------
--- Sets the function to execute the action.
--- The function set will be called with two arguments; 1) the action object from which it is called
--- (to be used as 'self'), and 2) a table with named arguments (each argument indexed
--- by its name). Before calling the arguments will have been checked, converted and counted.
--- The function should return a table with named return values (each indexed by its name). The
--- returned values can be the Lua types, will be converted to UPnP types before sending.
--- Upon an error the function should return; nil, errorstring, errornumber (see
--- the 6xx error codes in the UPnP 1.0 architecture document, section 3.2.2)
--- @param f the function to execute when the action gets called
-function action:setfunction(f)
-    assert (type(f) == "function", "Expected function, got " .. type(f))
-    self._function = f
 end
 
 
@@ -126,10 +106,28 @@ local function checkparams(params)
 end
 
 -----------------------------------------------------------------------------------------
--- Executes the action. Parameter values may be in either UPnP or Lua format.
+-- Executes the action.
+-- Override in descendant classes to implement the actual device behaviour. NOTE: if not
+-- overridden, the default result will be an error; 602, Optional Action Not Implemented (hence;
+-- from the descedant overridden method, DO NOT call the ancestor method, as it will only return the error)
+-- @param params table with named arguments (each argument indexed
+-- by its name). Before calling the arguments will have been checked, converted and counted.
+-- @returns table with named return values (each indexed by its name). The
+-- returned values can be the Lua types, will be converted to UPnP types (and validated) before sending.
+-- Upon an error the function should return; nil, errorstring, errornumber (see
+-- the 6xx error codes in the UPnP 1.0 architecture document, section 3.2.2)
+-- @see action:_execute
+function action:execute(params)
+    return nil, "Optional Action Not Implemented; " .. tostring(self.name), 602
+end
+
+-----------------------------------------------------------------------------------------
+-- Executes the action while checking inputs and outputs. Parameter values may be in either UPnP or Lua format.
+-- The actual implementation is in <code>action:execute()</code> which will be called by this method. So to
+-- implement device behaviour, override the <code>action:execute()</code> method, and not this one.
 -- @param params table with argument values, indexed by argument name.
 -- @returns 2 lists (names and values) of the 'out' arguments (in proper order), or nil, errormsg, errornumber upon failure
-function action:execute(params)
+function action:_execute(params)
     local result, names, values
     local result, err, errnr = checkparams(params)
     if not result then
@@ -137,7 +135,7 @@ function action:execute(params)
         return result, err, errnr
     end
 
-    success, result, err, errnr = pcall(self._function, self, params)
+    success, result, err, errnr = pcall(self.execute, self, params)
     if not success then
         -- pcall error...
         errnr = 501
