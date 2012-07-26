@@ -37,6 +37,7 @@ local action = upnp.classes.upnpbase:subclass({
     parent = nil,                   -- owning UPnP service of this variable
     argumentlist = nil,             -- list of arguments, each indexed both by name and number (position)
     argumentcount = 0,              -- number of arguments
+    classname = classname,          -- set object classname
 })
 
 -----------------------------------------------------------------------------------------
@@ -46,8 +47,6 @@ local action = upnp.classes.upnpbase:subclass({
 function action:initialize()
     -- initialize ancestor object
     super.initialize(self)
-    -- update classname
-    self.classname = classname
     -- set defaults
 end
 

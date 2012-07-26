@@ -38,6 +38,7 @@ local argument = upnp.classes.upnpbase:subclass({
     direction = "in",               -- in/out going argument, either "in" or "out"
     position = 0,                   -- position in the actions argument list
     parent = nil,                   -- owning UPnP action of this argument
+    classname = classname,          -- set object classname
 })
 
 -----------------------------------------------------------------------------------------
@@ -47,8 +48,6 @@ local argument = upnp.classes.upnpbase:subclass({
 function argument:initialize()
     -- initialize ancestor object
     super.initialize(self)
-    -- update classname
-    self.classname = classname
 end
 
 

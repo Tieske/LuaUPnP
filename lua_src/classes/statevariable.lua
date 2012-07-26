@@ -92,6 +92,7 @@ end
 -- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
 local statevariable = upnp.classes.upnpbase:subclass({
     name = "",                      -- statevariable name
+    _datatype = "string"            -- set the datatype
     defaultvalue = "",              -- default value for statevariable
     evented = true,                 -- is the variable evented or not
     parent = nil,                   -- owning UPnP service of this variable
@@ -99,6 +100,7 @@ local statevariable = upnp.classes.upnpbase:subclass({
     minimum = nil,                  -- numeric values; minimum
     maximum = nil,                  -- numeric values; maximum
     step = nil,                     -- stepsize between minimum & maximum
+    classname = classname,          -- set object classname
 })
 
 -----------------------------------------------------------------------------------------
@@ -108,11 +110,8 @@ local statevariable = upnp.classes.upnpbase:subclass({
 function statevariable:initialize()
     -- initialize ancestor object
     super.initialize(self)
-    -- update classname
-    self.classname = classname
     -- set defaults
     self._value = self.defaultvalue
-    self._datatype = "string"
 end
 
 

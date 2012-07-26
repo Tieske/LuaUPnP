@@ -39,6 +39,7 @@ local service = upnp.classes.upnpbase:subclass({
     parent = nil,                   -- owning UPnP device of this service
     actionlist = nil,               -- table with actions, indexed by name
     statetable = nil,               -- table with statevariables, indexed by name
+    classname = classname,          -- set object classname
 })
 
 -----------------------------------------------------------------------------------------
@@ -48,8 +49,6 @@ local service = upnp.classes.upnpbase:subclass({
 function service:initialize()
     -- initialize ancestor object
     super.initialize(self)
-    -- update classname
-    self.classname = classname
     -- set defaults
 
 end
