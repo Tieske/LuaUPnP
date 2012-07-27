@@ -64,14 +64,14 @@ function export.getxml(xmldoc)
             return nil, "Failed to parse xml buffer/file"
         end
     elseif type(xmldoc) == "userdata" then
-        -- do nothing
+        -- test executing an IXML method to see if its a proper IXML object
         success, err = pcall(xml.getNodeType, xmldoc)
         if not success then
             return nil, err
         end
         idoc = xmldoc
     else
-        return nil, "Expected string or IXML document, got " .. type(xmldoc))
+        return nil, "Expected string or IXML document, got " .. type(xmldoc)
     end
     return idoc
 end

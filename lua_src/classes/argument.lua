@@ -50,6 +50,41 @@ function argument:initialize()
     super.initialize(self)
 end
 
+-----------------------------------------------------------------------------------------
+-- Argument constructor method, creates a new argument, parsed from an XML 'argument' element.
+-- @param xmldoc an IXML object containing the 'argument' element
+-- @param creator callback function to create individual sub objects
+-- @param parent the parent object for the argument to be created
+-- @param service the service to attach to. Required because the parent relationships in the
+-- hierarchy haven't been set yet while parsing and the argument needs to access the statevariable
+-- list to check whether the related statevariable actually exists
+-- @returns argument object
+function argument:parsefromxml(xmldoc, creator, parent, service)
+    assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
+    creator = creator or function() end -- empty function if not provided
+    local plist = {}    -- property list to create the object from after the properties have been parsed
+    local ielement = xmldoc:getFirstChild()
+    while ielement do
+        local n = nil
+        n = string.lower(ielement:getNodeName())
+        if n == "retval" then
+            plist[n] = true
+        else
+            plist[n] = ielement:getNodeValue()
+        end
+    end
+    -- check statevariable
+    if not plist.relatedstatevariable or not service.statetable[plist.relatedstatevariable] then
+        return nil, "Error cannot attach statevariable to parsed argument, statevariable not found; " .. tostring(plist.relatedstatevariable)
+    end
+    -- attach statevariable
+    plist.statevariable = service.statetable[plist.relatedstatevariable]
+    plist.relatedstatevariable = nil
+    -- go create the object
+    local arg = (creator(plist, "argument", parent) or upnp.classes.argument:new(plist))
+
+    return arg  -- the parsing action will add it to the parent action
+end
 
 -----------------------------------------------------------------------------------------
 -- Formats the argument value in upnp format.

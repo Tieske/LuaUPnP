@@ -50,6 +50,60 @@ function action:initialize()
     -- set defaults
 end
 
+-- Parse an IXML 'argumentList' element (alist) in the parent (action object), while using 'creator' to generate objects
+-- service = parent service, because the 'parent' relations ships haven't been set yet and the argument creation needs
+-- the variablelist to check if the related statevariable exists
+local parseargumentlist = function(alist, creator, parent, service)
+    local success, arg, err
+    local elem = alist:getFirstChild()
+    while elem do
+        if string.lower(elem:getNodeName()) == "argument" then
+            arg, err = upnp.classes.argument:parsefromxml(elem, creator, parent)
+            if not arg then
+                return nil, "Error parsing an argument from the list; " .. tostring(err)
+            end
+            success, err = pcall(parent.addargument, parent, arg)
+            if not success then
+                return nil, "Error adding a parsed argument to the action; " .. tostring(err)
+            end
+        end
+        elem = elem:getNextSibling()
+    end
+    return 1   -- report success
+end
+
+-----------------------------------------------------------------------------------------
+-- Action constructor method, creates a new action, parsed from an XML 'action' element.
+-- @param xmldoc an IXML object containing the 'action' element
+-- @param creator callback function to create individual sub objects
+-- @param parent the parent object for the action to be created
+-- @returns action object
+function action:parsefromxml(xmldoc, creator, parent)
+    assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
+    creator = creator or function() end -- empty function if not provided
+    local plist = {}    -- property list to create the object from after the properties have been parsed
+    local alist = nil
+    local ielement = xmldoc:getFirstChild()
+    while ielement do
+        local n = nil
+        n = string.lower(ielement:getNodeName())
+        if n == "argumentlist" then
+            alist = ielement
+        else
+            plist[n] = ielement:getNodeValue()
+        end
+    end
+    -- go create the object
+    local act = (creator(plist, "action", parent) or upnp.classes.action:new(plist))
+    -- parse the argument list
+    local success
+    success, err = parseargumentlist(alist, creator, act, parent)
+    if not success then
+        return nil, "Failed to parse the action argumentlist; " .. tostring(err)
+    end
+
+    return act  -- the parsing service will add it to the parent service
+end
 
 -----------------------------------------------------------------------------------------
 -- Adds an argument to the actions argument list.

@@ -78,7 +78,7 @@ end
 creator = nil   -- delete again, only created for documentation purposes
 
 -----------------------------------------------------------------------------------------
--- Creates a new device, parsed from a device xml.
+-- Device constructor method, creates a new device, parsed from a device xml.
 -- The device object will be created, including all services and sub devices.
 -- @param xmldoc XML document from which a device is to be parsed, this can be either 1)
 -- a string value containing the xml, 2) a string value containing the filename of the xml
@@ -88,6 +88,7 @@ creator = nil   -- delete again, only created for documentation purposes
 -- @returns device object
 function device:parsefromxml(xmldoc, creator, parent)
     assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
+    creator = creator or function() end -- empty function if not provided
     local xml = upnp.lib.ixml
     local success, idoc, ielement, err
     idoc, err = upnp.getxml(xmldoc)
@@ -95,7 +96,7 @@ function device:parsefromxml(xmldoc, creator, parent)
         return nil, err
     end
 
-    local t = xml.getNodeType(idoc)    -- errors out if not a valid IXML object
+    local t = xml.getNodeType(idoc)
     if t ~= "ELEMENT_NODE" and t ~= "DOCUMENT_NODE" then
         return nil, "Expected an XML element or document node, got " .. tostring(t)
     end
@@ -141,10 +142,7 @@ function device:parsefromxml(xmldoc, creator, parent)
     end
     -- a list with properties has been compiled in plist
     -- now go create an object with it.
-    local dev
-    if creator then
-        dev = creator(plist, "device", parent)
-    end
+    local dev = creator(plist, "device", parent)
     if not dev then
         dev = upnp.classes.device:new(plist)
     end
@@ -192,7 +190,8 @@ function device:parsefromxml(xmldoc, creator, parent)
                     sdoc = string.gsub(sdoc, "\\/", "/")
                     sdoc = string.gsub(sdoc, "\\", "/")      -- entire path is now single-foward-slash-separated
                 end
-                sdoc, err = upnp.classes.service:parsefromxml(sdoc, creator, dev)
+                -- go fetch it
+                sdoc, err = upnp.classes.service:parsefromxml(sdoc, creator, dev, plist)
                 if not sdoc then
                     -- couldn't parse service, so exit
                     dev:setudn(nil) -- remove created device
@@ -229,6 +228,8 @@ function device:parsefromxml(xmldoc, creator, parent)
         s = nil
         dlist = nil
     end
+
+    return dev
 end
 
 -----------------------------------------------------------------------------------------

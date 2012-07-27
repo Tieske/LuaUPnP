@@ -17,7 +17,7 @@ local classname = "upnpbase"
 -- Only if an object is parent-less, the methods will be called
 -- Each object is supposed to call its own children if required
 local cteventhandler = function(self, sender, event)
-    if not self.parent and sender = upnp then
+    if not self.parent and sender == upnp then
         -- only deal with upnp events
         if event == upnp.events.UPnPstarting then
             -- do nothing here

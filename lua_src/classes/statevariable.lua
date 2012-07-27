@@ -87,14 +87,14 @@ end
 -- @class table
 -- @name statevariable fields/properties
 -- @field name name of the statevariable
--- @field evented indicator for the variable to be an evented statevariable
+-- @field sendevents indicator for the variable to be an evented statevariable
 -- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
 -- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
 local statevariable = upnp.classes.upnpbase:subclass({
     name = "",                      -- statevariable name
-    _datatype = "string"            -- set the datatype
+    _datatype = "string",           -- set the datatype
     defaultvalue = "",              -- default value for statevariable
-    evented = true,                 -- is the variable evented or not
+    sendevents = true,              -- is the variable evented or not
     parent = nil,                   -- owning UPnP service of this variable
     allowedvaluelist = nil,         -- set of possible values (set: keys and values are the same!) for UPnP type 'string' only
     minimum = nil,                  -- numeric values; minimum
@@ -112,6 +112,67 @@ function statevariable:initialize()
     super.initialize(self)
     -- set defaults
     self._value = self.defaultvalue
+end
+
+-- Parse the element 'allowedValueList' (in ielement) into propertylist plist
+local parseallowedlist = function(ielement, plist)
+    local al = {}
+    local elem = ielement:getFirstChild()
+    while elem do
+        if string.lower(elem:getNodeName()) == "allowedvalue" then
+            local v = elem:getNodeValue()
+            al[v] = v
+        end
+        elem = elem:getNextSibling()
+    end
+    plist["allowedvaluelist"] = al
+end
+-- Parse the element 'allowedValueRange' (in ielement) into propertylist plist
+local parseallowedrange = function(ielement, plist)
+    local elem = ielement:getFirstChild()
+    while elem do
+        plist[string.tolower(elem:getNodeName())] = elem:getNodeValue()
+        elem = elem:getNextSibling()
+    end
+end
+-----------------------------------------------------------------------------------------
+-- StateVariable constructor method, creates a new variable, parsed from an XML 'stateVariable' element.
+-- @param xmldoc an IXML object containing the 'stateVariable' element
+-- @param creator callback function to create individual sub objects
+-- @param parent the parent object for the variable to be created
+-- @returns statevariable object
+function statevariable:parsefromxml(xmldoc, creator, parent)
+    assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
+    creator = creator or function() end -- empty function if not provided
+    local plist = {}    -- property list to create the object from after the properties have been parsed
+    local ielement = xmldoc:getFirstChild()
+    while ielement do
+        local n = nil
+        n = string.lower(ielement:getNodeName())
+        if n == "allowedvaluelist" then
+            parseallowedlist(ielement, plist)
+        elseif n == "allowedvaluerange" then
+            parseallowedrange(ielement, plist)
+        else
+            plist[n] = ielement:getNodeValue()
+        end
+    end
+    -- properly update sendevents value to boolean
+    local se = string.lower(plist.sendevents or "yes")  -- defaults to yes according to spec
+    if se == "false" or se == "no" or se == "0" then
+        plist.sendevents = false
+    else
+        plist.sendevents = true
+    end
+    -- go create the object
+    local var = (creator(plist, "statevariable", parent) or upnp.classes.statevariable:new(plist))
+    -- set defaults and update type
+    var._datatype = (var.datatype or "string")
+    var.datatype = nil
+    var._value = (var.value or var.defaultvalue or "")
+    var.value = nil
+
+    return var  -- parsing service will add it to the parent service
 end
 
 
@@ -292,7 +353,7 @@ function statevariable:set(value, noevent)
             newval = newval:copy()
         end
         self._value = newval              -- set new value, fire event
-        if self.evented and not noevent then
+        if self.sendevents and not noevent then
             local handle = self:gethandle()
             if handle then
                 handle:Notify(event.DevUDN, event.ServiceID, self.name, newval)

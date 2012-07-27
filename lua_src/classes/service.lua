@@ -53,6 +53,125 @@ function service:initialize()
 
 end
 
+-- Parse the element 'actionList' (in lst) into service (in serv), while 'creator' creates required objects
+local parseactionlist = function(lst, creator, serv)
+    local success
+    local elem = lst:getFirstChild()
+    while elem do
+        if string.lower(elem:getNodeName()) == "action" then
+            -- create action
+            local act, err = upnp.classes.action:parsefromxml(elem, creator, serv)
+            if not act then
+                return nil, "Failed to add an action; " .. tostring(err)
+            end
+            -- add action to service
+            success, err = pcall(serv.addaction, serv, act)
+            if not success then
+                return nil, "Failed to add a parsed action; " .. tostring(err)
+            end
+        end
+        elem = elem:getNextSibling()
+    end
+    return 1    -- report success
+end
+
+-- Parse the element 'serviceStateTable' (in lst) into service (in serv), while 'creator' creates required objects
+local parsevariablelist = function(lst, creator, serv)
+    local success
+    local elem = lst:getFirstChild()
+    while elem do
+        if string.lower(elem:getNodeName()) == "statevariable" then
+            -- create statevariable
+            local variable, err = upnp.classes.statevariable:parsefromxml(elem, creator, serv)
+            if not variable then
+                return nil, "Failed to add a variable; " .. tostring(err)
+            end
+            -- add variable to service
+            success, err = pcall(serv.addaction, serv, variable)
+            if not success then
+                return nil, "Failed to add a parsed variable; " .. tostring(err)
+            end
+        end
+        elem = elem:getNextSibling()
+    end
+    return 1    -- report success
+end
+
+-----------------------------------------------------------------------------------------
+-- Service constructor method, creates a new service, parsed from a service xml.
+-- The service object will be created, including all its children.
+-- @param xmldoc XML document from which a service is to be parsed, this can be either 1)
+-- a string value containing the xml, 2) a string value containing the filename of the xml
+-- 3) an IXML object containing the 'service' element
+-- @param creator callback function to create individual sub objects
+-- @param parent the parent object for the service to be created
+-- @param plist key-value list with service properties already parsed from the Device XMLs 'serviceList' element.
+-- @returns service object
+function service:parsefromxml(xmldoc, creator, parent, plist)
+    assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
+    creator = creator or function() end -- empty function if not provided
+
+    local xml = upnp.lib.ixml
+    local success, idoc, ielement, err
+
+    idoc, err = upnp.getxml(xmldoc)
+    if not idoc then
+        return nil, err
+    end
+
+    local t = idoc:getNodeType()
+    if t ~= "ELEMENT_NODE" and t ~= "DOCUMENT_NODE" then
+        return nil, "Expected an XML element or document node, got " .. tostring(t)
+    end
+    if t == "ELEMENT_NODE" and idoc:getNodeName() ~= "service" then
+        return nil, "Expected an XML element named 'service', got " .. tostring(idoc:getNodeName())
+    end
+    if t == "ELEMENT_NODE" then
+        ielement = idoc
+    end
+
+    if t == "DOCUMENT_NODE" then
+        ielement = idoc:getFirstChild()
+        while ielement and string.lower(ielement:getNodeName()) ~= "device" do
+            ielement:getNextSibling()
+        end
+        if not ielement then
+            return nil, "XML document does not contain a 'service' element to parse"
+        end
+    end
+    -- ielement now contains the 'service' element
+    -- go create service object
+    local serv = (creator(plist, "service", parent) or upnp.classes.service:new(plist))
+
+    -- get started parsing...
+    local lst = ielement:getFirstChild()
+    local vlist, alist = nil, nil
+    while lst do
+        local name = string.tolower(lst:getNodeName())
+        if name == "actionlist"            then alist = lst
+        elseif name == "servicestatetable" then vlist = lst
+        else
+            -- some other element, do nothing
+        end
+        lst = lst:getNextSibling();
+    end
+    -- now first parse the variable list, to make sure that action arguments can find the related variables
+    if vlist then
+        success, err = parsevariablelist(vlist, serv)
+        if not success then
+            return nil, "Error parsing serviceStateTable element; " .. tostring(err)
+        end
+    end
+    if alist then
+        success, err = parseactionlist(alist, serv)
+        if not success then
+            return nil, "Error parsing actionList element; " .. tostring(err)
+        end
+    end
+
+    return serv
+end
+
 -----------------------------------------------------------------------------------------
 -- Adds a statevariable to the service statetable.
 -- @param statevar statevariable object to add
