@@ -25,7 +25,7 @@ copy "libupnp\pthread*.*" "%T_LUAPATH%\clibs\upnp"
 copy "libupnp\libupnp.*" "%T_LUAPATH%\clibs\upnp"
 
 echo Copying file 'LuaUPnP.*' (dll + debug files)
-copy "Debug\LuaUPnP.*" "%T_LUAPATH%\clibs\upnp"
+copy "Debug\core.*" "%T_LUAPATH%\clibs\upnp"
 
 REM ========== Cleanup ================================
 rem Delete temp var

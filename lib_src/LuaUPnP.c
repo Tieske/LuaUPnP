@@ -956,7 +956,7 @@ static int L_closeLib(lua_State *L) {
 	return 0;
 }
 
-LPNP_API	int luaopen_LuaUPnP(lua_State *L)
+LPNP_API	int luaopen_upnp_core(lua_State *L)
 {
 
 	/////////////////////////////////////////////
