@@ -183,12 +183,8 @@ function device:parsefromxml(xmldoc, creator, parent)
                 -- basics from the device XML have been collected, now get the service XML
                 local sdoc = creator(plist, "servicexml", dev)
                 if not sdoc then
-                    -- nothing was returned, so try construct location from webroot and device xml
-                    sdoc = string.gsub(upnp.webroot, "\\", "/") .. "\\" .. string.gsub(tostring(plist.scpdurl), "\\", "/")
-                    sdoc = string.gsub(sdoc, "/\\/", "/")
-                    sdoc = string.gsub(sdoc, "/\\", "/")
-                    sdoc = string.gsub(sdoc, "\\/", "/")
-                    sdoc = string.gsub(sdoc, "\\", "/")      -- entire path is now single-foward-slash-separated
+                    -- nothing was returned, so try construct location from url in device xml
+                    sdoc = plist.scpdurl
                 end
                 -- go fetch it
                 sdoc, err = upnp.classes.service:parsefromxml(sdoc, creator, dev, plist)

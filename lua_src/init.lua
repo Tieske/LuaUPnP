@@ -4,26 +4,57 @@
 --  and start the copas loop
 -----------------------------------------------------------------
 
+-- Setup logger
+require ("logging.console")
+logger = logging.console()
+logger:setLevel (logging.DEBUG)
+logger:debug("Starting logger")             -- possible: debug, info, warn, error, fatal
+-- replace print function with logger
+local oldprint = print
+function print(...)
+    local arg = {n=select('#',...),...}
+    local i = 1
+    result = ""
+    while i <= arg.n do
+        if i == 1 then
+            result = tostring(arg[i])
+        else
+            result = result .. "\t" .. tostring(arg[i])
+        end
+        i = i + 1
+    end
+    logger:info(result)
+end
+
+
 local export = {}                           -- module export table
+logger:debug("Loading Copas Timer")
 local copas = require('copas.timer')        -- load Copas socket scheduler
+logger:debug("Loading Copas Eventer")
 local eventer = require('copas.eventer')    -- add event capability to Copas
+logger:debug("Loading DSS")
 local dss = require('dss')                  -- load darksidesync module (required for UPnP)
-local lib = require("LuaUPnP")              -- load UPnP core module (C code)
+logger:debug("Loading UPnP core")
+local lib = require("upnp.core")            -- load UPnP core module (C code)
 
 -- create a global table
+logger:debug("Setting up globals and classes")
 upnp = export   -- create a global table
 upnp.classes               = upnp.classes or {}
 upnp.classes.base          = require("upnp.classes.base")
 upnp.classes.upnpbase      = require("upnp.classes.upnpbase")
+upnp.classes.device        = require("upnp.classes.device")
+upnp.classes.service       = require("upnp.classes.service")
 upnp.classes.statevariable = require("upnp.classes.statevariable")
+upnp.classes.action        = require("upnp.classes.action")
 upnp.classes.argument      = require("upnp.classes.argument")
-upnp.devices = {}   -- global list of UPnP devices, by their UDN
+upnp.devices = {}          -- global list of UPnP devices, by their UDN
+upnp.lib = lib             -- export the core UPnP lib
 
 -- webserver setup
+logger:debug("Configuring webserver")
 export.webroot = "./web"    -- web root directory
 export.baseurl = ""         -- base url pointing to webroot directory
-export.devices = {}         -- table of all known (sub)devices by their UDN
-export.lib = lib            -- export the core UPnP lib
 
 -- Link Copas to DSS;
 -- the darksidesync lib has a Lua side piece of code that listens to the UDP signal whenever
@@ -47,32 +78,62 @@ end
 
 
 -----------------------------------------------------------------------------------------
--- Gets an xml document.
+-- Gets an xml document. If a filename is given, it will first try to open, if it fails it
+-- will try again relative to the <code>upnp.webroot</code> directory.
 -- @param xmldoc this can be several things; 1) filename, 2) literal xml, 3) IXML object
 -- @returns IXML object or nil + errormessage
 function export.getxml(xmldoc)
+    logger:debug("Entering upnp.getxml(); ", xmldoc)
     local xml = upnp.lib.ixml
     local success, idoc, ielement, err
     if type(xmldoc)=="string" then
-        -- first try loading as a file (filename)
-        success, idoc = pcall(xml.LoadDocument, xmldoc)
-        if not success then
-            -- parse as an xml buffer (literal xml string)
-            success, idoc = pcall(xml.ParseBuffer, xmldoc)
+        -- parse as an xml buffer (literal xml string)
+        idoc, err = xml.ParseBuffer(xmldoc)
+        if not idoc then
+            logger:warn("    Failed parsing as xml:", err)
+            -- try loading as a file (filename)
+            local separator = _G.package.config:sub(1,1)
+            local filename = string.gsub(string.gsub(xmldoc, "\\", "/"), "/", separator) -- OS dependent
+            idoc, err = xml.LoadDocument(filename)
+            if not idoc then
+                logger:warn("    Failed parsing as file", filename, err)
+                -- nothing still, so try construct location from webroot and string given
+                filename = string.gsub(upnp.webroot, "\\", "/") .. "\\" .. string.gsub(xmldoc, "\\", "/")
+                filename = string.gsub(filename, "/\\/", "/")
+                filename = string.gsub(filename, "/\\", "/")
+                filename = string.gsub(filename, "\\/", "/")
+                filename = string.gsub(filename, "\\", "/")      -- entire path is now single-foward-slash-separated
+                -- parse as filename
+                local filename = string.gsub(string.gsub(filename, "\\", "/"), "/", separator) -- OS dependent
+                idoc, err = xml.LoadDocument(filename)
+                if not idoc then
+                    logger:warn("    Failed parsing as webroot based file", filename, err)
+                else
+                    logger:info("    Parsed as webroot based xml file")
+                end
+            else
+                logger:info("    Parsed as xml file")
+            end
+        else
+            logger:info("    Parsed as xml buffer")
         end
-        if not success or idoc == nil then
-            return nil, "Failed to parse xml buffer/file"
+        if not idoc then
+            logger:error("getxml(): Failed to parse xml buffer/file", xmldoc)
+            return nil, "Failed to parse xml buffer/file; " .. xmldoc
         end
     elseif type(xmldoc) == "userdata" then
         -- test executing an IXML method to see if its a proper IXML object
         success, err = pcall(xml.getNodeType, xmldoc)
         if not success then
+            logger:error("getxml(): userdata is not an IXML object,", err)
             return nil, err
         end
         idoc = xmldoc
     else
+        logger:error("getxml(): Expected string or IXML document, got " .. type(xmldoc))
         return nil, "Expected string or IXML document, got " .. type(xmldoc)
     end
+    logger:debug("Leaving upnp.getxml()")
     return idoc
 end
 
@@ -295,4 +356,5 @@ copas.eventer.decorate(export, events)
 copas:subscribe(export, CopasEventHandler)
 
 -- return the upnp table as module table
+logger:debug("Loaded UPnP library")
 return export
