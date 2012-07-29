@@ -47,9 +47,12 @@ local service = upnp.classes.upnpbase:subclass({
 -- Will be called upon instantiation of an object, override this method to set default
 -- values for all properties.
 function service:initialize()
+    logger:debug("Initializing class '%s' named '%s'...", classname, tostring(self.name))
     -- initialize ancestor object
     super.initialize(self)
     -- set defaults
+
+    logger:debug("Initializing class '%s' completed", classname)
 
 end
 
@@ -131,9 +134,10 @@ function service:parsefromxml(xmldoc, creator, parent, plist)
     end
 
     if t == "DOCUMENT_NODE" then
-        ielement = idoc:getFirstChild()
+        ielement = idoc:getFirstChild()     -- get root element
+        if ielement then ielement = ielement:getFirstChild() end  -- get first content element
         while ielement and string.lower(ielement:getNodeName()) ~= "device" do
-            ielement:getNextSibling()
+            ielement = ielement:getNextSibling()
         end
         if not ielement then
             return nil, "XML document does not contain a 'service' element to parse"

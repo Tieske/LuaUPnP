@@ -108,10 +108,12 @@ local statevariable = upnp.classes.upnpbase:subclass({
 -- Will be called upon instantiation of an object, override this method to set default
 -- values for all properties.
 function statevariable:initialize()
+    logger:debug("Initializing class '%s' named '%s'...", classname, tostring(self.name))
     -- initialize ancestor object
     super.initialize(self)
     -- set defaults
     self._value = self.defaultvalue
+    logger:debug("Initializing class '%s' completed", classname)
 end
 
 -- Parse the element 'allowedValueList' (in ielement) into propertylist plist

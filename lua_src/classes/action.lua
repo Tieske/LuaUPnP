@@ -45,9 +45,11 @@ local action = upnp.classes.upnpbase:subclass({
 -- Will be called upon instantiation of an object, override this method to set default
 -- values for all properties.
 function action:initialize()
+    logger:debug("Initializing class '%s' named '%s'...", classname, tostring(self.name))
     -- initialize ancestor object
     super.initialize(self)
     -- set defaults
+    logger:debug("Initializing class '%s' completed", classname)
 end
 
 -- Parse an IXML 'argumentList' element (alist) in the parent (action object), while using 'creator' to generate objects

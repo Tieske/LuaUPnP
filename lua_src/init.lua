@@ -83,20 +83,20 @@ end
 -- @param xmldoc this can be several things; 1) filename, 2) literal xml, 3) IXML object
 -- @returns IXML object or nil + errormessage
 function export.getxml(xmldoc)
-    logger:debug("Entering upnp.getxml(); ", xmldoc)
+    logger:debug("Entering upnp.getxml(); %s", tostring(xmldoc))
     local xml = upnp.lib.ixml
     local success, idoc, ielement, err
     if type(xmldoc)=="string" then
         -- parse as an xml buffer (literal xml string)
         idoc, err = xml.ParseBuffer(xmldoc)
         if not idoc then
-            logger:warn("    Failed parsing as xml:", err)
+            logger:warn("    Failed parsing as xml: %s", err)
             -- try loading as a file (filename)
             local separator = _G.package.config:sub(1,1)
             local filename = string.gsub(string.gsub(xmldoc, "\\", "/"), "/", separator) -- OS dependent
             idoc, err = xml.LoadDocument(filename)
             if not idoc then
-                logger:warn("    Failed parsing as file", filename, err)
+                logger:warn("    Failed parsing as file %s\t %s", filename, err)
                 -- nothing still, so try construct location from webroot and string given
                 filename = string.gsub(upnp.webroot, "\\", "/") .. "\\" .. string.gsub(xmldoc, "\\", "/")
                 filename = string.gsub(filename, "/\\/", "/")
@@ -107,7 +107,7 @@ function export.getxml(xmldoc)
                 local filename = string.gsub(string.gsub(filename, "\\", "/"), "/", separator) -- OS dependent
                 idoc, err = xml.LoadDocument(filename)
                 if not idoc then
-                    logger:warn("    Failed parsing as webroot based file", filename, err)
+                    logger:warn("    Failed parsing as webroot based file " .. tostring(filename) .. "\t" .. tostring(err))
                 else
                     logger:info("    Parsed as webroot based xml file")
                 end
@@ -118,14 +118,14 @@ function export.getxml(xmldoc)
             logger:info("    Parsed as xml buffer")
         end
         if not idoc then
-            logger:error("getxml(): Failed to parse xml buffer/file", xmldoc)
-            return nil, "Failed to parse xml buffer/file; " .. xmldoc
+            logger:error("getxml(): Failed to parse xml buffer/file " .. tostring(xmldoc))
+            return nil, "Failed to parse xml buffer/file; " .. tostring(xmldoc)
         end
     elseif type(xmldoc) == "userdata" then
         -- test executing an IXML method to see if its a proper IXML object
         success, err = pcall(xml.getNodeType, xmldoc)
         if not success then
-            logger:error("getxml(): userdata is not an IXML object,", err)
+            logger:error("getxml(): userdata is not an IXML object, " .. tostring(err))
             return nil, err
         end
         idoc = xmldoc
@@ -266,6 +266,8 @@ local UPnPCallback = function (wt, event)
     end
     if event then
         -- we've got an event to handle
+        logger:debug("UPnPCallback: received UPnP event; ")
+        logger:debug(event)
         local et = UPnPEvents[event.Event].type
         if EventTypeHandlers[et] then
             -- execute handler for the received event type
@@ -273,9 +275,7 @@ local UPnPCallback = function (wt, event)
         end
     else
         -- an error occured
-        print ("LuaUPnP error:")
-        print(err)
-        print()
+        logger:debug("UPnPCallback: " .. tostring(err))
     end
 end
 
@@ -291,19 +291,21 @@ local CopasEventHandler = function(self, sender, event)
         local et = self:dispatch(upnp.events.UPnPstarting)
         et:waitfor()    -- wait for event completion
         -- do initialization
-        print("Starting UPnP library...")
+        logger:debug("Starting UPnP library...")
         lib.Init(UPnPCallback)         -- start, attach event handler for UPnP events
         lib.web.SetRootDir(export.webroot)    -- setup the webserver
         export.baseurl = "http://" .. lib.GetServerIpAddress() .. ":" .. lib.GetServerPort() .. "/";
         -- raise event done
         self:dispatch(upnp.events.UPnPstarted)
-        print("UPnP library started, WebRoot = '" .. export.webroot .. "', BaseURL = '" .. export.baseurl .. "'.")
+        logger:info("UPnP library started, WebRoot = '%s', BaseURL = '%s'.", tostring(export.webroot), tostring(export.baseurl))
     elseif event == copas.events.loopstopping then
         -- Copas is stopping
+        logger:debug("Stopping UPnP library...")
         local et = self:dispatch(upnp.events.UPnPstopping)
         et:waitfor()    -- wait for event completion
         lib.Finish()
         -- raise event done
+        logger:debug("UPnP library stopped.")
         self:dispatch(upnp.events.UPnPstopped)
     end
 end

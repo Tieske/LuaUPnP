@@ -47,11 +47,13 @@ local device = upnp.classes.upnpbase:subclass({
 -- Will be called upon instantiation of an object, override this method to set default
 -- values for all properties.
 function device:initialize()
+    logger:debug("Initializing class '%s' named '%s'...", classname, tostring(self.name))
     -- initialize ancestor object
     super.initialize(self)
     -- set defaults
 
     end
+    logger:debug("Initializing class '%s' completed", classname)
 
 local creator -- trick LuaDoc to generate the documentation for this one
 -----------------------------------------------------------------------------------------
@@ -88,6 +90,7 @@ creator = nil   -- delete again, only created for documentation purposes
 -- @returns device object
 function device:parsefromxml(xmldoc, creator, parent)
     assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
+    logger:debug("Entering device:parsefromxml()")
     creator = creator or function() end -- empty function if not provided
     local xml = upnp.lib.ixml
     local success, idoc, ielement, err
@@ -108,9 +111,11 @@ function device:parsefromxml(xmldoc, creator, parent)
     end
 
     if idoc:getNodeType() == "DOCUMENT_NODE" then
-        ielement = idoc:getFirstChild()
+        logger:debug("device:parsefromxml(), looking for 'device' element in XML doc")
+        ielement = idoc:getFirstChild()     -- get root element
+        if ielement then ielement = ielement:getFirstChild() end  -- get first content element
         while ielement and string.lower(ielement:getNodeName()) ~= "device" do
-            ielement:getNextSibling()
+            ielement = ielement:getNextSibling()
         end
         if not ielement then
             return nil, "XML document does not contain a 'device' element to parse"
@@ -124,8 +129,12 @@ function device:parsefromxml(xmldoc, creator, parent)
         local name = string.lower(ielement:getNodeName())
 
         if ielement:getNodeType() == "ELEMENT_NODE" then
-            if name == "servicelist" then slist = ielement
-            elseif name == "devicelist" then dlist = ielement
+            if name == "servicelist" then
+                logger:debug("device:parsefromxml(), found 'servicelist' element")
+                slist = ielement
+            elseif name == "devicelist" then
+                logger:debug("device:parsefromxml(), found 'devicelist' element")
+                dlist = ielement
             else
                 local value, n = nil, nil
                 n = ielement:getFirstChild()
@@ -134,6 +143,7 @@ function device:parsefromxml(xmldoc, creator, parent)
                 end
                 if n then   -- store property value
                     plist[name] = n:getNodeValue()
+                    logger:debug("device:parsefromxml(), found property '%s' @ '%s'", name, plist[name])
                 end
                 n = nil
             end
@@ -142,8 +152,10 @@ function device:parsefromxml(xmldoc, creator, parent)
     end
     -- a list with properties has been compiled in plist
     -- now go create an object with it.
+    logger:debug("device:parsefromxml(), creating device through 'creator'")
     local dev = creator(plist, "device", parent)
     if not dev then
+        logger:debug("device:parsefromxml(), 'creator' didn't deliver, now creating device base class")
         dev = upnp.classes.device:new(plist)
     end
     if dev then
@@ -161,7 +173,7 @@ function device:parsefromxml(xmldoc, creator, parent)
         while s do
             if string.lower(s:getNodeName()) == "service" then
                 -- it is a service element, go create it
-                -- first get a list of properties (of the DEVICE xml)
+                -- first get a list of properties (from the DEVICE xml)
                 plist = {}   -- reinitialize
                 ielement = s:getFirstChild()
                 while ielement do
