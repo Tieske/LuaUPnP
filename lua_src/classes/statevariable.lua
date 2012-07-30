@@ -110,7 +110,7 @@ local statevariable = upnp.classes.upnpbase:subclass({
 function statevariable:initialize()
     logger:debug("Initializing class '%s' named '%s'...", classname, tostring(self.name))
     -- initialize ancestor object
-    super.initialize(self)
+    self.super.initialize(self)
     -- set defaults
     self._value = self.defaultvalue
     logger:debug("Initializing class '%s' completed", classname)

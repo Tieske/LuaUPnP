@@ -109,7 +109,7 @@ function export.getxml(xmldoc)
                 if not idoc then
                     logger:warn("    Failed parsing as webroot based file " .. tostring(filename) .. "\t" .. tostring(err))
                 else
-                    logger:info("    Parsed as webroot based xml file")
+                    logger:info("    Parsed as webroot based xml file %s", filename)
                 end
             else
                 logger:info("    Parsed as xml file")

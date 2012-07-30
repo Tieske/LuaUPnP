@@ -47,13 +47,13 @@ local device = upnp.classes.upnpbase:subclass({
 -- Will be called upon instantiation of an object, override this method to set default
 -- values for all properties.
 function device:initialize()
-    logger:debug("Initializing class '%s' named '%s'...", classname, tostring(self.name))
+    logger:debug("Initializing class '%s' as '%s' with id '%s'.", classname, tostring(self.friendlyname), tostring(self._udn or self.udn))
     -- initialize ancestor object
-    super.initialize(self)
+    self.super.initialize(self)
     -- set defaults
 
-    end
     logger:debug("Initializing class '%s' completed", classname)
+end
 
 local creator -- trick LuaDoc to generate the documentation for this one
 -----------------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ function device:parsefromxml(xmldoc, creator, parent)
                 local value, n = nil, nil
                 n = ielement:getFirstChild()
                 while n and n:getNodeType() ~= "TEXT_NODE" do
-                    n:getNextSibling()
+                    n = n:getNextSibling()
                 end
                 if n then   -- store property value
                     plist[name] = n:getNodeValue()
@@ -152,10 +152,10 @@ function device:parsefromxml(xmldoc, creator, parent)
     end
     -- a list with properties has been compiled in plist
     -- now go create an object with it.
-    logger:debug("device:parsefromxml(), creating device through 'creator'")
+    logger:debug("device:parsefromxml(), instantiating device through 'creator'")
     local dev = creator(plist, "device", parent)
     if not dev then
-        logger:debug("device:parsefromxml(), 'creator' didn't deliver, now creating device base class")
+        logger:debug("device:parsefromxml(), 'creator' didn't deliver, now instantiating a generic device base class")
         dev = upnp.classes.device:new(plist)
     end
     if dev then
@@ -309,7 +309,7 @@ end
 -- See also <code>upnpbase:start()</code>
 function device:start()
     -- start ancestor object
-    super.start(self)
+    self.super.start(self)
     -- start all sub-devices
     for _, dev in pairs(self.devicelist) do
         dev:start()
@@ -328,7 +328,7 @@ function device:stop()
         dev:stop()
     end
     -- stop ancestor object
-    super.stop(self)
+    self.super.stop(self)
 end
 
 return device

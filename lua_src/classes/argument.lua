@@ -48,7 +48,7 @@ local argument = upnp.classes.upnpbase:subclass({
 function argument:initialize()
     logger:debug("Initializing class '%s' named '%s'...", classname, tostring(self.name))
     -- initialize ancestor object
-    super.initialize(self)
+    self.super.initialize(self)
     logger:debug("Initializing class '%s' completed", classname)
 end
 

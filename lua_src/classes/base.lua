@@ -19,7 +19,7 @@ local object = {}
 -- <li><code>super:subclass(o)</code>; method to create a new class, which inherits from <code>super</code>
 -- </li></ul>
 -- NOTE: when calling methods on the superclass make sure to call them using function notation
--- (<code>super.method(self, param1, param2)</code>) and NOT method notation (<code>super:dosomething(param1,
+-- (<code>self.super.dosomething(self, param1, param2)</code>) and NOT method notation (<code>self.super:dosomething(param1,
 -- param2)</code>), because in the latter case <code>self</code> will point to <code>super</code> and not
 -- the instance called upon.
 -- @param obj table to convert into an object
@@ -125,7 +125,7 @@ local test = function()
     base.inherited = function() return true end
     -- make the table into an object (just required for the initial one)
     base = object.make(base)
-    -- create instance and check if the initialzeer ran (in the base object)
+    -- create instance and check if the initializer ran (in the base object)
     local instance = base:new({})
     assert(initialized, "Should have been true")
     assert(instance.super == base, "Super class should point to base")

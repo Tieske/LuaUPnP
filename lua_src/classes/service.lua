@@ -49,7 +49,7 @@ local service = upnp.classes.upnpbase:subclass({
 function service:initialize()
     logger:debug("Initializing class '%s' named '%s'...", classname, tostring(self.name))
     -- initialize ancestor object
-    super.initialize(self)
+    self.super.initialize(self)
     -- set defaults
 
     logger:debug("Initializing class '%s' completed", classname)
