@@ -15,6 +15,7 @@
 
 -- set the proper classname here, this should match the filename without the '.lua' extension
 local classname = "service"
+local super = upnp.classes.upnpbase
 
 -----------------
 -- LOCAL STUFF --
@@ -33,7 +34,7 @@ local classname = "service"
 -- @field evented indicator for the variable to be an evented statevariable
 -- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
 -- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
-local service = upnp.classes.upnpbase:subclass({
+local service = super:subclass({
     servicetype = nil,              -- service type
     serviceid = nil,                -- service id
     parent = nil,                   -- owning UPnP device of this service
@@ -47,9 +48,9 @@ local service = upnp.classes.upnpbase:subclass({
 -- Will be called upon instantiation of an object, override this method to set default
 -- values for all properties.
 function service:initialize()
-    logger:debug("Initializing class '%s' named '%s'...", classname, tostring(self.name))
+    logger:debug("Initializing class '%s' with id '%s'...", classname, tostring(self.serviceid))
     -- initialize ancestor object
-    self.super.initialize(self)
+    super.initialize(self)
     -- set defaults
 
     logger:debug("Initializing class '%s' completed", classname)
@@ -114,6 +115,8 @@ function service:parsefromxml(xmldoc, creator, parent, plist)
     assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
     creator = creator or function() end -- empty function if not provided
 
+    logger:debug("Entering service:parsefromxml()...")
+
     local xml = upnp.lib.ixml
     local success, idoc, ielement, err
 
@@ -134,26 +137,29 @@ function service:parsefromxml(xmldoc, creator, parent, plist)
     end
 
     if t == "DOCUMENT_NODE" then
+        logger:debug("service:parsefromxml(), looking for 'scpd' element in XML doc")
         ielement = idoc:getFirstChild()     -- get root element
         if ielement then ielement = ielement:getFirstChild() end  -- get first content element
-        while ielement and string.lower(ielement:getNodeName()) ~= "device" do
-            ielement = ielement:getNextSibling()
-        end
         if not ielement then
-            return nil, "XML document does not contain a 'service' element to parse"
+            return nil, "XML document does not contain a 'scpd' element to parse"
         end
     end
-    -- ielement now contains the 'service' element
+    -- ielement now contains the 'scpd' element
     -- go create service object
-    local serv = (creator(plist, "service", parent) or upnp.classes.service:new(plist))
+    logger:debug("service:parsefromxml(), calling 'creator' to create a service object, or a service baseclass if nothing is returned")
+    local serv = (creator(plist, "service", parent) or upnp.classes.service(plist))
 
     -- get started parsing...
     local lst = ielement:getFirstChild()
     local vlist, alist = nil, nil
     while lst do
-        local name = string.tolower(lst:getNodeName())
-        if name == "actionlist"            then alist = lst
-        elseif name == "servicestatetable" then vlist = lst
+        local name = string.lower(lst:getNodeName())
+        if name == "actionlist" then
+            alist = lst
+            logger:debug("service:parsefromxml(), found the 'actionlist' element")
+        elseif name == "servicestatetable" then
+            vlist = lst
+            logger:debug("service:parsefromxml(), found the 'servicestatetable' element")
         else
             -- some other element, do nothing
         end
@@ -163,16 +169,19 @@ function service:parsefromxml(xmldoc, creator, parent, plist)
     if vlist then
         success, err = parsevariablelist(vlist, serv)
         if not success then
+            logger:debug("service:parsefromxml(), parsing 'servicestatetable' element failed; %s", tostring(err))
             return nil, "Error parsing serviceStateTable element; " .. tostring(err)
         end
     end
     if alist then
         success, err = parseactionlist(alist, serv)
         if not success then
+            logger:debug("service:parsefromxml(), parsing 'actionlist' element failed; %s", tostring(err))
             return nil, "Error parsing actionList element; " .. tostring(err)
         end
     end
 
+    logger:debug("Leaving service:parsefromxml()...")
     return serv
 end
 

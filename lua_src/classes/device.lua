@@ -14,6 +14,7 @@
 -- @release Version 0.1, LuaxPL framework.
 
 -- set the proper classname here, this should match the filename without the '.lua' extension
+local super = upnp.classes.upnpbase
 local classname = "device"
 
 -----------------
@@ -33,7 +34,7 @@ local classname = "device"
 -- @field evented indicator for the variable to be an evented statevariable
 -- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
 -- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
-local device = upnp.classes.upnpbase:subclass({
+local device = super:subclass({
     devicetype = nil,               -- device type
     --_udn = nil,                      -- device udn (unique device name; UUID)
     parent = nil,                   -- owning UPnP device of this service
@@ -49,7 +50,7 @@ local device = upnp.classes.upnpbase:subclass({
 function device:initialize()
     logger:debug("Initializing class '%s' as '%s' with id '%s'.", classname, tostring(self.friendlyname), tostring(self._udn or self.udn))
     -- initialize ancestor object
-    self.super.initialize(self)
+    super.initialize(self)
     -- set defaults
 
     logger:debug("Initializing class '%s' completed", classname)
@@ -156,7 +157,7 @@ function device:parsefromxml(xmldoc, creator, parent)
     local dev = creator(plist, "device", parent)
     if not dev then
         logger:debug("device:parsefromxml(), 'creator' didn't deliver, now instantiating a generic device base class")
-        dev = upnp.classes.device:new(plist)
+        dev = upnp.classes.device(plist)
     end
     if dev then
         dev.parent = parent
@@ -170,10 +171,13 @@ function device:parsefromxml(xmldoc, creator, parent)
     -- append services
     if dev and slist then
         local s = slist:getFirstChild()
+        local scount = 0
         while s do
             if string.lower(s:getNodeName()) == "service" then
                 -- it is a service element, go create it
                 -- first get a list of properties (from the DEVICE xml)
+                scount = scount + 1
+                logger:debug("device:parsefromxml(), service found; %d", scount)
                 plist = {}   -- reinitialize
                 ielement = s:getFirstChild()
                 while ielement do
@@ -187,27 +191,32 @@ function device:parsefromxml(xmldoc, creator, parent)
                         end
                         if n then   -- store property value
                             plist[name] = n:getNodeValue()
+                            logger:debug("device:parsefromxml(), service element found %s @ %s", name, tostring(plist[name]))
                         end
                         n = nil
                     end
                     ielement = ielement:getNextSibling()
                 end
                 -- basics from the device XML have been collected, now get the service XML
+                logger:debug("device:parsefromxml(), collecting service-xml through 'creator'")
                 local sdoc = creator(plist, "servicexml", dev)
                 if not sdoc then
                     -- nothing was returned, so try construct location from url in device xml
+                    logger:warn("device:parsefromxml(), 'creator' didn't deliver, using scpdurl field as xml location; %s", tostring(plist.scpdurl))
                     sdoc = plist.scpdurl
                 end
                 -- go fetch it
                 sdoc, err = upnp.classes.service:parsefromxml(sdoc, creator, dev, plist)
                 if not sdoc then
                     -- couldn't parse service, so exit
+                    logger:error("device:parsefromxml(), parsing the servicexml failed; %s", tostring(err))
                     dev:setudn(nil) -- remove created device
                     return nil, "Failed parsing a service; " .. tostring(err)
                 end
                 -- add service to device
                 success, err = pcall(dev.addservice, dev, sdoc)
                 if not success then
+                    logger:error("device:parsefromxml(), Failed adding the service to the device; %s", tostring(err))
                     dev:setudn(nil) -- remove created device
                     return nil, "Failed adding parsed service to device; " .. tostring(err)
                 end
@@ -221,14 +230,25 @@ function device:parsefromxml(xmldoc, creator, parent)
     -- append sub-devices
     if dev and dlist then
         local s = dlist:getFirstChild()
+        local dcount = 0
         while s do
             if string.lower(s:getNodeName()) == "device" then
                 -- it is a subdevice element, go create it
+                dcount = dcount + 1
+                logger:debug("device:parsefromxml(), sub-device found; %d", scount)
                 local sd = upnp.classes.device:parsefromxml(s, creator, dev)
                 if not sd then
                     -- couldn't parse device, so exit
+                    logger:error("device:parsefromxml(), parsing the sub-device failed; %s", tostring(err))
                     dev:setudn(nil) -- remove created device
                     return nil, "Failed parsing a sub-device"
+                end
+                -- add sub device to device
+                success, err = pcall(dev.adddevice, dev, sd)
+                if not success then
+                    logger:error("device:parsefromxml(), Failed adding the sub-device to the device; %s", tostring(err))
+                    dev:setudn(nil) -- remove created device
+                    return nil, "Failed adding parsed sub-device to device; " .. tostring(err)
                 end
             end
             s = s:getNextSibling()
@@ -253,7 +273,7 @@ end
 -- <code>parent</code> property will remain unchanged)
 -- @param newudn New udn for the device
 function device:setudn(newudn)
-
+    logger:debug("device:setudn(), setting device udn; %s", tostring(newudn))
     if self._udn then
         -- already set, go clear existing stuff
         if self.parent then
@@ -279,6 +299,7 @@ end
 -- Adds a service to the device.
 -- @param service service object to add
 function device:addservice(service)
+    logger:debug("device:addservice(), adding service")
     assert(type(service) ~= "table", "Expected service table, got nil")
     assert(service.serviceid, "ServiceId not set, can't add to device")
     -- add to list
@@ -292,6 +313,7 @@ end
 -- Adds a sub-device to the device.
 -- @param device device object to add
 function device:adddevice(device)
+    logger:debug("device:adddevice(), adding sub-device")
     assert(type(device) ~= "table", "Expected device table, got nil")
     assert(device._udn, "Sub-device udn (unique device name; UUID) not set, can't add to device")
     -- add to list
@@ -308,12 +330,14 @@ end
 -- in child classes to add specific startup functionality (starting hardware comms for example)
 -- See also <code>upnpbase:start()</code>
 function device:start()
+    logger:debug("entering device:start(), starting device  %s...", tostring(self._udn))
     -- start ancestor object
     self.super.start(self)
     -- start all sub-devices
     for _, dev in pairs(self.devicelist) do
         dev:start()
     end
+    logger:error("leaving device:start()")
 end
 
 -----------------------------------------------------------------------------------------
@@ -323,12 +347,14 @@ end
 -- in child classes to add specific shutdown functionality (stopping hardware comms for example)
 -- See also <code>upnpbase:stop()</code>
 function device:stop()
+    logger:debug("entering device:stop(), stopping device  %s...", tostring(self._udn))
     -- stop all sub-devices
     for _, dev in pairs(self.devicelist) do
         dev:stop()
     end
     -- stop ancestor object
     self.super.stop(self)
+    logger:debug("leaving device:stop()")
 end
 
 return device

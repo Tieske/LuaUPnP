@@ -8,6 +8,16 @@
 
 -- set the proper classname here, this should match the filename without the '.lua' extension
 local classname = "upnpbase"
+local oo = require("loop.simple")
+-----------------------------------------------------------------------------------------
+-- Members of the upnpbase object.
+-- @class table
+-- @name upnpbase fields/properties
+-- @field classname (string) the name of this class, basically the filename without the extension. Required to identify the type
+-- of class, but also to re-create a device from persistence.
+-- @field parent (table/object) the parent object within the UPnP device hierarchy. Only a root device will not have a parent, but will
+-- have a field <code>root</root> set to <code>true</code>.
+local upnpbase = oo.class() --upnp.classes.base:subclass({})
 
 -----------------
 -- LOCAL STUFF --
@@ -41,23 +51,49 @@ end
 -- CLASS IMPLEMENTATION --
 --------------------------
 
+-- called upon instantiation, hidden in upnpbase becuase we don't want everyone tro call teh rawnew() thing
+-- instead do it here, and then  call 'initialize()' as a proper initialization method
+function upnpbase:__init(...)
+    --print ("calling upnpbase init...")
+    ret = oo.rawnew(self, ...)
+    if ret.initialize then
+        ret:initialize()
+    end
+    return ret
+end
 
 -----------------------------------------------------------------------------------------
--- Members of the upnpbase object.
--- @class table
--- @name upnpbase fields/properties
--- @field classname (string) the name of this class, basically the filename without the extension. Required to identify the type
--- of class, but also to re-create a device from persistence.
--- @field parent (table/object) the parent object within the UPnP device hierarchy. Only a root device will not have a parent, but will
--- have a field <code>root</root> set to <code>true</code>.
-local upnpbase = upnp.classes.base:subclass({})
+-- Check whether the object is a subclass of another class
+-- @param super the class to test against
+-- @returns <code>true</code> if the object is a subclass of <code>super</code>
+function upnpbase:subclassof(super)
+    return oo.subclassof(self, super)
+end
+
+-----------------------------------------------------------------------------------------
+-- Returns the superclass of an object.
+-- @returns the super-class of class or <code>nil</code> if class is not a class of the model
+-- or does not define a super class.
+function upnpbase:superclass()
+    return oo.superclass(self)
+end
+
+-----------------------------------------------------------------------------------------
+-- Creates a descendant class in the table provided.
+-- @tbl table with properties to turn into a new object class
+-- @returns object that represent a new class that provides the features defined by table and
+-- that inherits from the class called upon. Changes on the object returned by this function
+-- implies changes reflected on all its instances.
+function upnpbase:subclass(tbl)
+    return oo.class(tbl or {}, self)
+end
 
 -----------------------------------------------------------------------------------------
 -- Initializes the upnpbase object.
 -- Will be called upon instantiation of an object, override this method to set default
 -- values for all properties.
 function upnpbase:initialize()
-    logger:debug("Initializing class '%s' named '%s'...", classname, tostring(self.name))
+    logger:debug("Initializing class '%s'...", classname)
     self.classname = classname
     -- override in child classes
 

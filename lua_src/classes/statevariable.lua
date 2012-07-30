@@ -15,6 +15,7 @@
 
 -- set the proper classname here, this should match the filename without the '.lua' extension
 local classname = "statevariable"
+local super = upnp.classes.upnpbase
 
 -----------------
 -- LOCAL STUFF --
@@ -90,7 +91,7 @@ end
 -- @field sendevents indicator for the variable to be an evented statevariable
 -- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
 -- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
-local statevariable = upnp.classes.upnpbase:subclass({
+local statevariable = super:subclass({
     name = "",                      -- statevariable name
     _datatype = "string",           -- set the datatype
     defaultvalue = "",              -- default value for statevariable
@@ -110,7 +111,7 @@ local statevariable = upnp.classes.upnpbase:subclass({
 function statevariable:initialize()
     logger:debug("Initializing class '%s' named '%s'...", classname, tostring(self.name))
     -- initialize ancestor object
-    self.super.initialize(self)
+    super.initialize(self)
     -- set defaults
     self._value = self.defaultvalue
     logger:debug("Initializing class '%s' completed", classname)

@@ -41,7 +41,7 @@ local lib = require("upnp.core")            -- load UPnP core module (C code)
 logger:debug("Setting up globals and classes")
 upnp = export   -- create a global table
 upnp.classes               = upnp.classes or {}
-upnp.classes.base          = require("upnp.classes.base")
+--upnp.classes.base          = require("upnp.classes.base")
 upnp.classes.upnpbase      = require("upnp.classes.upnpbase")
 upnp.classes.device        = require("upnp.classes.device")
 upnp.classes.service       = require("upnp.classes.service")
