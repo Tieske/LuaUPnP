@@ -34,14 +34,7 @@ local classname = "device"
 -- @field evented indicator for the variable to be an evented statevariable
 -- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
 -- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
-local device = super:subclass({
-    devicetype = nil,               -- device type
-    --_udn = nil,                      -- device udn (unique device name; UUID)
-    parent = nil,                   -- owning UPnP device of this service
-    servicelist = nil,              -- table with services, indexed by serviceid
-    devicelist = nil,               -- table with sub-devices, indexed by udn
-    classname = classname,          -- set object classname
-})
+local device = super:subclass()
 
 -----------------------------------------------------------------------------------------
 -- Initializes the statevariable object.
@@ -52,7 +45,12 @@ function device:initialize()
     -- initialize ancestor object
     super.initialize(self)
     -- set defaults
-
+    --self.devicetype = nil               -- device type
+    --_udn = nil                          -- device udn (unique device name; UUID)
+    self.parent = nil                   -- owning UPnP device of this service
+    self.classname = classname          -- set object classname
+    self.devicelist = {}
+    self.servicelist = {}
     logger:debug("Initializing class '%s' completed", classname)
 end
 
@@ -273,7 +271,7 @@ end
 -- <code>parent</code> property will remain unchanged)
 -- @param newudn New udn for the device
 function device:setudn(newudn)
-    logger:debug("device:setudn(), setting device udn; %s", tostring(newudn))
+    logger:info("device:setudn(), setting device udn; %s", tostring(newudn))
     if self._udn then
         -- already set, go clear existing stuff
         if self.parent then
@@ -299,9 +297,9 @@ end
 -- Adds a service to the device.
 -- @param service service object to add
 function device:addservice(service)
-    logger:debug("device:addservice(), adding service")
-    assert(type(service) ~= "table", "Expected service table, got nil")
+    assert(type(service) == "table", "Expected service table, got nil")
     assert(service.serviceid, "ServiceId not set, can't add to device")
+    logger:info("device:addservice(), adding service; %s", tostring(service.serviceid))
     -- add to list
     self.servicelist = self.servicelist or {}
     self.servicelist[service.serviceid] = service
@@ -314,7 +312,7 @@ end
 -- @param device device object to add
 function device:adddevice(device)
     logger:debug("device:adddevice(), adding sub-device")
-    assert(type(device) ~= "table", "Expected device table, got nil")
+    assert(type(device) == "table", "Expected device table, got nil")
     assert(device._udn, "Sub-device udn (unique device name; UUID) not set, can't add to device")
     -- add to list
     self.devicelist = self.devicelist or {}
@@ -331,13 +329,27 @@ end
 -- See also <code>upnpbase:start()</code>
 function device:start()
     logger:debug("entering device:start(), starting device  %s...", tostring(self._udn))
+    assert(self.handle == nil, "Cannot start device, device handle is already available, stop first.")
     -- start ancestor object
-    self.super.start(self)
+    super.start(self)
+
+    -- register with UPnP lib to go online
+    if not self.parent then
+        -- only start with lib when I'm a root device
+        local err
+        self.handle, err = upnp.startdevice(self)
+        if not self.handle then
+            logger:fatal("device:start(); upnp lib could not start device: %s", tostring(err))
+            copas:exitloop()
+            return
+        end
+    end
+
     -- start all sub-devices
     for _, dev in pairs(self.devicelist) do
         dev:start()
     end
-    logger:error("leaving device:start()")
+    logger:debug("leaving device:start()")
 end
 
 -----------------------------------------------------------------------------------------
@@ -352,8 +364,17 @@ function device:stop()
     for _, dev in pairs(self.devicelist) do
         dev:stop()
     end
+
+    -- unregister
+    if not self.parent then     -- this is a root device
+        local dev = self:gethandle()
+        if dev then
+            upnp.stopdevice(dev)
+        end
+        self.handle = nil   -- erase handle
+    end
     -- stop ancestor object
-    self.super.stop(self)
+    super.stop(self)
     logger:debug("leaving device:stop()")
 end
 

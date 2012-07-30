@@ -34,14 +34,7 @@ local super = upnp.classes.upnpbase
 -- @field evented indicator for the variable to be an evented statevariable
 -- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
 -- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
-local service = super:subclass({
-    servicetype = nil,              -- service type
-    serviceid = nil,                -- service id
-    parent = nil,                   -- owning UPnP device of this service
-    actionlist = nil,               -- table with actions, indexed by name
-    statetable = nil,               -- table with statevariables, indexed by name
-    classname = classname,          -- set object classname
-})
+local service = super:subclass()
 
 -----------------------------------------------------------------------------------------
 -- Initializes the statevariable object.
@@ -52,6 +45,12 @@ function service:initialize()
     -- initialize ancestor object
     super.initialize(self)
     -- set defaults
+    --self.servicetype = nil              -- service type
+    --self.serviceid = nil                -- service id
+    self.parent = nil                   -- owning UPnP device of this service
+    self.actionlist = {}               -- table with actions, indexed by name
+    self.statetable = {}               -- table with statevariables, indexed by name
+    classname = classname          -- set object classname
 
     logger:debug("Initializing class '%s' completed", classname)
 
@@ -66,7 +65,7 @@ local parseactionlist = function(lst, creator, serv)
             -- create action
             local act, err = upnp.classes.action:parsefromxml(elem, creator, serv)
             if not act then
-                return nil, "Failed to add an action; " .. tostring(err)
+                return nil, "Failed to parse an action; " .. tostring(err)
             end
             -- add action to service
             success, err = pcall(serv.addaction, serv, act)
@@ -88,10 +87,10 @@ local parsevariablelist = function(lst, creator, serv)
             -- create statevariable
             local variable, err = upnp.classes.statevariable:parsefromxml(elem, creator, serv)
             if not variable then
-                return nil, "Failed to add a variable; " .. tostring(err)
+                return nil, "Failed to parse a variable; " .. tostring(err)
             end
             -- add variable to service
-            success, err = pcall(serv.addaction, serv, variable)
+            success, err = pcall(serv.addstatevariable, serv, variable)
             if not success then
                 return nil, "Failed to add a parsed variable; " .. tostring(err)
             end
@@ -138,11 +137,7 @@ function service:parsefromxml(xmldoc, creator, parent, plist)
 
     if t == "DOCUMENT_NODE" then
         logger:debug("service:parsefromxml(), looking for 'scpd' element in XML doc")
-        ielement = idoc:getFirstChild()     -- get root element
-        if ielement then ielement = ielement:getFirstChild() end  -- get first content element
-        if not ielement then
-            return nil, "XML document does not contain a 'scpd' element to parse"
-        end
+        ielement = idoc:getFirstChild()     -- get document root element
     end
     -- ielement now contains the 'scpd' element
     -- go create service object
@@ -167,16 +162,16 @@ function service:parsefromxml(xmldoc, creator, parent, plist)
     end
     -- now first parse the variable list, to make sure that action arguments can find the related variables
     if vlist then
-        success, err = parsevariablelist(vlist, serv)
+        success, err = parsevariablelist(vlist, creator, serv)
         if not success then
-            logger:debug("service:parsefromxml(), parsing 'servicestatetable' element failed; %s", tostring(err))
+            logger:error("service:parsefromxml(), parsing 'servicestatetable' element failed; %s", tostring(err))
             return nil, "Error parsing serviceStateTable element; " .. tostring(err)
         end
     end
     if alist then
-        success, err = parseactionlist(alist, serv)
+        success, err = parseactionlist(alist, creator, serv)
         if not success then
-            logger:debug("service:parsefromxml(), parsing 'actionlist' element failed; %s", tostring(err))
+            logger:error("service:parsefromxml(), parsing 'actionlist' element failed; %s", tostring(err))
             return nil, "Error parsing actionList element; " .. tostring(err)
         end
     end
@@ -189,9 +184,10 @@ end
 -- Adds a statevariable to the service statetable.
 -- @param statevar statevariable object to add
 function service:addstatevariable(statevar)
-    assert(type(statevar) ~= "table", "Expected statevariable table, got nil")
+    assert(type(statevar) == "table", "Expected statevariable table, got nil")
     assert(statevar.name, "Statevariable name not set, can't add to service")
     -- add to list
+    logger:info("service:addstatevariable(); adding '%s'", tostring(statevar.name))
     self.statetable = self.statetable or {}
     self.statetable[statevar.name] = statevar
     -- update statevariable
@@ -202,9 +198,10 @@ end
 -- Adds an action to the service actionlist.
 -- @param action action object to add
 function service:addaction(action)
-    assert(type(action) ~= "table", "Expected action table, got nil")
+    assert(type(action) == "table", "Expected action table, got nil")
     assert(action.name, "Action name not set, can't add to service")
     -- add to list
+    logger:info("service:addaction(); adding '%s'", tostring(action.name))
     self.actionlist = self.actionlist or {}
     self.actionlist[action.name] = action
     -- update action

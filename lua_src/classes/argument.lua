@@ -33,14 +33,7 @@ local super = upnp.classes.upnpbase
 -- @field evented indicator for the variable to be an evented statevariable
 -- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
 -- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
-local argument = super:subclass({
-    name = "",                      -- argument name
-    statevariable = nil,            -- related statevariable object
-    direction = "in",               -- in/out going argument, either "in" or "out"
-    position = 0,                   -- position in the actions argument list
-    parent = nil,                   -- owning UPnP action of this argument
-    classname = classname,          -- set object classname
-})
+local argument = super:subclass()
 
 -----------------------------------------------------------------------------------------
 -- Initializes the argument object.
@@ -50,6 +43,12 @@ function argument:initialize()
     logger:debug("Initializing class '%s' named '%s'...", classname, tostring(self.name))
     -- initialize ancestor object
     super.initialize(self)
+    --self.name = ""                      -- argument name
+    --self.statevariable = nil            -- related statevariable object
+    self.direction = self.direction or "in"               -- in/out going argument, either "in" or "out"
+    self.position = self.position or 0                   -- position in the actions argument list
+    self.parent = nil                   -- owning UPnP action of this argument
+    self.classname = classname          -- set object classname
     logger:debug("Initializing class '%s' completed", classname)
 end
 
@@ -68,23 +67,37 @@ function argument:parsefromxml(xmldoc, creator, parent, service)
     local plist = {}    -- property list to create the object from after the properties have been parsed
     local ielement = xmldoc:getFirstChild()
     while ielement do
-        local n = nil
-        n = string.lower(ielement:getNodeName())
-        if n == "retval" then
-            plist[n] = true
+        local name = nil
+        name = string.lower(ielement:getNodeName())
+        if name == "retval" then
+            logger:debug("argument:parsefromxml(): adding '%s' @ 'true'", tostring(name))
+            plist[name] = true
         else
-            plist[n] = ielement:getNodeValue()
+            local n = nil
+            n = ielement:getFirstChild()
+            while n and n:getNodeType() ~= "TEXT_NODE" do
+                n = n:getNextSibling()
+            end
+            if n then   -- store property value
+                local val = n:getNodeValue()
+                logger:debug("argument:parsefromxml(): adding '%s' @ '%s'", tostring(name), tostring(val))
+                plist[name] = val
+            end
         end
+        ielement = ielement:getNextSibling()
     end
     -- check statevariable
     if not plist.relatedstatevariable or not service.statetable[plist.relatedstatevariable] then
+for k,v in pairs(service.statetable) do
+    logger:fatal("%s = %s", tostring(k), tostring(v.name))
+end
         return nil, "Error cannot attach statevariable to parsed argument, statevariable not found; " .. tostring(plist.relatedstatevariable)
     end
     -- attach statevariable
     plist.statevariable = service.statetable[plist.relatedstatevariable]
     plist.relatedstatevariable = nil
     -- go create the object
-    local arg = (creator(plist, "argument", parent) or upnp.classes.argument:new(plist))
+    local arg = (creator(plist, "argument", parent) or upnp.classes.argument(plist))
 
     return arg  -- the parsing action will add it to the parent action
 end

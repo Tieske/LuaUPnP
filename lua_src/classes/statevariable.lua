@@ -91,18 +91,7 @@ end
 -- @field sendevents indicator for the variable to be an evented statevariable
 -- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
 -- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
-local statevariable = super:subclass({
-    name = "",                      -- statevariable name
-    _datatype = "string",           -- set the datatype
-    defaultvalue = "",              -- default value for statevariable
-    sendevents = true,              -- is the variable evented or not
-    parent = nil,                   -- owning UPnP service of this variable
-    allowedvaluelist = nil,         -- set of possible values (set: keys and values are the same!) for UPnP type 'string' only
-    minimum = nil,                  -- numeric values; minimum
-    maximum = nil,                  -- numeric values; maximum
-    step = nil,                     -- stepsize between minimum & maximum
-    classname = classname,          -- set object classname
-})
+local statevariable = super:subclass()
 
 -----------------------------------------------------------------------------------------
 -- Initializes the statevariable object.
@@ -113,13 +102,24 @@ function statevariable:initialize()
     -- initialize ancestor object
     super.initialize(self)
     -- set defaults
-    self._value = self.defaultvalue
+    --self.name = ""                      -- statevariable name
+    self._datatype = self._datatype or "string"           -- set the datatype
+    self.defaultvalue = self.defaultvalue or ""              -- default value for statevariable
+    self.sendevents = self.sendevents or true              -- is the variable evented or not
+    self.parent = nil                   -- owning UPnP service of this variable
+    --self.allowedvaluelist = nil         -- set of possible values (set: keys and values are the same!) for UPnP type 'string' only
+    --self.minimum = nil                  -- numeric values; minimum
+    --self.maximum = nil                  -- numeric values; maximum
+    --self.step = nil                     -- stepsize between minimum & maximum
+    self.classname = classname          -- set object classname
+    self._value = self._value or self.defaultvalue
     logger:debug("Initializing class '%s' completed", classname)
 end
 
 -- Parse the element 'allowedValueList' (in ielement) into propertylist plist
 local parseallowedlist = function(ielement, plist)
     local al = {}
+    logger:debug("Entering statevariable - parseallowedlist()")
     local elem = ielement:getFirstChild()
     while elem do
         if string.lower(elem:getNodeName()) == "allowedvalue" then
@@ -128,13 +128,24 @@ local parseallowedlist = function(ielement, plist)
         end
         elem = elem:getNextSibling()
     end
+    logger:debug(al)
     plist["allowedvaluelist"] = al
 end
 -- Parse the element 'allowedValueRange' (in ielement) into propertylist plist
 local parseallowedrange = function(ielement, plist)
+    logger:debug("Entering statevariable - parseallowedrange()")
     local elem = ielement:getFirstChild()
     while elem do
-        plist[string.tolower(elem:getNodeName())] = elem:getNodeValue()
+        local n = nil
+        n = elem:getFirstChild()
+        while n and n:getNodeType() ~= "TEXT_NODE" do
+            n = n:getNextSibling()
+        end
+        if n then   -- store property value
+            local name, val = string.lower(elem:getNodeName()), n:getNodeValue()
+            logger:debug("Range: adding '%s' @ '%s'", tostring(name), tostring(val))
+            plist[name] = val
+        end
         elem = elem:getNextSibling()
     end
 end
@@ -145,20 +156,31 @@ end
 -- @param parent the parent object for the variable to be created
 -- @returns statevariable object
 function statevariable:parsefromxml(xmldoc, creator, parent)
+    logger:debug("Entering statevariable:parsefromxml()...")
     assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
     creator = creator or function() end -- empty function if not provided
     local plist = {}    -- property list to create the object from after the properties have been parsed
     local ielement = xmldoc:getFirstChild()
     while ielement do
-        local n = nil
-        n = string.lower(ielement:getNodeName())
-        if n == "allowedvaluelist" then
+        local name = nil
+        name = string.lower(ielement:getNodeName())
+        if name == "allowedvaluelist" then
             parseallowedlist(ielement, plist)
-        elseif n == "allowedvaluerange" then
+        elseif name == "allowedvaluerange" then
             parseallowedrange(ielement, plist)
         else
-            plist[n] = ielement:getNodeValue()
+            local n = nil
+            n = ielement:getFirstChild()
+            while n and n:getNodeType() ~= "TEXT_NODE" do
+                n = n:getNextSibling()
+            end
+            if n then   -- store property value
+                local val = n:getNodeValue()
+                logger:debug("statevariable:parsefromxml(): adding '%s' @ '%s'", tostring(name), tostring(val))
+                plist[name] = val
+            end
         end
+        ielement = ielement:getNextSibling()
     end
     -- properly update sendevents value to boolean
     local se = string.lower(plist.sendevents or "yes")  -- defaults to yes according to spec
@@ -168,13 +190,15 @@ function statevariable:parsefromxml(xmldoc, creator, parent)
         plist.sendevents = true
     end
     -- go create the object
-    local var = (creator(plist, "statevariable", parent) or upnp.classes.statevariable:new(plist))
+    logger:debug("statevariable:parsefromxml(), parsing done, now creating object")
+    local var = (creator(plist, "statevariable", parent) or upnp.classes.statevariable(plist))
     -- set defaults and update type
     var._datatype = (var.datatype or "string")
     var.datatype = nil
     var._value = (var.value or var.defaultvalue or "")
     var.value = nil
 
+    logger:debug("Leaving statevariable:parsefromxml()...")
     return var  -- parsing service will add it to the parent service
 end
 

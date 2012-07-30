@@ -33,13 +33,7 @@ local super = upnp.classes.upnpbase
 -- @field evented indicator for the variable to be an evented statevariable
 -- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
 -- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
-local action = super:subclass({
-    name = "",                      -- action name
-    parent = nil,                   -- owning UPnP service of this variable
-    argumentlist = nil,             -- list of arguments, each indexed both by name and number (position)
-    argumentcount = 0,              -- number of arguments
-    classname = classname,          -- set object classname
-})
+local action = super:subclass()
 
 -----------------------------------------------------------------------------------------
 -- Initializes the action object.
@@ -50,6 +44,11 @@ function action:initialize()
     -- initialize ancestor object
     super.initialize(self)
     -- set defaults
+    --self.name = ""                      -- action name
+    self.parent = nil                   -- owning UPnP service of this variable
+    self.argumentlist = {}             -- list of arguments, each indexed both by name and number (position)
+    self.argumentcount = 0              -- number of arguments
+    self.classname = classname          -- set object classname
     logger:debug("Initializing class '%s' completed", classname)
 end
 
@@ -61,7 +60,7 @@ local parseargumentlist = function(alist, creator, parent, service)
     local elem = alist:getFirstChild()
     while elem do
         if string.lower(elem:getNodeName()) == "argument" then
-            arg, err = upnp.classes.argument:parsefromxml(elem, creator, parent)
+            arg, err = upnp.classes.argument:parsefromxml(elem, creator, parent, service)
             if not arg then
                 return nil, "Error parsing an argument from the list; " .. tostring(err)
             end
@@ -82,29 +81,44 @@ end
 -- @param parent the parent object for the action to be created
 -- @returns action object
 function action:parsefromxml(xmldoc, creator, parent)
+    logger:debug("Entering action:parsefromxml()...")
     assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
     creator = creator or function() end -- empty function if not provided
     local plist = {}    -- property list to create the object from after the properties have been parsed
     local alist = nil
     local ielement = xmldoc:getFirstChild()
     while ielement do
-        local n = nil
-        n = string.lower(ielement:getNodeName())
-        if n == "argumentlist" then
+        local name = nil
+        name = string.lower(ielement:getNodeName())
+        if name == "argumentlist" then
             alist = ielement
+            logger:debug("action:parsefromxml(), found 'argumentList' element")
         else
-            plist[n] = ielement:getNodeValue()
+            local n = nil
+            n = ielement:getFirstChild()
+            while n and n:getNodeType() ~= "TEXT_NODE" do
+                n = n:getNextSibling()
+            end
+            if n then   -- store property value
+                local val = n:getNodeValue()
+                logger:debug("action:parsefromxml(): adding '%s' @ '%s'", tostring(name), tostring(val))
+                plist[name] = val
+            end
         end
+        ielement = ielement:getNextSibling()
     end
     -- go create the object
     local act = (creator(plist, "action", parent) or upnp.classes.action:new(plist))
     -- parse the argument list
-    local success
-    success, err = parseargumentlist(alist, creator, act, parent)
-    if not success then
-        return nil, "Failed to parse the action argumentlist; " .. tostring(err)
+    if alist then
+        local success
+        success, err = parseargumentlist(alist, creator, act, parent)
+        if not success then
+            return nil, "Failed to parse the action argumentlist; " .. tostring(err)
+        end
     end
 
+    logger:debug("Leaving statevariable:parsefromxml()...")
     return act  -- the parsing service will add it to the parent service
 end
 
@@ -112,12 +126,14 @@ end
 -- Adds an argument to the actions argument list.
 -- This will append an argument, so adding must be done in proper UPnP order!
 function action:addargument(argument)
-    assert(type(argument) ~= "table", "Expected argument table, got nil")
+    assert(type(argument) == "table", "Expected argument table, got nil")
     assert(argument.direction == "in" or argument.direction == "out", "Direction must be either 'in' or 'out', not; " .. tostring(argument.direction))
-    assert(self.argumentcount > 0 and argument.direction == "in" and
-           self.argumentlist[self.argumentcount] ~= "in", "All 'in' arguments must preceed the 'out' arguments")
+    if self.argumentcount > 0 and argument.direction == "in" then
+        assert(self.argumentlist[self.argumentcount] == "in", "All 'in' arguments must preceed the 'out' arguments")
+    end
     -- increase count
     self.argumentcount = self.argumentcount + 1
+    logger:info("action:addargument(); adding nr %d named '%s'", self.argumentcount, tostring(argument.name))
     -- add to list
     self.argumentlist[self.argumentcount] = argument    -- add on index/position
     self.argumentlist[argument.name] = argument         -- add by name
