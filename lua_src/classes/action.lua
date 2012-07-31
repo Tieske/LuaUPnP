@@ -134,6 +134,10 @@ function action:addargument(argument)
     -- increase count
     self.argumentcount = self.argumentcount + 1
     logger:info("action:addargument(); adding nr %d named '%s'", self.argumentcount, tostring(argument.name))
+
+    -- register original name, switch to lowercase
+    argument._name, argument.name = argument.name, string.lower(argument.name)
+
     -- add to list
     self.argumentlist[self.argumentcount] = argument    -- add on index/position
     self.argumentlist[argument.name] = argument         -- add by name
@@ -144,7 +148,15 @@ end
 
 
 -- Checks parameters, completeness and conversion to Lua values/types
-local function checkparams(params)
+local function checkparams(self, params)
+    -- convert parameters to lowercase for matching
+    local lcase = {}
+    for name, value in pairs(params) do
+        lcase[string.lower(name)] = value
+    end
+    params = lcase
+    lcase = nil
+    -- now check parameters
     if self.argumentcount > 0 then
         local i = 1;
         local p = self.argumentlist[i]
@@ -152,7 +164,7 @@ local function checkparams(params)
             if p.direction ~= "out" then
                 if params[p.name] then
                     local success, val, errstr, errnr = pcall(p.check, p, params[p.name])
-                    if success and val then     -- pcall succeeded and a value was returned
+                    if success and val ~= nil then     -- pcall succeeded and a value was returned
                         params[p.name] = val    -- now converted to Lua type, replace UPnP type
                     else
                         -- failure, report error and exit
@@ -190,7 +202,8 @@ end
 -- the 6xx error codes in the UPnP 1.0 architecture document, section 3.2.2)
 -- @see action:_execute
 function action:execute(params)
-    return nil, "Optional Action Not Implemented; " .. tostring(self.name), 602
+    logger:warning("Action '%s' has not been implemented!", tostring(self._name))
+    return nil, "Optional Action Not Implemented; " .. tostring(self._name), 602
 end
 
 -----------------------------------------------------------------------------------------
@@ -200,23 +213,31 @@ end
 -- @param params table with argument values, indexed by argument name.
 -- @returns 2 lists (names and values) of the 'out' arguments (in proper order), or nil, errormsg, errornumber upon failure
 function action:_execute(params)
-    local result, names, values
-    local result, err, errnr = checkparams(params)
+    logger:info("Entering action:_execute() for action '%s'", tostring(self._name))
+    local names, values, success
+    local result, err, errnr = checkparams(self, params)
     if not result then
         -- parameter check failed
+        logger:error("action:_execute() checking parameters failed; %s", tostring(err))
         return result, err, errnr
+    else
+        -- parameter check succeeded, updated list was returned
+        params = result     -- update local params table
     end
 
     success, result, err, errnr = pcall(self.execute, self, params)
     if not success then
         -- pcall error...
+        logger:error("action:execute() failed (pcall); %s", tostring(result))
         errnr = 501
         err = "Action Failed. Internal error; " .. tostring(result)
         result = nil
+        return nil, err, errnr
     end
-    if not result then
+    if not result and (err ~= nil or errnr ~= nil) then
         -- execution failed
-        return result, err, errnr
+        logger:error("action:execute() failed (returned error); %s", tostring(err))
+        return nil, err, errnr
     end
     -- transform result in 2 lists, names and values
     -- proper order, and UPnP typed values
@@ -225,15 +246,18 @@ function action:_execute(params)
     local i = 1
     for n, arg in ipairs(self._argumentlist or {}) do
         if arg.direction == "out" then
-            names[i] = arg.name
+            names[i] = arg._name    -- use original casing here
             if not result[arg.name] then
-                return nil, "Action Failed; device internal error, argument '" .. tostring(arg.name) .. "' is missing from the results", 501
+                logger:error("action:execute() results are incomplete; '%s' is missing as a return value.", tostring(arg._name))
+                return nil, "Action Failed; device internal error, argument '" .. tostring(arg._name) .. "' is missing from the results", 501
             end
             values[i] = arg.getupnp(result[arg.name])
+            logger:debug("    results: %2d   %s = '%s'", i, tostring(names[i]),tostring(values[i]))
             i = i + 1
         end
     end
 
+    logger:debug("Leaving action:_execute()")
     return names, values
 end
 

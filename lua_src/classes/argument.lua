@@ -87,10 +87,10 @@ function argument:parsefromxml(xmldoc, creator, parent, service)
         ielement = ielement:getNextSibling()
     end
     -- check statevariable
+    if plist.relatedstatevariable then
+        plist.relatedstatevariable = string.lower(plist.relatedstatevariable)
+    end
     if not plist.relatedstatevariable or not service.statetable[plist.relatedstatevariable] then
-for k,v in pairs(service.statetable) do
-    logger:fatal("%s = %s", tostring(k), tostring(v.name))
-end
         return nil, "Error cannot attach statevariable to parsed argument, statevariable not found; " .. tostring(plist.relatedstatevariable)
     end
     -- attach statevariable

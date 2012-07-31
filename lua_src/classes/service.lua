@@ -188,6 +188,10 @@ function service:addstatevariable(statevar)
     assert(statevar.name, "Statevariable name not set, can't add to service")
     -- add to list
     logger:info("service:addstatevariable(); adding '%s'", tostring(statevar.name))
+
+    -- register original name, switch to lowercase
+    statevar._name, statevar.name = statevar.name, string.lower(statevar.name)
+
     self.statetable = self.statetable or {}
     self.statetable[statevar.name] = statevar
     -- update statevariable
@@ -202,6 +206,10 @@ function service:addaction(action)
     assert(action.name, "Action name not set, can't add to service")
     -- add to list
     logger:info("service:addaction(); adding '%s'", tostring(action.name))
+
+    -- register original name, switch to lowercase
+    action._name, action.name = action.name, string.lower(action.name)
+
     self.actionlist = self.actionlist or {}
     self.actionlist[action.name] = action
     -- update action
@@ -215,7 +223,7 @@ end
 -- @returns 2 lists (names and values) of the 'out' arguments (in proper order), or nil, errormsg, errornumber upon failure
 function service:executeaction(actionname, params)
     params = params or {}
-    actionname = tostring(actionname or "")
+    actionname = string.lower(tostring(actionname or ""))
     local action = (self.actionlist or {})[actionname]
     if action then
         -- found, execute it
@@ -234,8 +242,10 @@ function service:getupnpvalues()
     local names = {}
     local values = {}
     for _, v in pairs(self.statetable) do
-        table.insert(names, v.name)
-        table.insert(values, v:getupnp())
+        if v.sendevents then    -- only if evented
+            table.insert(names, v._name)    -- use original casing for name here
+            table.insert(values, v:getupnp())
+        end
     end
     return names, values
 end

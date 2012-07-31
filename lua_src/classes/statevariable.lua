@@ -105,7 +105,8 @@ function statevariable:initialize()
     super.initialize(self)
     -- set defaults
     --self.name = ""                      -- statevariable name
-    self.sendevents = self.sendevents or true              -- is the variable evented or not
+    self.sendevents = self.sendevents or self.sendEvents or true              -- is the variable evented or not
+    self.sendEvents = nil
     self.parent = nil                   -- owning UPnP service of this variable
     --self.allowedvaluelist = nil         -- set of possible values (set: keys and values are the same!) for UPnP type 'string' only
     --self.minimum = nil                  -- numeric values; minimum
@@ -257,7 +258,7 @@ end
 -- use is returning properly formatted results for action arguments during a call)
 -- @returns The statevariable value in UPnP format as a Lua string.
 function statevariable:getupnp(value)
-logger:debug("reporting upnp value for '%s', with internal value '' and provided value ''", tostring(self.name), tostring(self._value), tostring(value))
+    logger:debug("reporting upnp value for '%s', with internal value '%s' and provided value '%s'", tostring(self._name), tostring(self._value), tostring(value))
     value = value or self._value
     local t = (datatypes[self._datatype] or {}).luatype
     if t == "number" then
@@ -325,7 +326,7 @@ function statevariable:check(value)
         end
     elseif t == "boolean" then
         result = boolconversion[value]
-        if not result then
+        if result == nil then   -- check against nil, 'false' is a valid value !
             -- couldn't convert, hence error
             result = nil
             errnr = 600
@@ -409,7 +410,7 @@ function statevariable:set(value, noevent)
         if self.sendevents and not noevent then
             local handle = self:gethandle()
             if handle then
-                handle:Notify(event.DevUDN, event.ServiceID, self.name, newval)
+                handle:Notify(self:getdevice():getudn(), self:getservice().serviceid, self._name, self:getupnp())
             end
         end
         -- call the after handler
