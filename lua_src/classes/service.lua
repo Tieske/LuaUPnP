@@ -240,4 +240,18 @@ function service:getupnpvalues()
     return names, values
 end
 
+-----------------------------------------------------------------------------------------
+-- Clears all the lazy-elements set. Applies to <code>getaction(), getservice(), getdevice(),
+-- getroot(), gethandle()</code> methods.
+-- Override in subclasses to clear tree-structure.
+function service:clearlazyness()
+    super.clearlazyness(self)
+    for _, statevar in pairs(self.statetable or {}) do
+        statevar:clearlazyness()
+    end
+    for _, act in pairs(self.actionlist or {}) do
+        act:clearlazyness()
+    end
+end
+
 return service

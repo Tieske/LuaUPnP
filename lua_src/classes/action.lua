@@ -237,4 +237,15 @@ function action:_execute(params)
     return names, values
 end
 
+-----------------------------------------------------------------------------------------
+-- Clears all the lazy-elements set. Applies to <code>getaction(), getservice(), getdevice(),
+-- getroot(), gethandle()</code> methods.
+-- Override in subclasses to clear tree-structure.
+function action:clearlazyness()
+    super.clearlazyness(self)
+    for _, arg in pairs(self.argumentlist or {}) do
+        arg:clearlazyness()
+    end
+end
+
 return action

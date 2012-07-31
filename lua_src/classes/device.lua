@@ -371,11 +371,26 @@ function device:stop()
         if dev then
             upnp.stopdevice(dev)
         end
-        self.handle = nil   -- erase handle
+        self.handle = nil       -- erase handle
+        self:clearlazyness()    -- handle is gone, so propagate change
     end
     -- stop ancestor object
     super.stop(self)
     logger:debug("leaving device:stop()")
+end
+
+-----------------------------------------------------------------------------------------
+-- Clears all the lazy-elements set. Applies to <code>getaction(), getservice(), getdevice(),
+-- getroot(), gethandle()</code> methods.
+-- Override in subclasses to clear tree-structure.
+function device:clearlazyness()
+    super.clearlazyness(self)
+    for _, dev in pairs(self.devicelist or {}) do
+        dev:clearlazyness()
+    end
+    for _, serv in pairs(self.servicelist or {}) do
+        serv:clearlazyness()
+    end
 end
 
 return device

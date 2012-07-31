@@ -165,7 +165,7 @@ function upnpbase:getroot()
     local function getit()
         r = self:getdevice()
         while r ~= nil do
-            if r.root then      -- found root
+            if r.parent == nil then      -- found root
                 self._root = r
                 return r
             end
@@ -175,6 +175,7 @@ function upnpbase:getroot()
     end
     return self._root or getit()
 end
+
 -----------------------------------------------------------------------------------------
 -- Gets the handle of the owning rootdevice.
 function upnpbase:gethandle()
@@ -188,6 +189,18 @@ function upnpbase:gethandle()
         end
     end
     return self._handle or getit()
+end
+
+-----------------------------------------------------------------------------------------
+-- Clears all the lazy-elements set. Applies to <code>getaction(), getservice(), getdevice(),
+-- getroot(), gethandle()</code> methods.
+-- Override in subclasses to clear tree-structure.
+function upnpbase:clearlazyness()
+    self._handle = nil
+    self._root = nil
+    self._device = nil
+    self._service = nil
+    self._action = nil
 end
 
 -----------------------------------------------------------------------------------------

@@ -17,36 +17,38 @@
 local classname = "statevariable"
 local super = upnp.classes.upnpbase
 
+local date = require("date")
+
 -----------------
 -- LOCAL STUFF --
 -----------------
 
 -- table conversion of upnp types to Lua types
 local datatypes = {
-    ui1             = "number",
-    ui2             = "number",
-    ui4             = "number",
-    i1              = "number",
-    i2              = "number",
-    i4              = "number",
-    int             = "number",
-    r4              = "number",
-    r8              = "number",
-    number          = "number",
-    ["fixed.14.4"]  = "number",
-    float           = "number",
-    char            = "string",
-    ["string"]      = "string",
-    ["date"]        = "date",
-    dateTime        = "date",
-    ["dateTime.tz"]	= "date",
-    ["time"]	    = "date",
-    ["time.tz"]	    = "date",
-    boolean         = "boolean",
-    ["bin.base64"]  = "string",
-    ["bin.hex"]     = "string",
-    uri             = "string",
-    uuid            = "string",
+    ui1             = { luatype = "number", default = "0" },
+    ui2             = { luatype = "number", default = "0" },
+    ui4             = { luatype = "number", default = "0" },
+    i1              = { luatype = "number", default = "0" },
+    i2              = { luatype = "number", default = "0" },
+    i4              = { luatype = "number", default = "0" },
+    int             = { luatype = "number", default = "0" },
+    r4              = { luatype = "number", default = "0" },
+    r8              = { luatype = "number", default = "0" },
+    number          = { luatype = "number", default = "0" },
+    ["fixed.14.4"]  = { luatype = "number", default = "0" },
+    float           = { luatype = "number", default = "0" },
+    char            = { luatype = "string", default = "" },
+    ["string"]      = { luatype = "string", default = "" },
+    ["date"]        = { luatype = "date", default = date() },
+    dateTime        = { luatype = "date", default = date() },
+    ["dateTime.tz"]	= { luatype = "date", default = date() },
+    ["time"]	    = { luatype = "date", default = date() },
+    ["time.tz"]	    = { luatype = "date", default = date() },
+    boolean         = { luatype = "boolean", default = true },
+    ["bin.base64"]  = { luatype = "string", default = "" },
+    ["bin.hex"]     = { luatype = "string", default = "" },
+    uri             = { luatype = "string", default = "" },
+    uuid            = { luatype = "string", default = "" },
 }
 -- sub table for number; the integers
 local integertypes = {
@@ -76,7 +78,7 @@ local boolconversion = {
 
 -- round a number to nearest integer
 local function round(num)
-    math.floor(num + .5)
+    return math.floor(num + .5)
 end
 
 --------------------------
@@ -103,8 +105,6 @@ function statevariable:initialize()
     super.initialize(self)
     -- set defaults
     --self.name = ""                      -- statevariable name
-    self._datatype = self._datatype or "string"           -- set the datatype
-    self.defaultvalue = self.defaultvalue or ""              -- default value for statevariable
     self.sendevents = self.sendevents or true              -- is the variable evented or not
     self.parent = nil                   -- owning UPnP service of this variable
     --self.allowedvaluelist = nil         -- set of possible values (set: keys and values are the same!) for UPnP type 'string' only
@@ -112,7 +112,22 @@ function statevariable:initialize()
     --self.maximum = nil                  -- numeric values; maximum
     --self.step = nil                     -- stepsize between minimum & maximum
     self.classname = classname          -- set object classname
-    self._value = self._value or self.defaultvalue
+    self._datatype = self._datatype or "string"           -- set the datatype
+    if (datatypes[self._datatype]) == nil then
+        -- datatype is unknown, change to string
+        logger:warn("statevariable:initialize(); invalid 'datatype' provided; '%s', switching to 'string'.", tostring(self._datatype))
+        self._datatype = "string"
+    end
+    local val = self:check(self.defaultvalue)
+    if not val then
+        -- defaultvalue is invalid, set the default-default-value
+        logger:warn("statevariable:initialize(); invalid 'defaultvalue' provided; '%s'.", tostring(self.defaultvalue))
+        self.defaultvalue = datatypes[self._datatype].default
+        logger:warn("statevariable:initialize(); switching to default-default-value; '%s'.", tostring(self.defaultvalue))
+    end
+    -- set value, revert to defaults if necessary
+    self._value = self:check(self._value or self.defaultvalue)
+
     logger:debug("Initializing class '%s' completed", classname)
 end
 
@@ -143,11 +158,18 @@ local parseallowedrange = function(ielement, plist)
         end
         if n then   -- store property value
             local name, val = string.lower(elem:getNodeName()), n:getNodeValue()
+            if name == "minimum" or name == "maximum" or name == "step" then
+                val = tonumber(val)
+            end
             logger:debug("Range: adding '%s' @ '%s'", tostring(name), tostring(val))
             plist[name] = val
         end
         elem = elem:getNextSibling()
     end
+    -- sanitize
+    if not plist.minimum then plist.minimum = 0 end
+    if not plist.maximum then plist.maximum = plist.minimum + 100 end
+    if not plist.step then plist.step = 1 end
 end
 -----------------------------------------------------------------------------------------
 -- StateVariable constructor method, creates a new variable, parsed from an XML 'stateVariable' element.
@@ -189,14 +211,12 @@ function statevariable:parsefromxml(xmldoc, creator, parent)
     else
         plist.sendevents = true
     end
+    -- rename some to the internals
+    plist._datatype, plist.datatype = plist.datatype, nil
+    plist._value   , plist.value    = plist.value   , nil
     -- go create the object
     logger:debug("statevariable:parsefromxml(), parsing done, now creating object")
     local var = (creator(plist, "statevariable", parent) or upnp.classes.statevariable(plist))
-    -- set defaults and update type
-    var._datatype = (var.datatype or "string")
-    var.datatype = nil
-    var._value = (var.value or var.defaultvalue or "")
-    var.value = nil
 
     logger:debug("Leaving statevariable:parsefromxml()...")
     return var  -- parsing service will add it to the parent service
@@ -237,8 +257,9 @@ end
 -- use is returning properly formatted results for action arguments during a call)
 -- @returns The statevariable value in UPnP format as a Lua string.
 function statevariable:getupnp(value)
+logger:debug("reporting upnp value for '%s', with internal value '' and provided value ''", tostring(self.name), tostring(self._value), tostring(value))
     value = value or self._value
-    local t = datatypes[self._datatype]
+    local t = (datatypes[self._datatype] or {}).luatype
     if t == "number" then
         return tostring(value)
     elseif t == "string" then
@@ -262,8 +283,10 @@ end
 -- @returns error string, if failure
 -- @returns error number, if failure
 function statevariable:check(value)
-    assert(value ~= nil, "nil is not a valid value")
-    local t = datatypes[self._datatype]
+    if value == nil then
+        return nil, "Argument Value Out of Range; 'nil' is not a valid value", 601
+    end
+    local t = (datatypes[self._datatype] or {}).luatype
     local result, errnr, errstr
 
     if t == "number" then
@@ -329,8 +352,11 @@ function statevariable:check(value)
         end
     else
         -- unknown type
-        error("Unknown type; " .. tostring(t))
+        result = nil
+        errstr = "Argument Value Invalid, statevariable internally uses an unknown type; " .. tostring(self._datatype)
+        errnr = 600
     end
+    return result, errstr, errnr
 end
 
 -----------------------------------------------------------------------------------------
@@ -365,17 +391,17 @@ function statevariable:set(value, noevent)
     -- check provided values
     local newval, errstr, errnr = self:check(value)
     if newval == nil then
-        return newval, errstr, errnr
+        return nil, errstr, errnr
     end
     -- call before handler
     newval, errstr, errnr = self:beforeset(newval)
     if newval == nil then
-        return newval, errstr, errnr
+        return nil, errstr, errnr
     end
 
     if self._value ~= newval then
         local oldval = self._value
-        if datatypes[self._datatype] == "date" then
+        if (datatypes[self._datatype] or {}).luatype == "date" then
             -- always create a new date table/object to prevent unintended changes
             newval = newval:copy()
         end

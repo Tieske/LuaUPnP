@@ -142,17 +142,26 @@ EventTypeHandlers = {
         if event.Event == "UPNP_EVENT_SUBSCRIPTION_REQUEST" then
             -- simply accept everything
             local device = upnp.devices[event.UDN or ""]
-            local service = (device.servicelist or {})[event.ServiceID]
-            if service then
-                wt:setresult(device, service:getupnpvalues())   -- getupnpvalues returns 2 tables!!
-                print()
-                print("Added a subscription for service:", event.ServiceID)
-                print()
-            else
-                print()
-                print("Invalid subscription request for service:", event.ServiceID)
-                print()
+            if not device then
+                logger:error("Invalid subscription request, have no device with id '%s'", tostring(event.UDN))
+                return
             end
+            local service = (device.servicelist or {})[event.ServiceID]
+            if not service then
+                logger:error("Invalid subscription request, have no service with id '%s' for device '%s'", tostring(event.ServiceID), tostring(event.UDN))
+                return
+            end
+            local hdl = device:gethandle()
+            if not hdl then
+                logger:error("Error handling subscription request, device '%s' has no valid handle (bug??)", tostring(event.UDN))
+                return
+            end
+            local names, values = service:getupnpvalues()
+            wt:setresult(device:gethandle(), names, values)   -- getupnpvalues returns 2 tables!!
+            logger:info("Subscription accepted, for service '%s' @ device '%s'", tostring(event.ServiceID), tostring(event.UDN))
+            logger:debug("send the following statevariable list (names and values)")
+            logger:debug(names)
+            logger:debug(values)
         elseif event.Event == "UPNP_CONTROL_ACTION_REQUEST" then
             -- lookup device and service
             local device = upnp.devices[event.UDN or ""]
@@ -260,7 +269,6 @@ end
 -- @returns handle to the newly registered device
 function export.startdevice(rootdev)
     logger:debug("Entering upnp.startdevice()...")
-print(type(rootdev), rootdev.classname, rootdev.parent)
     if type(rootdev) ~= "table" or
        rootdev.classname ~= "device" or
        rootdev.parent ~= nil then
