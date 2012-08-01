@@ -111,7 +111,7 @@ function action:parsefromxml(xmldoc, creator, parent)
     local act = (creator(plist, "action", parent) or upnp.classes.action:new(plist))
     -- parse the argument list
     if alist then
-        local success
+        local success, err
         success, err = parseargumentlist(alist, creator, act, parent)
         if not success then
             return nil, "Failed to parse the action argumentlist; " .. tostring(err)
@@ -244,7 +244,7 @@ function action:_execute(params)
     names = {}
     values = {}
     local i = 1
-    for n, arg in ipairs(self._argumentlist or {}) do
+    for _, arg in ipairs(self._argumentlist or {}) do
         if arg.direction == "out" then
             names[i] = arg._name    -- use original casing here
             if not result[arg.name] then

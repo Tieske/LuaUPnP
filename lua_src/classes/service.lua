@@ -116,7 +116,6 @@ function service:parsefromxml(xmldoc, creator, parent, plist)
 
     logger:debug("Entering service:parsefromxml()...")
 
-    local xml = upnp.lib.ixml
     local success, idoc, ielement, err
 
     idoc, err = upnp.getxml(xmldoc)

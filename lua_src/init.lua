@@ -14,7 +14,7 @@ local oldprint = print
 function print(...)
     local arg = {n=select('#',...),...}
     local i = 1
-    result = ""
+    local result = ""
     while i <= arg.n do
         if i == 1 then
             result = tostring(arg[i])
@@ -308,7 +308,7 @@ end
 function export.getxml(xmldoc)
     logger:debug("Entering upnp.getxml(); %s", tostring(xmldoc))
     local xml = upnp.lib.ixml
-    local success, idoc, ielement, err
+    local success, idoc, err
     if type(xmldoc)=="string" then
         -- parse as an xml buffer (literal xml string)
         idoc, err = xml.ParseBuffer(xmldoc)

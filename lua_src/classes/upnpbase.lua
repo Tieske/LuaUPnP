@@ -55,7 +55,7 @@ end
 -- instead do it here, and then  call 'initialize()' as a proper initialization method
 function upnpbase:__init(...)
     --print ("calling upnpbase init...")
-    ret = oo.rawnew(self, ...)
+    local ret = oo.rawnew(self, ...)
     if ret.initialize then
         ret:initialize()
     end
@@ -163,7 +163,7 @@ end
 -- Gets the owning rootdevice.
 function upnpbase:getroot()
     local function getit()
-        r = self:getdevice()
+        local r = self:getdevice()
         while r ~= nil do
             if r.parent == nil then      -- found root
                 self._root = r

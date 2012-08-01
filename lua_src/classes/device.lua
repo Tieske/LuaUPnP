@@ -135,7 +135,7 @@ function device:parsefromxml(xmldoc, creator, parent)
                 logger:debug("device:parsefromxml(), found 'devicelist' element")
                 dlist = ielement
             else
-                local value, n = nil, nil
+                local n = nil
                 n = ielement:getFirstChild()
                 while n and n:getNodeType() ~= "TEXT_NODE" do
                     n = n:getNextSibling()
@@ -182,7 +182,7 @@ function device:parsefromxml(xmldoc, creator, parent)
                     local name = string.lower(ielement:getNodeName())
 
                     if ielement:getNodeType() == "ELEMENT_NODE" then
-                        local value, n = nil, nil
+                        local n = nil
                         n = ielement:getFirstChild()
                         while n and n:getNodeType() ~= "TEXT_NODE" do
                             n:getNextSibling()
@@ -233,7 +233,7 @@ function device:parsefromxml(xmldoc, creator, parent)
             if string.lower(s:getNodeName()) == "device" then
                 -- it is a subdevice element, go create it
                 dcount = dcount + 1
-                logger:debug("device:parsefromxml(), sub-device found; %d", scount)
+                logger:debug("device:parsefromxml(), sub-device found; %d", dcount)
                 local sd = upnp.classes.device:parsefromxml(s, creator, dev)
                 if not sd then
                     -- couldn't parse device, so exit

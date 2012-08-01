@@ -81,6 +81,13 @@ local function round(num)
     return math.floor(num + .5)
 end
 
+-- check a date to be a proper date library date-object
+local dtmt = getmetatable(date())   -- get the date object metatable
+local isdate = function(td)
+    -- return true if it is a table, AND has the same metatable
+    return type(td) == "table" and getmetatable(td) == dtmt
+end
+
 --------------------------
 -- CLASS IMPLEMENTATION --
 --------------------------
@@ -187,6 +194,7 @@ function statevariable:parsefromxml(xmldoc, creator, parent)
     while ielement do
         local name = nil
         name = string.lower(ielement:getNodeName())
+-- TODO: must parse attributes also, for sendEvents attribute
         if name == "allowedvaluelist" then
             parseallowedlist(ielement, plist)
         elseif name == "allowedvaluerange" then
@@ -336,10 +344,10 @@ function statevariable:check(value)
         if isdate(value) then
             -- we got a date object
             result = value
-        elseif type(value) == "string" then
-            -- we a string to parse, so construct a date
-            local success, res = pcall(date.__call, date, value)
-            if success then
+        elseif type(value) == "string" or type(value) == "table" then
+            -- we got a string to parse, so construct a date
+            local success, res = pcall(date.__call, value)
+            if success and res ~= nil then
                 result = res
             else
                 result = nil
