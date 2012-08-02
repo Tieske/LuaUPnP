@@ -132,26 +132,25 @@ static void pushLuaNodeList(lua_State *L, IXML_NodeList *list)
 static void pushLuaNodeNamedMap(lua_State *L, IXML_NamedNodeMap *nnmap)
 {
 	unsigned long l = 0;	// length of list
-	//unsigned long c;		// counter
-	if (nnmap != NULL) 
-		l = ixmlNamedNodeMap_getLength(nnmap);
-	if (l > 0)
+	unsigned long c = 1;		// counter
+	if (nnmap == NULL) 
 	{
-		lua_checkstack(L, 2);
-		// TODO: fix this for the nodenamedmap
-/*		lua_createtable(L,l,0);
-		for (c = 0; c <= (l - 1); c = c + 1) 
-		{
-			lua_pushinteger(L, c + 1);
-			pushLuaNode(L, ixmlNodeList_item(list, c));
-			lua_settable(L, -2);
-		}
-*/	}
-	else
-	{
-		// Empty list, deliver a nil
 		lua_checkstack(L, 1);
 		lua_pushnil(L);
+	}
+	else
+	{
+		l = ixmlNamedNodeMap_getLength(nnmap);
+		lua_createtable(L,l,0);
+		lua_pushinteger(L,l);
+		lua_setfield(L,-2, "n");	// set length field in table
+		while (c <= l)
+		{
+			lua_pushinteger(L, c);
+			pushLuaNode(L, ixmlNamedNodeMap_item(nnmap, c - 1));
+			lua_settable(L, -3);
+			c = c + 1;
+		}
 	}
 }
 
