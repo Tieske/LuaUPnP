@@ -61,19 +61,20 @@ local integertypes = {
     int             = "number",
 }
 -- boolean conversion;
+-- do not do an actual conversion to a Lua boolean becasue of error checking nil/false are both false
 local boolconversion = {
     -- trues
-    ["true"]  = true,
-    ["yes"]   = true,
-    ["1"]     = true,
-    [1]       = true,
-    [true]    = true,
+    ["true"]  = 1,
+    ["yes"]   = 1,
+    ["1"]     = 1,
+    [1]       = 1,
+    [true]    = 1,
     -- falses
-    ["false"] = false,
-    ["no"]    = false,
-    ["0"]     = false,
-    [0]       = false,
-    [false]   = false,
+    ["false"] = 0,
+    ["no"]    = 0,
+    ["0"]     = 0,
+    [0]       = 0,
+    [false]   = 0,
 }
 
 -- round a number to nearest integer
@@ -112,8 +113,17 @@ function statevariable:initialize()
     super.initialize(self)
     -- set defaults
     --self.name = ""                      -- statevariable name
-    self.sendevents = self.sendevents or self.sendEvents or true              -- is the variable evented or not
+    local evt
+    evt = boolconversion[self.sendEvents or ""]
+    if evt == nil then
+        evt = boolconversion[self.sendevents or ""]
+        if evt == nil then
+            evt = 1
+        end
+    end
+    self.sendevents = (evt == 1)        -- is the variable evented or not, make it a Lua boolean
     self.sendEvents = nil
+
     self.parent = nil                   -- owning UPnP service of this variable
     --self.allowedvaluelist = nil         -- set of possible values (set: keys and values are the same!) for UPnP type 'string' only
     --self.minimum = nil                  -- numeric values; minimum
@@ -190,11 +200,16 @@ function statevariable:parsefromxml(xmldoc, creator, parent)
     assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
     creator = creator or function() end -- empty function if not provided
     local plist = {}    -- property list to create the object from after the properties have been parsed
+    -- must parse attributes also, for sendEvents attribute
+    local attribs = xmldoc:getAttributes()
+    for _,v in ipairs(attribs) do
+        plist[v:getNodeName()] = v:getNodeValue()
+    end
+    -- Now parse child elements
     local ielement = xmldoc:getFirstChild()
     while ielement do
         local name = nil
         name = string.lower(ielement:getNodeName())
--- TODO: must parse attributes also, for sendEvents attribute
         if name == "allowedvaluelist" then
             parseallowedlist(ielement, plist)
         elseif name == "allowedvaluerange" then
@@ -274,7 +289,7 @@ function statevariable:getupnp(value)
     elseif t == "string" then
         return tostring(value)
     elseif t == "boolean" then
-        if value then return "1" else return "0" end
+        return tostring(value)
     elseif t == "date" then
 -- TODO to be done
         return tostring(value)
@@ -334,7 +349,7 @@ function statevariable:check(value)
         end
     elseif t == "boolean" then
         result = boolconversion[value]
-        if result == nil then   -- check against nil, 'false' is a valid value !
+        if not result then
             -- couldn't convert, hence error
             result = nil
             errnr = 600
@@ -399,12 +414,12 @@ end
 function statevariable:set(value, noevent)
     -- check provided values
     local newval, errstr, errnr = self:check(value)
-    if newval == nil then
+    if not newval then
         return nil, errstr, errnr
     end
     -- call before handler
     newval, errstr, errnr = self:beforeset(newval)
-    if newval == nil then
+    if not newval then
         return nil, errstr, errnr
     end
 

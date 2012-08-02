@@ -244,15 +244,15 @@ function action:_execute(params)
     names = {}
     values = {}
     local i = 1
-    for _, arg in ipairs(self._argumentlist or {}) do
+    for _, arg in ipairs(self.argumentlist or {}) do
         if arg.direction == "out" then
             names[i] = arg._name    -- use original casing here
             if not result[arg.name] then
                 logger:error("action:execute() results are incomplete; '%s' is missing as a return value.", tostring(arg._name))
                 return nil, "Action Failed; device internal error, argument '" .. tostring(arg._name) .. "' is missing from the results", 501
             end
-            values[i] = arg.getupnp(result[arg.name])
-            logger:debug("    results: %2d   %s = '%s'", i, tostring(names[i]),tostring(values[i]))
+            values[i] = arg:getupnp(result[arg.name])
+            logger:info("    results: %2d   %s = '%s'", i, tostring(names[i]),tostring(values[i]))
             i = i + 1
         end
     end
