@@ -1,17 +1,9 @@
 ---------------------------------------------------------------------
--- The base object for xPL devices. It features all the main characteristics
--- of the xPL devices, so only user code needs to be added. Starting, stopping,
--- regular heartbeats, configuration has all been implemented in this base class.<br/>
--- <br/>No global will be created, it just returns the xpldevice base class. The main
--- xPL module will create a global <code>xpl.classes.xpldevice</code> to access it.<br/>
--- <br/>You can create a new device from; <code>xpl.classes.xpldevice:new( {} )</code>,
--- but it is probably best to use the
--- <a href="../files/src/xpl/new_device_template.html">new_device_template.lua</a>
--- file as an example on how to use the <code>xpldevice</code> class
+-- The base object for UPnP Action arguments.
 -- @class module
--- @name xpldevice
--- @copyright 2011 Thijs Schreijer
--- @release Version 0.1, LuaxPL framework.
+-- @name upnp.argument
+-- @copyright 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>
+-- @release Version 0.1, LuaUPnP
 
 -- set the proper classname here, this should match the filename without the '.lua' extension
 local classname = "argument"
@@ -28,11 +20,12 @@ local super = upnp.classes.upnpbase
 -----------------------------------------------------------------------------------------
 -- Members of the statevariable object
 -- @class table
--- @name statevariable fields/properties
--- @field name name of the statevariable
--- @field evented indicator for the variable to be an evented statevariable
--- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
--- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
+-- @name Argument fields/properties
+-- @field name name of the argument
+-- @field parent the owning action object
+-- @field direction of the argument either <code>'in'</code> or <code>'out'</code>
+-- @field statevariable the related statevariable object
+-- @field position position on the argument list of the owning action
 local argument = super:subclass()
 
 -----------------------------------------------------------------------------------------
@@ -56,11 +49,11 @@ end
 -- Argument constructor method, creates a new argument, parsed from an XML 'argument' element.
 -- @param xmldoc an IXML object containing the 'argument' element
 -- @param creator callback function to create individual sub objects
--- @param parent the parent object for the argument to be created
+-- @param parent the parent action object for the argument to be created
 -- @param service the service to attach to. Required because the parent relationships in the
 -- hierarchy haven't been set yet while parsing and the argument needs to access the statevariable
 -- list to check whether the related statevariable actually exists
--- @returns argument object
+-- @returns argument object or <code>nil + error message</code>
 function argument:parsefromxml(xmldoc, creator, parent, service)
     assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
     creator = creator or function() end -- empty function if not provided
@@ -116,10 +109,10 @@ end
 
 -----------------------------------------------------------------------------------------
 -- Check a value against the arguments related statevariable.
--- will coerce booleans and numbers, including min/max/step values.  Only
+-- This will coerce booleans and numbers, including min/max/step values. Only
 -- values not convertable will return an error.
 -- @param value the argument value
--- @returns value (in corresponding lua type) on success, nil on failure
+-- @returns value (in corresponding lua type) on success, <code>nil</code> on failure
 -- @returns error string, if failure
 -- @returns error number, if failure
 function argument:check(value)

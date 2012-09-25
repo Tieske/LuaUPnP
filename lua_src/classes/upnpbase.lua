@@ -1,10 +1,10 @@
 ---------------------------------------------------------------------
--- The base object for UPnP objects. This object provides hierarchy traversal,
--- through lazy-loading.
+-- The base object for UPnP objects. This object provides hierarchy traversal 
+-- and starting/stopping devices through eventhandlers
 -- @class module
--- @name upnpbase
--- @copyright 2012 Thijs Schreijer
--- @release Version 0.1, Lua UPnP framework.
+-- @name upnp.upnpbase
+-- @copyright 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>
+-- @release Version 0.1, LuaUPnP
 
 -- set the proper classname here, this should match the filename without the '.lua' extension
 local classname = "upnpbase"
@@ -14,9 +14,9 @@ local oo = require("loop.simple")
 -- @class table
 -- @name upnpbase fields/properties
 -- @field classname (string) the name of this class, basically the filename without the extension. Required to identify the type
--- of class, but also to re-create a device from persistence.
+-- of class, but also to re-create a device from persistence.  ????? check this!!
 -- @field parent (table/object) the parent object within the UPnP device hierarchy. Only a root device will not have a parent, but will
--- have a field <code>root</root> set to <code>true</code>.
+-- have a field <code>root</code> set to <code>true</code>.
 local upnpbase = oo.class() --upnp.classes.base:subclass({})
 
 -----------------
@@ -51,7 +51,7 @@ end
 -- CLASS IMPLEMENTATION --
 --------------------------
 
--- called upon instantiation, hidden in upnpbase becuase we don't want everyone tro call teh rawnew() thing
+-- called upon instantiation, hidden in upnpbase because we don't want everyone to call the rawnew() thing
 -- instead do it here, and then  call 'initialize()' as a proper initialization method
 function upnpbase:__init(...)
     --print ("calling upnpbase init...")

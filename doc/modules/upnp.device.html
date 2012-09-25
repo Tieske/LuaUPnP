@@ -1,0 +1,441 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>upnp.device: Module Index</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+	<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h1>LuaDoc</h1>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h1>Modules</h1>
+<ul>
+
+	<li>
+		<a href="../modules/upnp.html">upnp</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.action.html">upnp.action</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.argument.html">upnp.argument</a>
+	</li>
+
+	<li><strong>upnp.device</strong></li>
+	
+	<li>
+		<a href="../modules/upnp.service.html">upnp.service</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.statevariable.html">upnp.statevariable</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.upnpbase.html">upnp.upnpbase</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module <code>upnp.device</code></h1>
+
+<p>The base object for UPnP actions.</p>
+
+
+<p>Copyright&copy; 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a></p>
+
+
+<p><small><b>Release:</b> Version 0.1, LuaUPnP</small></p>
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+	<tr>
+	<td class="name" nowrap><a href="#creator">creator</a>&nbsp;(plist, classname, parent)</td>
+	<td class="summary">Description of the "creator" callback function as it has to be provided to <code>device:parsefromxml()</code>.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#device:adddevice">device:adddevice</a>&nbsp;(device)</td>
+	<td class="summary">Adds a sub-device to the device.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#device:addservice">device:addservice</a>&nbsp;(service)</td>
+	<td class="summary">Adds a service to the device.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#device:getudn">device:getudn</a>&nbsp;()</td>
+	<td class="summary">Gets the udn (unique device name; UUID) of the device.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#device:initialize">device:initialize</a>&nbsp;()</td>
+	<td class="summary">Initializes the device object.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#device:parsefromxml">device:parsefromxml</a>&nbsp;(xmldoc, creator, parent)</td>
+	<td class="summary">Device constructor method, creates a new device, parsed from a device xml.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#device:setudn">device:setudn</a>&nbsp;(newudn)</td>
+	<td class="summary">Sets the udn (unique device name; UUID) of the device.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#device:start">device:start</a>&nbsp;()</td>
+	<td class="summary">Startup handler.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#device:stop">device:stop</a>&nbsp;()</td>
+	<td class="summary">Shutdown handler.</td>
+	</tr>
+
+</table>
+
+
+
+
+<h2>Tables</h2>
+<table class="table_list">
+
+	<tr>
+	<td class="name" nowrap><a href="#statevariable fields/properties">statevariable fields/properties</a></td>
+	<td class="summary">Members of the statevariable object </td>
+	</tr>
+
+</table>
+
+
+
+<br/>
+<br/>
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="creator"></a><strong>creator</strong>&nbsp;(plist, classname, parent)</dt>
+<dd>
+Description of the "creator" callback function as it has to be provided to <code>device:parsefromxml()</code>. This function allows to create the device object hierarchy with custom objects, implementing the required device behaviour. The most common case being to override the <code>action:execute(params)</code> method.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>plist</em></code>: list of named properties as parsed from the xml, eg. a device could expect a key-value pair <code>friendlyname = "name as specified in xml"</code>. NOTE: all keys have been converted to lowercase!!
+	</li>
+	
+	<li>
+	  <code><em>classname</em></code>: the type of object (or descendant of that type) to be created, this will be any of the following; <code>"device", "service", "statevariable", "action", "argument",</code> or <code>"servicexml"</code>.
+	</li>
+	
+	<li>
+	  <code><em>parent</em></code>: The parent object to which the requested object will be added. The parent property on the created object will be set afterwards, no need to set it here.
+	</li>
+	
+</ul>
+
+
+
+
+
+
+<h3>Return value:</h3>
+<ul>object type as requested, to be created by calling <code>objectbaseclass:new(plist)</code>, which will instantiate a new class and set the properties from plist accordingly. EXCEPTION: if class <code>servicexml</code> is requested, a string with the service xml should be returned, the string should be parseable by the <code>upnp.getxml()</code> function. If <code>nil</code> is returned, then a standard baseclass of the requested type will be instatiated. If <code>"servicexml"</code> was requested, and <code>nil</code> is returned, an attempt will be made to combine the <code>upnp.webroot</code> value with the <code>SCPDURL</code> element from the device description to locate the xml.</ul>
+
+
+
+</dd>
+
+
+
+
+<dt><a name="device:adddevice"></a><strong>device:adddevice</strong>&nbsp;(device)</dt>
+<dd>
+Adds a sub-device to the device.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>device</em></code>: device object to add
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="device:addservice"></a><strong>device:addservice</strong>&nbsp;(service)</dt>
+<dd>
+Adds a service to the device.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>service</em></code>: service object to add
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="device:getudn"></a><strong>device:getudn</strong>&nbsp;()</dt>
+<dd>
+Gets the udn (unique device name; UUID) of the device.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="device:initialize"></a><strong>device:initialize</strong>&nbsp;()</dt>
+<dd>
+Initializes the device object. Will be called upon instantiation of an object, override this method to set default values for all properties.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="device:parsefromxml"></a><strong>device:parsefromxml</strong>&nbsp;(xmldoc, creator, parent)</dt>
+<dd>
+Device constructor method, creates a new device, parsed from a device xml. The device object will be created, including all services and sub devices.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>xmldoc</em></code>: XML document from which a device is to be parsed, this can be either 1) a string value containing the xml, 2) a string value containing the filename of the xml 3) an IXML object containing the 'device' element
+	</li>
+	
+	<li>
+	  <code><em>creator</em></code>: callback function to create individual sub objects
+	</li>
+	
+	<li>
+	  <code><em>parent</em></code>: the parent object for the device to be created (or <code>nil</code> if a root device)
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+<h3>See also:</h3>
+<ul>
+	
+	<!-- <li><a href="#../modules/upnp.device.html#creatorcreator"> -->
+	<li><a href="#creator">
+		creator</li>
+	</a>
+	
+</ul>
+
+</dd>
+
+
+
+
+<dt><a name="device:setudn"></a><strong>device:setudn</strong>&nbsp;(newudn)</dt>
+<dd>
+Sets the udn (unique device name; UUID) of the device. Adds the device to the global device list. Set it to <code>nil</code> to remove it from the global list and parent object (its own <code>parent</code> property will remain unchanged)
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>newudn</em></code>: New udn for the device
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="device:start"></a><strong>device:start</strong>&nbsp;()</dt>
+<dd>
+Startup handler. Called by <code>upnpbase</code> ancestor object for the event <code>upnp.events.UPnPstarted</code> (event through the Copas Timer eventer mechanism) When called it will call the <code>start()</code> method on all sub-devices. Override in child classes to add specific startup functionality (starting hardware comms for example) See also <code>upnpbase:start()</code>
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="device:stop"></a><strong>device:stop</strong>&nbsp;()</dt>
+<dd>
+Shutdown handler. Called by <code>upnpbase</code> ancestor object for the event <code>upnp.events.UPnPstopping</code> (event through the Copas Timer eventer mechanism) When called it will call the <code>stop()</code> method on all sub-devices. Override in child classes to add specific shutdown functionality (stopping hardware comms for example) See also <code>upnpbase:stop()</code>
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+</dl>
+
+
+
+
+<h2><a name="tables"></a>Tables</h2>
+<dl class="table">
+
+<dt><a name="statevariable fields/properties"></a><strong>statevariable fields/properties</strong></dt>
+<dd>Members of the statevariable object
+
+
+<h3>Fields</h3>
+<ul>
+	
+	<li>
+	  _udn: device udn (unique device name; UUID). Do not access directly, use <code>device:getudn(), device:setudn()</code>
+	</li>
+	
+	<li>
+	  parent: owning device, or <code>nil</code> if it is a root device
+	</li>
+	
+	<li>
+	  devicelist: list of sub-devices, ordered by their UDN
+	</li>
+	
+	<li>
+	  servicelist: list of services, ordered by their serviceid
+	</li>
+	
+</ul>
+
+
+</dd>
+
+
+</dl>
+
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+	<p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->	
+</body>
+</html>

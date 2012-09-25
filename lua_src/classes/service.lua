@@ -9,9 +9,9 @@
 -- <a href="../files/src/xpl/new_device_template.html">new_device_template.lua</a>
 -- file as an example on how to use the <code>xpldevice</code> class
 -- @class module
--- @name xpldevice
--- @copyright 2011 Thijs Schreijer
--- @release Version 0.1, LuaxPL framework.
+-- @name upnp.service
+-- @copyright 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>
+-- @release Version 0.1, LuaUPnP
 
 -- set the proper classname here, this should match the filename without the '.lua' extension
 local classname = "service"

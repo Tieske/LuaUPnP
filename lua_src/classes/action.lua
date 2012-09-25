@@ -1,17 +1,9 @@
 ---------------------------------------------------------------------
--- The base object for xPL devices. It features all the main characteristics
--- of the xPL devices, so only user code needs to be added. Starting, stopping,
--- regular heartbeats, configuration has all been implemented in this base class.<br/>
--- <br/>No global will be created, it just returns the xpldevice base class. The main
--- xPL module will create a global <code>xpl.classes.xpldevice</code> to access it.<br/>
--- <br/>You can create a new device from; <code>xpl.classes.xpldevice:new( {} )</code>,
--- but it is probably best to use the
--- <a href="../files/src/xpl/new_device_template.html">new_device_template.lua</a>
--- file as an example on how to use the <code>xpldevice</code> class
+-- The base object for UPnP actions.
 -- @class module
--- @name xpldevice
--- @copyright 2011 Thijs Schreijer
--- @release Version 0.1, LuaxPL framework.
+-- @name upnp.action
+-- @copyright 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>
+-- @release Version 0.1, LuaUPnP
 
 -- set the proper classname here, this should match the filename without the '.lua' extension
 local classname = "action"
@@ -28,11 +20,11 @@ local super = upnp.classes.upnpbase
 -----------------------------------------------------------------------------------------
 -- Members of the action object
 -- @class table
--- @name action fields/properties
+-- @name Action fields/properties
 -- @field name name of the action
--- @field evented indicator for the variable to be an evented statevariable
--- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
--- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
+-- @field parent the owning upnpservice object
+-- @field argumentlist list with arguments, indexed both by name and number (order in the list)
+-- @field argumentcount number of arguments for the action
 local action = super:subclass()
 
 -----------------------------------------------------------------------------------------
@@ -52,9 +44,16 @@ function action:initialize()
     logger:debug("Initializing class '%s' completed", classname)
 end
 
+--------------------------------------------------------------------------------------------------------
 -- Parse an IXML 'argumentList' element (alist) in the parent (action object), while using 'creator' to generate objects
 -- service = parent service, because the 'parent' relations ships haven't been set yet and the argument creation needs
 -- the variablelist to check if the related statevariable exists
+-- @param alist ixml object holding the argumentlist
+-- @param creator creator function that creates the argument objects
+-- @param parent the parent argument object
+-- @param service the owning service, because the xml is being parsed, the owning service has not been set 
+-- yet and access to the service is required to check wether the related statevariables exist
+-- @return 1 on success or nil + error message
 local parseargumentlist = function(alist, creator, parent, service)
     local success, arg, err
     local elem = alist:getFirstChild()
@@ -78,8 +77,8 @@ end
 -- Action constructor method, creates a new action, parsed from an XML 'action' element.
 -- @param xmldoc an IXML object containing the 'action' element
 -- @param creator callback function to create individual sub objects
--- @param parent the parent object for the action to be created
--- @returns action object
+-- @param parent the parent service object for the action to be created
+-- @returns action object or nil + error message
 function action:parsefromxml(xmldoc, creator, parent)
     logger:debug("Entering action:parsefromxml()...")
     assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
@@ -125,6 +124,7 @@ end
 -----------------------------------------------------------------------------------------
 -- Adds an argument to the actions argument list.
 -- This will append an argument, so adding must be done in proper UPnP order!
+-- @param argument the argument object to be added to the argumentlist
 function action:addargument(argument)
     assert(type(argument) == "table", "Expected argument table, got nil")
     assert(argument.direction == "in" or argument.direction == "out", "Direction must be either 'in' or 'out', not; " .. tostring(argument.direction))
@@ -191,14 +191,16 @@ end
 
 -----------------------------------------------------------------------------------------
 -- Executes the action.
--- Override in descendant classes to implement the actual device behaviour. NOTE: if not
--- overridden, the default result will be an error; 602, Optional Action Not Implemented (hence;
+-- Override in descendant classes to implement the actual device behaviour. <br/><strong>NOTE 1</strong>: if not
+-- overridden, the default result will be an error; <code>602, Optional Action Not Implemented</code> (hence;
 -- from the descedant overridden method, DO NOT call the ancestor method, as it will only return the error)
+-- <br/><strong>NOTE 2</strong>: this method is wrapped by <code>action:_execute()</code> from which it will be 
+-- called. So never call this method directly, if you need to execute, call <code>_execute()</code>.
 -- @param params table with named arguments (each argument indexed
 -- by its name). Before calling the arguments will have been checked, converted and counted.
 -- @returns table with named return values (each indexed by its name). The
 -- returned values can be the Lua types, will be converted to UPnP types (and validated) before sending.
--- Upon an error the function should return; nil, errorstring, errornumber (see
+-- Upon an error the function should return; <code>nil, errorstring, errornumber</code> (see
 -- the 6xx error codes in the UPnP 1.0 architecture document, section 3.2.2)
 -- @see action:_execute
 function action:execute(params)
@@ -208,10 +210,16 @@ end
 
 -----------------------------------------------------------------------------------------
 -- Executes the action while checking inputs and outputs. Parameter values may be in either UPnP or Lua format.
--- The actual implementation is in <code>action:execute()</code> which will be called by this method. So to
--- implement device behaviour, override the <code>action:execute()</code> method, and not this one.
+-- The actual implementation is in <code>action:execute()</code> which will be called by this method. 
+-- <br/>Actual execution order;
+-- <br/>1) <code>action:_execute()</code> verifies correctness of all arguments provided and converts them to Lua equivalents
+-- <br/>2) <code>action:execute()</code> gets called to perform actual device behaviour
+-- <br/>3) <code>action:_execute()</code> verifies the return values and converts them to UPnP formats
+-- <br/>So to implement device behaviour, override the <code>action:execute()</code> method, to execute the action
+-- call <code>action:_execute()</code>.
 -- @param params table with argument values, indexed by argument name.
--- @returns 2 lists (names and values) of the 'out' arguments (in proper order), or nil, errormsg, errornumber upon failure
+-- @returns 2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure
+-- @see action:execute
 function action:_execute(params)
     logger:info("Entering action:_execute() for action '%s'", tostring(self._name))
     local names, values, success
@@ -261,7 +269,6 @@ function action:_execute(params)
     return names, values
 end
 
------------------------------------------------------------------------------------------
 -- Clears all the lazy-elements set. Applies to <code>getaction(), getservice(), getdevice(),
 -- getroot(), gethandle()</code> methods.
 -- Override in subclasses to clear tree-structure.

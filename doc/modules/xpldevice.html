@@ -1,0 +1,485 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>xpldevice: Module Index</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+	<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h1>LuaDoc</h1>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h1>Modules</h1>
+<ul>
+
+	<li>
+		<a href="../modules/LuaUPnP.html">LuaUPnP</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnpbase.html">upnpbase</a>
+	</li>
+
+	<li><strong>xpldevice</strong></li>
+	
+</ul>
+
+
+
+<!-- File list -->
+
+<h1>Files</h1>
+<ul>
+
+	<li>
+		<a href="../files/./lua_src/classes/action.html">./lua_src/classes/action.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/./lua_src/classes/argument.html">./lua_src/classes/argument.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/./lua_src/classes/device.html">./lua_src/classes/device.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/./lua_src/classes/service.html">./lua_src/classes/service.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/./lua_src/classes/statevariable.html">./lua_src/classes/statevariable.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/./lua_src/classes/upnpbase.html">./lua_src/classes/upnpbase.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/./lua_src/device_config.html">./lua_src/device_config.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/./lua_src/init.html">./lua_src/init.lua</a>
+	</li>
+
+</ul>
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module <code>xpldevice</code></h1>
+
+<p>The base object for xPL devices. It features all the main characteristics of the xPL devices, so only user code needs to be added. Starting, stopping, regular heartbeats, configuration has all been implemented in this base class.<br/>&nbsp<br/>No global will be created, it just returns the xpldevice base class. The main xPL module will create a global <code>xpl.classes.xpldevice</code> to access it.<br/>&nbsp<br/>You can create a new device from; <code>xpl.classes.xpldevice:new( {} )</code>, but it is probably best to use the <a href="../files/src/xpl/new_device_template.html">new_device_template.lua</a> file as an example on how to use the <code>xpldevice</code> class</p>
+
+
+<p>Copyright&copy; 2011 Thijs Schreijer</p>
+
+
+<p><small><b>Release:</b> Version 0.1, LuaxPL framework.</small></p>
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+	<tr>
+	<td class="name" nowrap><a href="#statevariable:afterset">statevariable:afterset</a>&nbsp;(oldval)</td>
+	<td class="summary">Handler called after the new value has been set.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#statevariable:beforeset">statevariable:beforeset</a>&nbsp;(newval)</td>
+	<td class="summary">Handler called before the new value is set.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#statevariable:check">statevariable:check</a>&nbsp;(value)</td>
+	<td class="summary">Check a value against the statevariable.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#statevariable:get">statevariable:get</a>&nbsp;()</td>
+	<td class="summary">Gets the variable value.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#statevariable:getdatatype">statevariable:getdatatype</a>&nbsp;()</td>
+	<td class="summary">Gets the variable UPnP type.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#statevariable:getupnp">statevariable:getupnp</a>&nbsp;(value)</td>
+	<td class="summary">Gets the variable value in upnp format.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#statevariable:initialize">statevariable:initialize</a>&nbsp;()</td>
+	<td class="summary">Initializes the statevariable object.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#statevariable:parsefromxml">statevariable:parsefromxml</a>&nbsp;(xmldoc, creator, parent)</td>
+	<td class="summary">StateVariable constructor method, creates a new variable, parsed from an XML 'stateVariable' element.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#statevariable:set">statevariable:set</a>&nbsp;(value, noevent)</td>
+	<td class="summary">Sets the statevariable value.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#statevariable:setdatatype">statevariable:setdatatype</a>&nbsp;(upnptype)</td>
+	<td class="summary">Sets the variable UPnP type.</td>
+	</tr>
+
+</table>
+
+
+
+
+<h2>Tables</h2>
+<table class="table_list">
+
+	<tr>
+	<td class="name" nowrap><a href="#statevariable fields/properties">statevariable fields/properties</a></td>
+	<td class="summary">Members of the statevariable object </td>
+	</tr>
+
+</table>
+
+
+
+<br/>
+<br/>
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="statevariable:afterset"></a><strong>statevariable:afterset</strong>&nbsp;(oldval)</dt>
+<dd>
+Handler called after the new value has been set. The newvalue will have been checked and converted before this handler is called. NOTE: this will only be called when the value has actually changed! Override in descendant classes to implement device behaviour.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>oldval</em></code>: the previous value of the statevariable
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="statevariable:beforeset"></a><strong>statevariable:beforeset</strong>&nbsp;(newval)</dt>
+<dd>
+Handler called before the new value is set. The newvalue will have been checked and converted before this handler is called. Override in descendant classes to implement device behaviour.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>newval</em></code>: the new value to be set (this handler has the opportunity to change the value being set!)
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="statevariable:check"></a><strong>statevariable:check</strong>&nbsp;(value)</dt>
+<dd>
+Check a value against the statevariable. will coerce booelans and numbers, including min/max/step values.  Only values not convertable will return an error.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>value</em></code>: the new value for the statevariable
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="statevariable:get"></a><strong>statevariable:get</strong>&nbsp;()</dt>
+<dd>
+Gets the variable value. The value will be in the corresponding Lua type. Note: for a date object, always a copy will be stored/returned to prevent changes from going 'unevented', so the change must be explicitly set.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="statevariable:getdatatype"></a><strong>statevariable:getdatatype</strong>&nbsp;()</dt>
+<dd>
+Gets the variable UPnP type.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="statevariable:getupnp"></a><strong>statevariable:getupnp</strong>&nbsp;(value)</dt>
+<dd>
+Gets the variable value in upnp format.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>value</em></code>: (optional) the value to convert to the UPnP format of this variable. If omitted, then the current value of the statevariable will be used (this parameters main use is returning properly formatted results for action arguments during a call)
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="statevariable:initialize"></a><strong>statevariable:initialize</strong>&nbsp;()</dt>
+<dd>
+Initializes the statevariable object. Will be called upon instantiation of an object, override this method to set default values for all properties.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="statevariable:parsefromxml"></a><strong>statevariable:parsefromxml</strong>&nbsp;(xmldoc, creator, parent)</dt>
+<dd>
+StateVariable constructor method, creates a new variable, parsed from an XML 'stateVariable' element.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>xmldoc</em></code>: an IXML object containing the 'stateVariable' element
+	</li>
+	
+	<li>
+	  <code><em>creator</em></code>: callback function to create individual sub objects
+	</li>
+	
+	<li>
+	  <code><em>parent</em></code>: the parent object for the variable to be created
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="statevariable:set"></a><strong>statevariable:set</strong>&nbsp;(value, noevent)</dt>
+<dd>
+Sets the statevariable value. Any value provided will be converted to the corresponding Lua type
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>value</em></code>: the new value for the statevariable
+	</li>
+	
+	<li>
+	  <code><em>noevent</em></code>: boolean indicating whether and event should be blocked for evented statevariables
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="statevariable:setdatatype"></a><strong>statevariable:setdatatype</strong>&nbsp;(upnptype)</dt>
+<dd>
+Sets the variable UPnP type.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>upnptype</em></code>: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+</dl>
+
+
+
+
+<h2><a name="tables"></a>Tables</h2>
+<dl class="table">
+
+<dt><a name="statevariable fields/properties"></a><strong>statevariable fields/properties</strong></dt>
+<dd>Members of the statevariable object
+
+
+<h3>Fields</h3>
+<ul>
+	
+	<li>
+	  name: name of the statevariable
+	</li>
+	
+	<li>
+	  sendevents: indicator for the variable to be an evented statevariable
+	</li>
+	
+	<li>
+	  _value: internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
+	</li>
+	
+	<li>
+	  _datatype: internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
+	</li>
+	
+</ul>
+
+
+</dd>
+
+
+</dl>
+
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+	<p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->	
+</body>
+</html>

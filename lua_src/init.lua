@@ -1,10 +1,38 @@
------------------------------------------------------------------
---  UPnP core module, will load other modules
---  After requiring this module, create your devices
---  and start the copas loop
------------------------------------------------------------------
+---------------------------------------------------------------------
+-- LuaUPnP is a binding for the pupnp library for Lua.
+-- <br/>The library has dependencies on 
+-- <a href="http://luasocket.luaforge.net/">LuaSocket</a>, 
+-- <a href="http://keplerproject.github.com/copas/">Copas</a>, 
+-- <a href="http://github.com/Tieske/CopasTimer">CopasTimer</a>, 
+-- <a href="http://www.keplerproject.org/lualogging/">LuaLogging</a>,
+-- <a href="http://loop.luaforge.net/">Loop</a>,
+-- <a href="http://github.com/Tieske/DarkSideSync">DarkSideSync</a> and 
+-- <a href="http://pupnp.sourceforge.net/">pupnp</a>.
+-- When 'required' it will load all required modules, the core UPnP library, all devices 
+-- classes, etc. Only devices need to be set up before calling <code>copas.loop()</code>
+-- to start the scheduler.
+-- <br/>A global <code>upnp</code> will be created and it will be returned.
+-- <br/><br/><strong>Note</strong>: the global <code>print()</code> function will be remapped to the logger, so everything
+-- printed will be logged at the <code>info</code> level.
+-- @class module
+-- @name upnp
+-- @copyright 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>
+-- @release Version 0.x, LuaUPnP.
 
--- Setup logger
+-----------------------------------------------------------------------
+-- List of members and namespaces within LuaUPnP.
+-- @name upnp members and namespaces
+-- @class table
+-- @field classes holds a list of classes for upnp devices; upnpbase, device, service, etc.
+-- @field devices list of registered devices indexed by their UDN
+-- @field webroot path of the web-root directory
+-- @field baseurl base url pointing to the web-root directory
+-- @field lib contains the mapped functions of pupnp library
+-- @field lib.web contains the mapped functions of upnp web methods
+-- @field lib.http contains the mapped functions of upnp http methods
+-- @field lib.util contains the mapped functions of upnp util methods
+-- @field lib.ixml contains the mapped functions of upnp ixml methods
+
 require ("logging.console")
 logger = logging.console()
 logger:setLevel (logging.DEBUG)
@@ -27,7 +55,6 @@ function print(...)
 end
 
 
-local export = {}                           -- module export table
 logger:debug("Loading Copas Timer")
 local copas = require('copas.timer')        -- load Copas socket scheduler
 logger:debug("Loading Copas Eventer")
@@ -39,7 +66,7 @@ local lib = require("upnp.core")            -- load UPnP core module (C code)
 
 -- create a global table
 logger:debug("Setting up globals and classes")
-upnp = export   -- create a global table
+upnp = {}   -- create a global table
 upnp.classes               = upnp.classes or {}
 --upnp.classes.base          = require("upnp.classes.base")
 upnp.classes.upnpbase      = require("upnp.classes.upnpbase")
@@ -53,8 +80,8 @@ upnp.lib = lib             -- export the core UPnP lib
 
 -- webserver setup
 logger:debug("Configuring webserver")
-export.webroot = "./web"    -- web root directory
-export.baseurl = ""         -- base url pointing to webroot directory
+upnp.webroot = "./web"    -- web root directory
+upnp.baseurl = ""         -- base url pointing to webroot directory
 
 -- Link Copas to DSS;
 -- the darksidesync lib has a Lua side piece of code that listens to the UDP signal whenever
@@ -71,9 +98,14 @@ copas.addserver(dss.getsocket(), function(skt)
         end
     end)
 
-local errf = function(msg)
-	print (debug.traceback(msg or "Stacktrace:"))
-    --copas.exitloop()
+---------------------------------------------------------------------
+-- Logs an error and then returns it. See usage, it will log the error
+-- and then return the lua side nil + error msg, in a single call
+-- @usage# return upnperror("my error message")
+-- @parma msg the error message
+local upnperror = function(msg)
+    logger:error(msg)
+    return nil, msg
 end
 
 
@@ -134,8 +166,10 @@ for k,v in pairs(UPnPEvents) do
     v.name = k
 end
 
-
+---------------------------------------------------------
 -- Eventhandlers per event type
+-- The eventhandlers call the appropriate Lua side object with the event data
+-- @return the handlers return 1 on succes, or nil + error upon failure
 local EventTypeHandlers
 EventTypeHandlers = {
     DEVICE = function(event, wt)
@@ -143,18 +177,15 @@ EventTypeHandlers = {
             -- simply accept everything
             local device = upnp.devices[event.UDN or ""]
             if not device then
-                logger:error("Invalid subscription request, have no device with id '%s'", tostring(event.UDN))
-                return
+                return upnperror(string.format("%s: have no device with id '%s'", event.Event, tostring(event.UDN)))
             end
             local service = (device.servicelist or {})[event.ServiceID]
             if not service then
-                logger:error("Invalid subscription request, have no service with id '%s' for device '%s'", tostring(event.ServiceID), tostring(event.UDN))
-                return
+                return upnperror(string.format("%s: have no service with id '%s' for device '%s'", event.Event, tostring(event.ServiceID), tostring(event.UDN)))
             end
             local hdl = device:gethandle()
             if not hdl then
-                logger:error("Error handling subscription request, device '%s' has no valid handle (bug??)", tostring(event.UDN))
-                return
+                return upnperror(string.format("%s: device '%s' has no valid handle (bug??)", event.Event, tostring(event.UDN)))
             end
             local names, values = service:getupnpvalues()
             wt:setresult(device:gethandle(), names, values)   -- getupnpvalues returns 2 tables!!
@@ -162,6 +193,7 @@ EventTypeHandlers = {
             logger:debug("send the following statevariable list (names and values)")
             logger:debug(names)
             logger:debug(values)
+            return 1
         elseif event.Event == "UPNP_CONTROL_ACTION_REQUEST" then
             -- lookup device and service
             local device = upnp.devices[event.UDN or ""]
@@ -183,29 +215,34 @@ EventTypeHandlers = {
             if errnr then
                 -- error
                 wt:setresult(errnr, errstr)
+                return upnperror(string.format("%s: Error: %s, %s", event.Event, tostring(errnr), tostring(errstr)))
             else
                 -- success
                 wt:setresult(names, values)
+                return 1
             end
         end
     end,
     SOAP = function(event, wt)
         -- do nothing, no controlpoint yet
         print("Received unsupported request; SOAP, SSDP, GENA")
+        return 1
     end,
     SSDP = function(event, wt)
         -- for now pass on to SOAP handler
-        EventTypeHandlers.SOAP(event, wt)
+        return EventTypeHandlers.SOAP(event, wt)
     end,
     GENA = function(event, wt)
         -- for now pass on to SOAP handler
-        EventTypeHandlers.SOAP(event, wt)
+        return EventTypeHandlers.SOAP(event, wt)
     end,
 }
 
--- Callback function, executed whenever a UPnP event arrives
--- wt = waitingthread object, on which 'setresult' must be called
--- event = table with event parameters
+---------------------------------------------------------------------
+-- Callback function, executed whenever a UPnP event arrives through DSS.
+-- It will call the appropriate function from the <code>EventTypeHandlers</code> table
+-- @param wt waitingthread object, on which 'setresult' must be called
+-- @param event table with event parameters
 local UPnPCallback = function (wt, event)
     local err
     if type(wt) ~= "userdata" then
@@ -224,7 +261,7 @@ local UPnPCallback = function (wt, event)
         end
     else
         -- an error occured
-        logger:debug("UPnPCallback: " .. tostring(err))
+        upnperror("UPnPCallback(): The UPnP lib returned an error through DSS: " .. tostring(err))
     end
 end
 
@@ -242,22 +279,27 @@ local CopasEventHandler = function(self, sender, event)
         -- do initialization
         logger:debug("Starting UPnP library...")
         lib.Init(UPnPCallback)         -- start, attach event handler for UPnP events
-        lib.web.SetRootDir(export.webroot)    -- setup the webserver
-        export.baseurl = "http://" .. lib.GetServerIpAddress() .. ":" .. lib.GetServerPort() .. "/";
+        lib.web.SetRootDir(upnp.webroot)    -- setup the webserver
+        upnp.baseurl = "http://" .. lib.GetServerIpAddress() .. ":" .. lib.GetServerPort() .. "/";
         -- raise event done
         logger:info("UPnP library started;")
-        logger:info("    WebRoot = '%s'", tostring(export.webroot))
-        logger:info("    BaseURL = '%s'.", tostring(export.baseurl))
+        logger:info("    WebRoot = '%s'", tostring(upnp.webroot))
+        logger:info("    BaseURL = '%s'.", tostring(upnp.baseurl))
         self:dispatch(upnp.events.UPnPstarted)
     elseif event == copas.events.loopstopping then
         -- Copas is stopping
-        logger:debug("Stopping UPnP library...")
+        logger:debug("Stopping UPnP library... (1/3)")
         local et = self:dispatch(upnp.events.UPnPstopping)
         et:waitfor()    -- wait for event completion
         lib.Finish()
         -- raise event done
-        logger:debug("UPnP library stopped.")
-        self:dispatch(upnp.events.UPnPstopped)
+        logger:debug("UPnP library stopped (2/3).")
+        et = self:dispatch(upnp.events.UPnPstopped)
+        -- wait for this one, because copas loopstopping will wait for the current 
+        -- thread to finish, but not on threads spawned by this process. So waiting 
+        -- must be done here.
+        et:waitfor()  
+        logger:debug("UPnP library stop handlers completed (3/3).")
     end
 end
 
@@ -266,28 +308,31 @@ end
 -- @param rootdev device object, must be a root device with the <code>rootdev.devicexmlurl</code> set
 -- to the relative path within the <code>webroot</code> path, where the device description xml can be
 -- downloaded.
--- @returns handle to the newly registered device
-function export.startdevice(rootdev)
+-- @returns handle to the newly registered device or nil + error message
+function upnp.startdevice(rootdev)
     logger:debug("Entering upnp.startdevice()...")
     if type(rootdev) ~= "table" or
        rootdev.classname ~= "device" or
        rootdev.parent ~= nil then
-       return nil, "Expected a root-device table, didn't get it"
+       return upnperror("upnp.startdevice(): Expected a root-device table, didn't get it")
     end
     if not rootdev.devicexmlurl then
-        return nil, string.format("upnp.startdevice(); property 'devicexmlurl' not set, cannot start device '%s' without description url.", tostring(rootdev.getudn()))
+        return upnperror(string.format("upnp.startdevice(); property 'devicexmlurl' not set, cannot start device '%s' without description url.", tostring(rootdev.getudn())))
     end
     -- structure url
-    local url = string.gsub(export.baseurl, "\\", "/") .. "\\" .. string.gsub(rootdev.devicexmlurl, "\\", "/")
+    local url = string.gsub(upnp.baseurl, "\\", "/") .. "\\" .. string.gsub(rootdev.devicexmlurl, "\\", "/")
     url = string.gsub(url, "/\\/", "/")
     url = string.gsub(url, "/\\", "/")
     url = string.gsub(url, "\\/", "/")
     url = string.gsub(url, "\\", "/")      -- entire path is now single-foward-slash-separated
     -- start it
-    local hdl, err = lib.RegisterRootDevice(url, export.UPnPCallback)
+    local hdl, err = lib.RegisterRootDevice(url, upnp.UPnPCallback)
     if hdl then
         logger:info("upnp.startdevice(); advertizing '%s' with id '%s'", tostring(rootdev.friendlyname), tostring(rootdev:getudn()))
         hdl:SendAdvertisement(100)
+        logger:debug("upnp.startdevice(); successfully started device")
+    else
+        logger:error("upnp.startdevice(); error returned from RegisterRootDevice(): " .. tostring(err))
     end
     logger:debug("Leaving upnp.startdevice()...")
     return hdl, err
@@ -296,7 +341,8 @@ end
 -----------------------------------------------------------------------------------------
 -- Stops a UPnP device. Unregisters the device with the lib to disable network comms and callbacks.
 -- @param hdl handle to the currently enabled device
-function export.stopdevice(hdl)
+-- @return 1 on success, or nil + error message
+function upnp.stopdevice(hdl)
     return lib.UnRegisterRootDevice(hdl)
 end
 
@@ -305,7 +351,7 @@ end
 -- will try again relative to the <code>upnp.webroot</code> directory.
 -- @param xmldoc this can be several things; 1) filename, 2) literal xml, 3) IXML object
 -- @returns IXML object or nil + errormessage
-function export.getxml(xmldoc)
+function upnp.getxml(xmldoc)
     logger:debug("Entering upnp.getxml(); %s", tostring(xmldoc))
     local xml = upnp.lib.ixml
     local success, idoc, err
@@ -341,20 +387,17 @@ function export.getxml(xmldoc)
             logger:info("    Parsed as xml buffer")
         end
         if not idoc then
-            logger:error("getxml(): Failed to parse xml buffer/file " .. tostring(xmldoc))
-            return nil, "Failed to parse xml buffer/file; " .. tostring(xmldoc)
+            return upnperror("getxml(): Failed to parse xml buffer/file " .. tostring(xmldoc))
         end
     elseif type(xmldoc) == "userdata" then
         -- test executing an IXML method to see if its a proper IXML object
         success, err = pcall(xml.getNodeType, xmldoc)
         if not success then
-            logger:error("getxml(): userdata is not an IXML object, " .. tostring(err))
-            return nil, err
+            return upnperror("getxml(): userdata is not an IXML object, " .. tostring(err))
         end
         idoc = xmldoc
     else
-        logger:error("getxml(): Expected string or IXML document, got " .. type(xmldoc))
-        return nil, "Expected string or IXML document, got " .. type(xmldoc)
+        return upnperror("getxml(): Expected string or IXML document, got " .. type(xmldoc))
     end
     logger:debug("Leaving upnp.getxml()")
     return idoc
@@ -363,50 +406,42 @@ end
 
 local subscribe, unsubscribe, events        -- make local trick LuaDoc
 ---------------------------------------------------------------------------------
--- Subscribe to events of xpllistener.
--- @usage# function xpldevice:eventhandler(sender, event, msg, ...)
---     -- do your stuff with the message
--- end
--- &nbsp
--- function xpldevice:initialize()
---     -- subscribe to events of listener for new messages
---     xpl.listener:subscribe(self, self.eventhandler, xpl.listener.events.newmessage)
--- end
+-- Subscribe to events of upnp library. 
+-- These are not individual device/service event, but library event.
+-- @name upnp.subscribe
 -- @see copas.eventer
 -- @see events
 subscribe = function()
 end
 subscribe = nil
 ---------------------------------------------------------------------------------
--- Unsubscribe from events of xpllistener.
+-- Unsubscribe from events of upnp library.
+-- @name upnp.unsubscribe
 -- @see copas.eventer
 -- @see events
 unsubscribe = function()
 end
 unsubscribe = nil
 ---------------------------------------------------------------------------------
--- Events generated by xpllistener. There is only one event, for additional events
--- the start and stop events of the <code>copas</code> scheduler may be used (see
+-- Events generated by upnp library for starting and stopping. Besides these events
+-- there are additional events from <code>copas</code> as that scheduler is used (see
 -- 'CopasTimer' and specifically the <code>copas.eventer</code> module).
 -- @see subscribe
 -- @see unsubscribe
 -- @class table
--- @name events
--- @field newmessage event to indicate a new message has arrived. The message will
--- be passed as an argument to the event handler.
--- @field networkchange event to indicate that the newtork state changed (ip address,
--- connectio lost/restored, etc.). The <code>newState</code> and <code>oldState</code>
--- will be passed as arguments to the event handler (see 'NetCheck' documentation for
--- details on the <code>xxxState</code> format)
--- @see subscribe
+-- @name upnp.events
+-- @field UPnPstarting This event is started on the <code>copas.events.loopstarted</code> event and executes before any UPnP code is being run. Only when this event is complete (all handlers spawned have finished) the UPnP code will start.
+-- @field UPnPstarted Runs after the UPnP library has been initiated and is running
+-- @field UPnPstopping This event is started from the <code>copas.events.loopstopping</code> event and executes before any UPnP code is being torn down. Only when this event is complete (all handlers spawned have finished) the UPnP code will initiate the teardown.
+-- @field UPnPstopped Runs after the UPnP code has been stopped
 events = { "UPnPstarting", "UPnPstarted", "UPnPstopping", "UPnPstopped"}
 
 -- add event capability to module table
-copas.eventer.decorate(export, events)
+copas.eventer.decorate(upnp, events)
 
 -- subscribe to copas events
-copas:subscribe(export, CopasEventHandler)
+copas:subscribe(upnp, CopasEventHandler)
 
 -- return the upnp table as module table
 logger:debug("Loaded UPnP library")
-return export
+return upnp

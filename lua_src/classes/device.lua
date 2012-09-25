@@ -1,17 +1,9 @@
 ---------------------------------------------------------------------
--- The base object for xPL devices. It features all the main characteristics
--- of the xPL devices, so only user code needs to be added. Starting, stopping,
--- regular heartbeats, configuration has all been implemented in this base class.<br/>
--- <br/>No global will be created, it just returns the xpldevice base class. The main
--- xPL module will create a global <code>xpl.classes.xpldevice</code> to access it.<br/>
--- <br/>You can create a new device from; <code>xpl.classes.xpldevice:new( {} )</code>,
--- but it is probably best to use the
--- <a href="../files/src/xpl/new_device_template.html">new_device_template.lua</a>
--- file as an example on how to use the <code>xpldevice</code> class
+-- The base object for UPnP actions.
 -- @class module
--- @name xpldevice
--- @copyright 2011 Thijs Schreijer
--- @release Version 0.1, LuaxPL framework.
+-- @name upnp.device
+-- @copyright 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>
+-- @release Version 0.1, LuaUPnP
 
 -- set the proper classname here, this should match the filename without the '.lua' extension
 local super = upnp.classes.upnpbase
@@ -30,14 +22,14 @@ local classname = "device"
 -- Members of the statevariable object
 -- @class table
 -- @name statevariable fields/properties
--- @field name name of the statevariable
--- @field evented indicator for the variable to be an evented statevariable
--- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
--- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
+-- @field _udn device udn (unique device name; UUID). Do not access directly, use <code>device:getudn(), device:setudn()</code>
+-- @field parent owning device, or <code>nil</code> if it is a root device
+-- @field devicelist list of sub-devices, ordered by their UDN
+-- @field servicelist list of services, ordered by their serviceid
 local device = super:subclass()
 
 -----------------------------------------------------------------------------------------
--- Initializes the statevariable object.
+-- Initializes the device object.
 -- Will be called upon instantiation of an object, override this method to set default
 -- values for all properties.
 function device:initialize()
@@ -56,23 +48,21 @@ end
 
 local creator -- trick LuaDoc to generate the documentation for this one
 -----------------------------------------------------------------------------------------
--- Description of the "creator" callback function as it has to be provided to "device:parsefromxml()".
--- This function allows to create the device object hierarchy with custom objects, implemented the required
+-- Description of the "creator" callback function as it has to be provided to <code>device:parsefromxml()</code>.
+-- This function allows to create the device object hierarchy with custom objects, implementing the required
 -- device behaviour. The most common case being to override the <code>action:execute(params)</code> method.
--- NOTE: if the classname "servicexml" a string should be returned allowing the collection of the service
--- description xml.
 -- @param plist list of named properties as parsed from the xml, eg. a device could expect a key-value pair
--- <code>friendlyname = "name as specified in xml"</code>. NOTE: alle keys have been converted to lowercase!!
+-- <code>friendlyname = "name as specified in xml"</code>. NOTE: all keys have been converted to lowercase!!
 -- @param classname the type of object (or descendant of that type) to be created, this will be any of the
--- following; "device", "service", "statevariable", "action", "argument", or "servicexml".
+-- following; <code>"device", "service", "statevariable", "action", "argument",</code> or <code>"servicexml"</code>.
 -- @param parent The parent object to which the requested object will be added. The parent property on the
 -- created object will be set afterwards, no need to set it here.
--- @returns object type as requested, to be created by calling <code>objectbaseclass:new(plist)</code>, which
--- will instantiate a new class and set the properties from plist accordingly. EXCEPTION: if class "servicexml"
+-- @return object type as requested, to be created by calling <code>objectbaseclass:new(plist)</code>, which
+-- will instantiate a new class and set the properties from plist accordingly. EXCEPTION: if class <code>servicexml</code>
 -- is requested, a string with the service xml should be returned, the string should be parseable by the
--- <code>upnp.getxml()<code> function.
--- @remark if <code>nil</code> is returned, then a standard base class will be instatiated. If "servicexml" was
--- requested, and nothing is returned, an attempt will be made to combine the <code>upnp.webroot</code> value
+-- <code>upnp.getxml()</code> function. If <code>nil</code> is returned, then a standard baseclass of the requested type 
+-- will be instatiated. If <code>"servicexml"</code> was
+-- requested, and <code>nil</code> is returned, an attempt will be made to combine the <code>upnp.webroot</code> value
 -- with the <code>SCPDURL</code> element from the device description to locate the xml.
 creator = function(plist, classname, parent)
 end
@@ -85,8 +75,9 @@ creator = nil   -- delete again, only created for documentation purposes
 -- a string value containing the xml, 2) a string value containing the filename of the xml
 -- 3) an IXML object containing the 'device' element
 -- @param creator callback function to create individual sub objects
--- @param parent the parent object for the device to be created (or nil if a root device)
--- @returns device object
+-- @param parent the parent object for the device to be created (or <code>nil</code> if a root device)
+-- @returns device object or <code>nil + error message</code>
+-- @see creator
 function device:parsefromxml(xmldoc, creator, parent)
     assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
     logger:debug("Entering device:parsefromxml()")
@@ -266,7 +257,7 @@ function device:getudn()
 end
 
 -----------------------------------------------------------------------------------------
--- Sets the udn (unique device name; UUID) of the device.
+-- Sets the udn (unique device name; UUID) of the device. Adds the device to the global device list.
 -- Set it to <code>nil</code> to remove it from the global list and parent object (its own
 -- <code>parent</code> property will remain unchanged)
 -- @param newudn New udn for the device
@@ -322,7 +313,7 @@ function device:adddevice(device)
 end
 
 -----------------------------------------------------------------------------------------
--- Startup handler. Called for the event <code>upnp.events.UPnPstarted</code> (event
+-- Startup handler. Called by <code>upnpbase</code> ancestor object for the event <code>upnp.events.UPnPstarted</code> (event
 -- through the Copas Timer eventer mechanism)
 -- When called it will call the <code>start()</code> method on all sub-devices. Override
 -- in child classes to add specific startup functionality (starting hardware comms for example)
@@ -353,7 +344,7 @@ function device:start()
 end
 
 -----------------------------------------------------------------------------------------
--- Shutdown handler. Called for the event <code>upnp.events.UPnPstopping</code> (event
+-- Shutdown handler. Called by <code>upnpbase</code> ancestor object for the event <code>upnp.events.UPnPstopping</code> (event
 -- through the Copas Timer eventer mechanism)
 -- When called it will call the <code>stop()</code> method on all sub-devices. Override
 -- in child classes to add specific shutdown functionality (stopping hardware comms for example)
@@ -379,7 +370,6 @@ function device:stop()
     logger:debug("leaving device:stop()")
 end
 
------------------------------------------------------------------------------------------
 -- Clears all the lazy-elements set. Applies to <code>getaction(), getservice(), getdevice(),
 -- getroot(), gethandle()</code> methods.
 -- Override in subclasses to clear tree-structure.
