@@ -91,8 +91,8 @@ end
 -- @name statevariable fields/properties
 -- @field name name of the statevariable
 -- @field sendevents indicator for the variable to be an evented statevariable
--- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
--- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
+-- @field _value internal field holding the value, use <code>get(), set()</code> and <code>getupnp()</code> methods for access
+-- @field _datatype internal field holding the UPnP type, use <code>getdatatype()</code> and <code>setdatatype()</code> methods for access
 local statevariable = super:subclass()
 
 -----------------------------------------------------------------------------------------
@@ -241,12 +241,14 @@ end
 
 -----------------------------------------------------------------------------------------
 -- Gets the variable UPnP type.
+-- @return (string) UPnP data type
 function statevariable:getdatatype()
     return self._datatype
 end
 
 -----------------------------------------------------------------------------------------
--- Sets the variable UPnP type.
+-- Sets the variable UPnP type
+-- @param upnptype a valid UPnP datatype
 function statevariable:setdatatype(upnptype)
     assert (datatypes[upnptype] ~= nil, "Not a valid UPnP datatype; " .. tostring(upnptype))
     self._datatype = upnptype
@@ -258,6 +260,9 @@ end
 -- The value will be in the corresponding Lua type. Note: for a date object, always
 -- a copy will be stored/returned to prevent changes from going 'unevented', so the
 -- change must be explicitly set.
+-- <br/><strong>Note:</strong> The boolean type is represented in Lua as 1 or 0, this is done
+-- to prevent the mixup with <code>nil</code> which is also falsy.
+-- @return statevariable value as Lua type
 function statevariable:get()
     if type(self._value) == "table" then
         -- always create a new date table/object to prevent unintended changes
@@ -292,12 +297,12 @@ end
 
 -----------------------------------------------------------------------------------------
 -- Check a value against the statevariable.
--- will coerce booelans and numbers, including min/max/step values.  Only
+-- Will coerce booelans and numbers, including min/max/step values.  Only
 -- values not convertable will return an error.
--- @param value the new value for the statevariable
--- @returns value (in corresponding lua type) on success, nil on failure
+-- @param value the value to check against the statevariable
+-- @returns value (in corresponding lua type) on success, <code>nil</code> on failure
 -- @returns error string, if failure
--- @returns error number, if failure
+-- @returns UPnP error number, if failure
 function statevariable:check(value)
     if value == nil then
         return nil, "Argument Value Out of Range; 'nil' is not a valid value", 601
@@ -380,17 +385,17 @@ end
 -- before this handler is called.
 -- Override in descendant classes to implement device behaviour.
 -- @param newval the new value to be set (this handler has the opportunity to change the value being set!)
--- @returns newval to be set (Lua type) or nil, error message, error number upon failure
+-- @returns newval to be set (Lua type) or <code>nil, error message, error number</code> upon failure
 function statevariable:beforeset(newval)
     return newval
 end
 
 -----------------------------------------------------------------------------------------
 -- Handler called after the new value has been set. The newvalue will have been checked and converted
--- before this handler is called. NOTE: this will only be called when the value has actually changed!
+-- before this handler is called. <br/><strong>NOTE:</strong> this will only be called when the value 
+-- has actually changed, so setting the current value again will not trigger it!
 -- Override in descendant classes to implement device behaviour.
 -- @param oldval the previous value of the statevariable
--- @returns nothing
 function statevariable:afterset(oldval)
 end
 
@@ -398,11 +403,11 @@ end
 -- Sets the statevariable value.
 -- Any value provided will be converted to the corresponding Lua type
 -- @param value the new value for the statevariable
--- @param noevent boolean indicating whether and event should be blocked for evented
+-- @param noevent boolean indicating whether an event should be blocked for evented
 -- statevariables
--- @returns value (in corresponding lua type) on success, nil on failure
+-- @returns value (in corresponding lua type) on success, <code>nil</code> on failure
 -- @returns error string, if failure
--- @returns error number, if failure
+-- @returns UPnP error number, if failure
 function statevariable:set(value, noevent)
     -- check provided values
     local newval, errstr, errnr = self:check(value)

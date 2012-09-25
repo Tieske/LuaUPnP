@@ -77,7 +77,7 @@
 
 <h1>Module <code>upnp.service</code></h1>
 
-<p>The base object for xPL devices. It features all the main characteristics of the xPL devices, so only user code needs to be added. Starting, stopping, regular heartbeats, configuration has all been implemented in this base class.<br/>&nbsp<br/>No global will be created, it just returns the xpldevice base class. The main xPL module will create a global <code>xpl.classes.xpldevice</code> to access it.<br/>&nbsp<br/>You can create a new device from; <code>xpl.classes.xpldevice:new( {} )</code>, but it is probably best to use the <a href="../files/src/xpl/new_device_template.html">new_device_template.lua</a> file as an example on how to use the <code>xpldevice</code> class</p>
+<p>The base object for UPnP services.</p>
 
 
 <p>Copyright&copy; 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a></p>
@@ -101,11 +101,6 @@
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#service:clearlazyness">service:clearlazyness</a>&nbsp;()</td>
-	<td class="summary">Clears all the lazy-elements set.</td>
-	</tr>
-
-	<tr>
 	<td class="name" nowrap><a href="#service:executeaction">service:executeaction</a>&nbsp;(actionname, params)</td>
 	<td class="summary">Execute an action of the service.</td>
 	</tr>
@@ -117,7 +112,7 @@
 
 	<tr>
 	<td class="name" nowrap><a href="#service:initialize">service:initialize</a>&nbsp;()</td>
-	<td class="summary">Initializes the statevariable object.</td>
+	<td class="summary">Initializes the service object.</td>
 	</tr>
 
 	<tr>
@@ -134,8 +129,8 @@
 <table class="table_list">
 
 	<tr>
-	<td class="name" nowrap><a href="#statevariable fields/properties">statevariable fields/properties</a></td>
-	<td class="summary">Members of the statevariable object </td>
+	<td class="name" nowrap><a href="#service fields/properties">service fields/properties</a></td>
+	<td class="summary">Members of the service object </td>
 	</tr>
 
 </table>
@@ -204,26 +199,9 @@ Adds a statevariable to the service statetable.
 
 
 
-<dt><a name="service:clearlazyness"></a><strong>service:clearlazyness</strong>&nbsp;()</dt>
-<dd>
-Clears all the lazy-elements set. Applies to <code>getaction(), getservice(), getdevice(), getroot(), gethandle()</code> methods. Override in subclasses to clear tree-structure.
-
-
-
-
-
-
-
-
-
-</dd>
-
-
-
-
 <dt><a name="service:executeaction"></a><strong>service:executeaction</strong>&nbsp;(actionname, params)</dt>
 <dd>
-Execute an action of the service.
+Execute an action of the service. This will call basically the <code>action:_execute()</code> method, but additionally, if the action does not exist, it will return the proper UPnP error.
 
 
 <h3>Parameters:</h3>
@@ -270,7 +248,7 @@ Creates a list of all variables and values, to be provided when a subscription i
 
 <dt><a name="service:initialize"></a><strong>service:initialize</strong>&nbsp;()</dt>
 <dd>
-Initializes the statevariable object. Will be called upon instantiation of an object, override this method to set default values for all properties.
+Initializes the service object. Will be called upon instantiation of an object, override this method to set default values for all properties.
 
 
 
@@ -298,11 +276,11 @@ Service constructor method, creates a new service, parsed from a service xml. Th
 	</li>
 	
 	<li>
-	  <code><em>creator</em></code>: callback function to create individual sub objects
+	  <code><em>creator</em></code>: callback function to create individual sub objects, see <a href="upnp.device.html#creator"><code>creator()</code></a>.
 	</li>
 	
 	<li>
-	  <code><em>parent</em></code>: the parent object for the service to be created
+	  <code><em>parent</em></code>: the parent device object for the service to be created
 	</li>
 	
 	<li>
@@ -315,6 +293,9 @@ Service constructor method, creates a new service, parsed from a service xml. Th
 
 
 
+
+<h3>Return value:</h3>
+<ul>service object or <code>nil + error message</code></ul>
 
 
 
@@ -329,27 +310,31 @@ Service constructor method, creates a new service, parsed from a service xml. Th
 <h2><a name="tables"></a>Tables</h2>
 <dl class="table">
 
-<dt><a name="statevariable fields/properties"></a><strong>statevariable fields/properties</strong></dt>
-<dd>Members of the statevariable object
+<dt><a name="service fields/properties"></a><strong>service fields/properties</strong></dt>
+<dd>Members of the service object
 
 
 <h3>Fields</h3>
 <ul>
 	
 	<li>
-	  name: name of the statevariable
+	  servicetype: type of the service
 	</li>
 	
 	<li>
-	  evented: indicator for the variable to be an evented statevariable
+	  serviceid: id of the service
 	</li>
 	
 	<li>
-	  _value: internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
+	  parent: the device owning this service
 	</li>
 	
 	<li>
-	  _datatype: internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
+	  actionlist: list of actions, indexed by their name
+	</li>
+	
+	<li>
+	  statetable: list of statevariables, indexed by their name
 	</li>
 	
 </ul>

@@ -92,7 +92,7 @@
 
 	<tr>
 	<td class="name" nowrap><a href="#creator">creator</a>&nbsp;(plist, classname, parent)</td>
-	<td class="summary">Description of the "creator" callback function as it has to be provided to <code>device:parsefromxml()</code>.</td>
+	<td class="summary">Description of the "creator" callback function as it has to be provided to <code>parsefromxml()</code>.</td>
 	</tr>
 
 	<tr>
@@ -144,8 +144,8 @@
 <table class="table_list">
 
 	<tr>
-	<td class="name" nowrap><a href="#statevariable fields/properties">statevariable fields/properties</a></td>
-	<td class="summary">Members of the statevariable object </td>
+	<td class="name" nowrap><a href="#device fields/properties">device fields/properties</a></td>
+	<td class="summary">Members of the device object </td>
 	</tr>
 
 </table>
@@ -164,7 +164,7 @@
 
 <dt><a name="creator"></a><strong>creator</strong>&nbsp;(plist, classname, parent)</dt>
 <dd>
-Description of the "creator" callback function as it has to be provided to <code>device:parsefromxml()</code>. This function allows to create the device object hierarchy with custom objects, implementing the required device behaviour. The most common case being to override the <code>action:execute(params)</code> method.
+Description of the "creator" callback function as it has to be provided to <code>parsefromxml()</code>. This function allows to create the device object hierarchy with custom objects, implementing the required device behaviour. The most common case being to override the <code>action:execute(params)</code> method.
 
 
 <h3>Parameters:</h3>
@@ -395,8 +395,8 @@ Shutdown handler. Called by <code>upnpbase</code> ancestor object for the event 
 <h2><a name="tables"></a>Tables</h2>
 <dl class="table">
 
-<dt><a name="statevariable fields/properties"></a><strong>statevariable fields/properties</strong></dt>
-<dd>Members of the statevariable object
+<dt><a name="device fields/properties"></a><strong>device fields/properties</strong></dt>
+<dd>Members of the device object
 
 
 <h3>Fields</h3>
