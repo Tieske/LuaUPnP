@@ -76,7 +76,7 @@ end
 -----------------------------------------------------------------------------------------
 -- Action constructor method, creates a new action, parsed from an XML 'action' element.
 -- @param xmldoc an IXML object containing the 'action' element
--- @param creator callback function to create individual sub objects
+-- @param creator callback function to create individual sub objects, see <a href="upnp.device.html#creator"><code>creator()</code></a>.
 -- @param parent the parent service object for the action to be created
 -- @returns action object or nil + error message
 function action:parsefromxml(xmldoc, creator, parent)
@@ -195,7 +195,9 @@ end
 -- overridden, the default result will be an error; <code>602, Optional Action Not Implemented</code> (hence;
 -- from the descedant overridden method, DO NOT call the ancestor method, as it will only return the error)
 -- <br/><strong>NOTE 2</strong>: this method is wrapped by <code>action:_execute()</code> from which it will be 
--- called. So never call this method directly, if you need to execute, call <code>_execute()</code>.
+-- called. So never call this method directly, if you need to execute, call <code>_execute()</code>. If called 
+-- externally, it is best to call <code>service:executeaction()</code> as that will also return the proper UPnP
+-- error if the action doesn't exist.
 -- @param params table with named arguments (each argument indexed
 -- by its name). Before calling the arguments will have been checked, converted and counted.
 -- @returns table with named return values (each indexed by its name). The
@@ -203,6 +205,7 @@ end
 -- Upon an error the function should return; <code>nil, errorstring, errornumber</code> (see
 -- the 6xx error codes in the UPnP 1.0 architecture document, section 3.2.2)
 -- @see action:_execute
+-- @see service:executeaction()
 function action:execute(params)
     logger:warning("Action '%s' has not been implemented!", tostring(self._name))
     return nil, "Optional Action Not Implemented; " .. tostring(self._name), 602
@@ -220,6 +223,7 @@ end
 -- @param params table with argument values, indexed by argument name.
 -- @returns 2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure
 -- @see action:execute
+-- @see service:executeaction()
 function action:_execute(params)
     logger:info("Entering action:_execute() for action '%s'", tostring(self._name))
     local names, values, success

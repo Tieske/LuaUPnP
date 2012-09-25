@@ -18,7 +18,7 @@ local super = upnp.classes.upnpbase
 --------------------------
 
 -----------------------------------------------------------------------------------------
--- Members of the statevariable object
+-- Members of the argument object
 -- @class table
 -- @name Argument fields/properties
 -- @field name name of the argument
@@ -48,7 +48,7 @@ end
 -----------------------------------------------------------------------------------------
 -- Argument constructor method, creates a new argument, parsed from an XML 'argument' element.
 -- @param xmldoc an IXML object containing the 'argument' element
--- @param creator callback function to create individual sub objects
+-- @param creator callback function to create individual sub objects, see <a href="upnp.device.html#creator"><code>creator()</code></a>.
 -- @param parent the parent action object for the argument to be created
 -- @param service the service to attach to. Required because the parent relationships in the
 -- hierarchy haven't been set yet while parsing and the argument needs to access the statevariable

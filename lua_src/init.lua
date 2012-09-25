@@ -5,6 +5,7 @@
 -- <a href="http://keplerproject.github.com/copas/">Copas</a>, 
 -- <a href="http://github.com/Tieske/CopasTimer">CopasTimer</a>, 
 -- <a href="http://www.keplerproject.org/lualogging/">LuaLogging</a>,
+-- <a href="http://luaforge.net/projects/date/">date</a>,
 -- <a href="http://loop.luaforge.net/">Loop</a>,
 -- <a href="http://github.com/Tieske/DarkSideSync">DarkSideSync</a> and 
 -- <a href="http://pupnp.sourceforge.net/">pupnp</a>.

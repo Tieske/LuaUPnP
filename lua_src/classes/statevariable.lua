@@ -1,13 +1,5 @@
 ---------------------------------------------------------------------
--- The base object for xPL devices. It features all the main characteristics
--- of the xPL devices, so only user code needs to be added. Starting, stopping,
--- regular heartbeats, configuration has all been implemented in this base class.<br/>
--- <br/>No global will be created, it just returns the xpldevice base class. The main
--- xPL module will create a global <code>xpl.classes.xpldevice</code> to access it.<br/>
--- <br/>You can create a new device from; <code>xpl.classes.xpldevice:new( {} )</code>,
--- but it is probably best to use the
--- <a href="../files/src/xpl/new_device_template.html">new_device_template.lua</a>
--- file as an example on how to use the <code>xpldevice</code> class
+-- The base object for UPnP statevariable.
 -- @class module
 -- @name upnp.statevariable
 -- @copyright 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>
@@ -61,7 +53,7 @@ local integertypes = {
     int             = "number",
 }
 -- boolean conversion;
--- do not do an actual conversion to a Lua boolean becasue of error checking nil/false are both false
+-- do not do an actual conversion to a Lua boolean because of error checking nil/false are both false
 local boolconversion = {
     -- trues
     ["true"]  = 1,
@@ -192,7 +184,7 @@ end
 -----------------------------------------------------------------------------------------
 -- StateVariable constructor method, creates a new variable, parsed from an XML 'stateVariable' element.
 -- @param xmldoc an IXML object containing the 'stateVariable' element
--- @param creator callback function to create individual sub objects
+-- @param creator callback function to create individual sub objects, see <a href="upnp.device.html#creator"><code>creator()</code></a>.
 -- @param parent the parent object for the variable to be created
 -- @returns statevariable object
 function statevariable:parsefromxml(xmldoc, creator, parent)

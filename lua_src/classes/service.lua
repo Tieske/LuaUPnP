@@ -1,13 +1,5 @@
 ---------------------------------------------------------------------
--- The base object for xPL devices. It features all the main characteristics
--- of the xPL devices, so only user code needs to be added. Starting, stopping,
--- regular heartbeats, configuration has all been implemented in this base class.<br/>
--- <br/>No global will be created, it just returns the xpldevice base class. The main
--- xPL module will create a global <code>xpl.classes.xpldevice</code> to access it.<br/>
--- <br/>You can create a new device from; <code>xpl.classes.xpldevice:new( {} )</code>,
--- but it is probably best to use the
--- <a href="../files/src/xpl/new_device_template.html">new_device_template.lua</a>
--- file as an example on how to use the <code>xpldevice</code> class
+-- The base object for UPnP services.
 -- @class module
 -- @name upnp.service
 -- @copyright 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>
@@ -27,17 +19,18 @@ local super = upnp.classes.upnpbase
 --------------------------
 
 -----------------------------------------------------------------------------------------
--- Members of the statevariable object
+-- Members of the service object
 -- @class table
--- @name statevariable fields/properties
--- @field name name of the statevariable
--- @field evented indicator for the variable to be an evented statevariable
--- @field _value internal field holding the value, use <code>get, set</code> and <code>getupnp</code> methods for access
--- @field _datatype internal field holding the UPnP type, use <code>getdatatype</code> and <code>setdatatype</code> methods for access
+-- @name service fields/properties
+-- @field servicetype type of the service
+-- @field serviceid id of the service
+-- @field parent the device owning this service
+-- @field actionlist list of actions, indexed by their name
+-- @field statetable list of statevariables, indexed by their name
 local service = super:subclass()
 
 -----------------------------------------------------------------------------------------
--- Initializes the statevariable object.
+-- Initializes the service object.
 -- Will be called upon instantiation of an object, override this method to set default
 -- values for all properties.
 function service:initialize()
@@ -106,10 +99,10 @@ end
 -- @param xmldoc XML document from which a service is to be parsed, this can be either 1)
 -- a string value containing the xml, 2) a string value containing the filename of the xml
 -- 3) an IXML object containing the 'service' element
--- @param creator callback function to create individual sub objects
--- @param parent the parent object for the service to be created
+-- @param creator callback function to create individual sub objects, see <a href="upnp.device.html#creator"><code>creator()</code></a>.
+-- @param parent the parent device object for the service to be created
 -- @param plist key-value list with service properties already parsed from the Device XMLs 'serviceList' element.
--- @returns service object
+-- @return service object or <code>nil + error message</code>
 function service:parsefromxml(xmldoc, creator, parent, plist)
     assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
     creator = creator or function() end -- empty function if not provided
@@ -216,10 +209,11 @@ function service:addaction(action)
 end
 
 -----------------------------------------------------------------------------------------
--- Execute an action of the service.
+-- Execute an action of the service. This will call basically the <code>action:_execute()</code> 
+-- method, but additionally, if the action does not exist, it will return the proper UPnP error.
 -- @param actionname (string) name of action to execute
 -- @param params (table) table of parameter values, keyed by parameter names
--- @returns 2 lists (names and values) of the 'out' arguments (in proper order), or nil, errormsg, errornumber upon failure
+-- @returns 2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure
 function service:executeaction(actionname, params)
     params = params or {}
     actionname = string.lower(tostring(actionname or ""))
@@ -249,7 +243,6 @@ function service:getupnpvalues()
     return names, values
 end
 
------------------------------------------------------------------------------------------
 -- Clears all the lazy-elements set. Applies to <code>getaction(), getservice(), getdevice(),
 -- getroot(), gethandle()</code> methods.
 -- Override in subclasses to clear tree-structure.

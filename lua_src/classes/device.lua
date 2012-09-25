@@ -19,9 +19,9 @@ local classname = "device"
 --------------------------
 
 -----------------------------------------------------------------------------------------
--- Members of the statevariable object
+-- Members of the device object
 -- @class table
--- @name statevariable fields/properties
+-- @name device fields/properties
 -- @field _udn device udn (unique device name; UUID). Do not access directly, use <code>device:getudn(), device:setudn()</code>
 -- @field parent owning device, or <code>nil</code> if it is a root device
 -- @field devicelist list of sub-devices, ordered by their UDN
@@ -48,7 +48,7 @@ end
 
 local creator -- trick LuaDoc to generate the documentation for this one
 -----------------------------------------------------------------------------------------
--- Description of the "creator" callback function as it has to be provided to <code>device:parsefromxml()</code>.
+-- Description of the "creator" callback function as it has to be provided to <code>parsefromxml()</code>.
 -- This function allows to create the device object hierarchy with custom objects, implementing the required
 -- device behaviour. The most common case being to override the <code>action:execute(params)</code> method.
 -- @param plist list of named properties as parsed from the xml, eg. a device could expect a key-value pair
