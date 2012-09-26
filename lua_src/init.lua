@@ -309,7 +309,7 @@ end
 -- @param rootdev device object, must be a root device with the <code>rootdev.devicexmlurl</code> set
 -- to the relative path within the <code>webroot</code> path, where the device description xml can be
 -- downloaded.
--- @returns handle to the newly registered device or nil + error message
+-- @return handle to the newly registered device or nil + error message
 function upnp.startdevice(rootdev)
     logger:debug("Entering upnp.startdevice()...")
     if type(rootdev) ~= "table" or
@@ -342,16 +342,17 @@ end
 -----------------------------------------------------------------------------------------
 -- Stops a UPnP device. Unregisters the device with the lib to disable network comms and callbacks.
 -- @param hdl handle to the currently enabled device
--- @return 1 on success, or nil + error message
+-- @return 1 on success, or <code>nil + error message</code>
 function upnp.stopdevice(hdl)
     return lib.UnRegisterRootDevice(hdl)
 end
 
 -----------------------------------------------------------------------------------------
--- Gets an xml document. If a filename is given, it will first try to open, if it fails it
--- will try again relative to the <code>upnp.webroot</code> directory.
--- @param xmldoc this can be several things; 1) filename, 2) literal xml, 3) IXML object
--- @returns IXML object or nil + errormessage
+-- Gets an xml document. It will try to get the xml from several things; 1) filename, 
+-- 2) literal xml, 3) IXML object. If a filename is given, it will first try to open, if 
+-- it fails it will try again relative to the <code>upnp.webroot</code> directory.
+-- @param xmldoc either 1) filename, 2) literal xml, 3) IXML object
+-- @return IXML object or <code>nil + errormessage</code>
 function upnp.getxml(xmldoc)
     logger:debug("Entering upnp.getxml(); %s", tostring(xmldoc))
     local xml = upnp.lib.ixml
@@ -408,7 +409,7 @@ end
 local subscribe, unsubscribe, events        -- make local trick LuaDoc
 ---------------------------------------------------------------------------------
 -- Subscribe to events of upnp library. 
--- These are not individual device/service event, but library event.
+-- These are not individual device/service event, but library events.
 -- @name upnp.subscribe
 -- @see copas.eventer
 -- @see events

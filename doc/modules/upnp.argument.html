@@ -77,7 +77,7 @@
 
 <h1>Module <code>upnp.argument</code></h1>
 
-<p>The base object for UPnP Action arguments.</p>
+<p>The base object for UPnP action arguments.</p>
 
 
 <p>Copyright&copy; 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a></p>
@@ -156,6 +156,17 @@ Check a value against the arguments related statevariable. This will coerce bool
 
 
 
+<h3>Return values:</h3>
+<ol>
+	
+	<li>value (in corresponding lua type) on success, <code>nil</code> on failure</li>
+	
+	<li>error string, if failure</li>
+	
+	<li>error number, if failure</li>
+	
+</ol>
+
 
 
 </dd>
@@ -181,6 +192,9 @@ Formats the argument value in upnp format.
 
 
 
+
+<h3>Return value:</h3>
+<ul>The value in UPnP format as a Lua string.</ul>
 
 
 
@@ -236,6 +250,9 @@ Argument constructor method, creates a new argument, parsed from an XML 'argumen
 
 
 
+
+<h3>Return value:</h3>
+<ul>argument object or <code>nil + error message</code></ul>
 
 
 

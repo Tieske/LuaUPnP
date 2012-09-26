@@ -161,6 +161,9 @@ Executes the action while checking inputs and outputs. Parameter values may be i
 
 
 
+<h3>Return value:</h3>
+<ul>2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure</ul>
+
 
 
 <h3>See also:</h3>
@@ -211,7 +214,7 @@ Adds an argument to the actions argument list. This will append an argument, so 
 
 <dt><a name="action:execute"></a><strong>action:execute</strong>&nbsp;(params)</dt>
 <dd>
-Executes the action. Override in descendant classes to implement the actual device behaviour. <br/><strong>NOTE 1</strong>: if not overridden, the default result will be an error; <code>602, Optional Action Not Implemented</code> (hence; from the descedant overridden method, DO NOT call the ancestor method, as it will only return the error) <br/><strong>NOTE 2</strong>: this method is wrapped by <code>action:_execute()</code> from which it will be called. So never call this method directly, if you need to execute, call <code>_execute()</code>. If called externally, it is best to call <code>service:executeaction()</code> as that will also return the proper UPnP error if the action doesn't exist.
+Executes the action. Override in descendant classes to implement the actual device behaviour. <br/><strong>NOTE 1</strong>: if not overridden, the default result will be an error; <code>602, Optional Action Not Implemented</code> (hence; from the descedant overridden method, DO NOT call the ancestor method, as it will only return the error) <br/><strong>NOTE 2</strong>: this method is wrapped by <code>action:_execute()</code> from which it will be called. So never call this method directly, if you need to execute, call <code>_execute()</code>. If called externally, it is best to call <a href="upnp.service.html#service:executeaction"><code>service:executeaction()</code></a> as that will also return the proper UPnP error if the action doesn't exist.
 
 
 <h3>Parameters:</h3>
@@ -227,6 +230,9 @@ Executes the action. Override in descendant classes to implement the actual devi
 
 
 
+
+<h3>Return value:</h3>
+<ul>table with named return values (each indexed by its name). The returned values can be the Lua types, will be converted to UPnP types (and validated) before sending. Upon an error the function should return; <code>nil, errorstring, errornumber</code> (see the 6xx error codes in the UPnP 1.0 architecture document, section 3.2.2)</ul>
 
 
 
@@ -293,6 +299,9 @@ Action constructor method, creates a new action, parsed from an XML 'action' ele
 
 
 
+
+<h3>Return value:</h3>
+<ul>action object or <code>nil + error message</code></ul>
 
 
 

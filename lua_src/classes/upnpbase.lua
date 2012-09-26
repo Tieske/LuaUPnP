@@ -65,14 +65,14 @@ end
 -----------------------------------------------------------------------------------------
 -- Check whether the object is a subclass of another class
 -- @param super the class to test against
--- @returns <code>true</code> if the object is a subclass of <code>super</code>
+-- @return <code>true</code> if the object is a subclass of <code>super</code>
 function upnpbase:subclassof(super)
     return oo.subclassof(self, super)
 end
 
 -----------------------------------------------------------------------------------------
 -- Returns the superclass of an object.
--- @returns the super-class of class or <code>nil</code> if class is not a class of the model
+-- @return the super-class of class or <code>nil</code> if class is not a class of the model
 -- or does not define a super class.
 function upnpbase:superclass()
     return oo.superclass(self)
@@ -81,7 +81,7 @@ end
 -----------------------------------------------------------------------------------------
 -- Creates a descendant class in the table provided.
 -- @tbl table with properties to turn into a new object class
--- @returns object that represent a new class that provides the features defined by table and
+-- @return object that represent a new class that provides the features defined by table and
 -- that inherits from the class called upon. Changes on the object returned by this function
 -- implies changes reflected on all its instances.
 function upnpbase:subclass(tbl)
@@ -207,7 +207,7 @@ end
 -- Startup handler. Called for the event <code>upnp.events.UPnPstarted</code> (event
 -- through the Copas Timer eventer mechanism)
 -- This method will only be called on objects WITHOUT a parent (root devices). If an object has children,
--- it should call the <code>start</code> method on its children if required, they will not
+-- it should call the <code>start()</code> method on its children if required, they will not
 -- be called automatically.
 function upnpbase:start()
     -- override in descendant classes
@@ -217,7 +217,7 @@ end
 -- Shutdown handler. Called for the event <code>upnp.events.UPnPstopping</code> (event
 -- through the Copas Timer eventer mechanism)
 -- This method will only be called on objects WITHOUT a parent (root devices). If an object has children,
--- it should call the <code>stop</code> method on its children if required, they will not
+-- it should call the <code>stop()</code> method on its children if required, they will not
 -- be called automatically.
 function upnpbase:stop()
     -- override in descendant classes

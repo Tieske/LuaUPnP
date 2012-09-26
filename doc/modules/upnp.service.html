@@ -201,7 +201,7 @@ Adds a statevariable to the service statetable.
 
 <dt><a name="service:executeaction"></a><strong>service:executeaction</strong>&nbsp;(actionname, params)</dt>
 <dd>
-Execute an action of the service. This will call basically the <code>action:_execute()</code> method, but additionally, if the action does not exist, it will return the proper UPnP error.
+Execute an action of the service. This will call basically the <a href="upnp.action.html#action:execute"><code>action:_execute()</code></a> method, but additionally, if the action does not exist, it will return the proper UPnP error.
 
 
 <h3>Parameters:</h3>
@@ -222,6 +222,9 @@ Execute an action of the service. This will call basically the <code>action:_exe
 
 
 
+<h3>Return value:</h3>
+<ul>2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure</ul>
+
 
 
 </dd>
@@ -238,6 +241,15 @@ Creates a list of all variables and values, to be provided when a subscription i
 
 
 
+
+<h3>Return values:</h3>
+<ol>
+	
+	<li>list with variablenames</li>
+	
+	<li>list with variablevalues (order matching the name list)</li>
+	
+</ol>
 
 
 

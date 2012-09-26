@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------
--- The base object for UPnP actions.
+-- The base object for UPnP devices.
 -- @class module
 -- @name upnp.device
 -- @copyright 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>
@@ -60,7 +60,7 @@ local creator -- trick LuaDoc to generate the documentation for this one
 -- @return object type as requested, to be created by calling <code>objectbaseclass:new(plist)</code>, which
 -- will instantiate a new class and set the properties from plist accordingly. EXCEPTION: if class <code>servicexml</code>
 -- is requested, a string with the service xml should be returned, the string should be parseable by the
--- <code>upnp.getxml()</code> function. If <code>nil</code> is returned, then a standard baseclass of the requested type 
+-- <a href="upnp.html#upnp.getxml"><code>upnp.getxml()</code></a> function. If <code>nil</code> is returned, then a standard baseclass of the requested type 
 -- will be instatiated. If <code>"servicexml"</code> was
 -- requested, and <code>nil</code> is returned, an attempt will be made to combine the <code>upnp.webroot</code> value
 -- with the <code>SCPDURL</code> element from the device description to locate the xml.
@@ -76,7 +76,7 @@ creator = nil   -- delete again, only created for documentation purposes
 -- 3) an IXML object containing the 'device' element
 -- @param creator callback function to create individual sub objects
 -- @param parent the parent object for the device to be created (or <code>nil</code> if a root device)
--- @returns device object or <code>nil + error message</code>
+-- @return device object or <code>nil + error message</code>
 -- @see creator
 function device:parsefromxml(xmldoc, creator, parent)
     assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
@@ -251,7 +251,7 @@ end
 
 -----------------------------------------------------------------------------------------
 -- Gets the udn (unique device name; UUID) of the device.
--- @returns udn of the device
+-- @return udn of the device
 function device:getudn()
     return self._udn
 end
@@ -317,7 +317,7 @@ end
 -- through the Copas Timer eventer mechanism)
 -- When called it will call the <code>start()</code> method on all sub-devices. Override
 -- in child classes to add specific startup functionality (starting hardware comms for example)
--- See also <code>upnpbase:start()</code>
+-- See also <a href="upnp.upnpbase.html#upnpbase:start"><code>upnpbase:start()</code></a>
 function device:start()
     logger:debug("entering device:start(), starting device  %s...", tostring(self._udn))
     assert(self.handle == nil, "Cannot start device, device handle is already available, stop first.")
@@ -348,7 +348,7 @@ end
 -- through the Copas Timer eventer mechanism)
 -- When called it will call the <code>stop()</code> method on all sub-devices. Override
 -- in child classes to add specific shutdown functionality (stopping hardware comms for example)
--- See also <code>upnpbase:stop()</code>
+-- See also <a href="upnp.upnpbase.html#upnpbase:start"><code>upnpbase:stop()</code></a>
 function device:stop()
     logger:debug("entering device:stop(), stopping device  %s...", tostring(self._udn))
     -- stop all sub-devices

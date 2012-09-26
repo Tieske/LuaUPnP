@@ -149,14 +149,14 @@
 
 <dt><a name="upnp.getxml"></a><strong>upnp.getxml</strong>&nbsp;(xmldoc)</dt>
 <dd>
-Gets an xml document. If a filename is given, it will first try to open, if it fails it will try again relative to the <code>upnp.webroot</code> directory.
+Gets an xml document. It will try to get the xml from several things; 1) filename, 2) literal xml, 3) IXML object. If a filename is given, it will first try to open, if it fails it will try again relative to the <code>upnp.webroot</code> directory.
 
 
 <h3>Parameters:</h3>
 <ul>
 	
 	<li>
-	  <code><em>xmldoc</em></code>: this can be several things; 1) filename, 2) literal xml, 3) IXML object
+	  <code><em>xmldoc</em></code>: either 1) filename, 2) literal xml, 3) IXML object
 	</li>
 	
 </ul>
@@ -165,6 +165,9 @@ Gets an xml document. If a filename is given, it will first try to open, if it f
 
 
 
+
+<h3>Return value:</h3>
+<ul>IXML object or <code>nil + errormessage</code></ul>
 
 
 
@@ -191,6 +194,9 @@ Starts a UPnP device. Registers the device with the lib to enable network comms 
 
 
 
+
+<h3>Return value:</h3>
+<ul>handle to the newly registered device or nil + error message</ul>
 
 
 
@@ -219,7 +225,7 @@ Stops a UPnP device. Unregisters the device with the lib to disable network comm
 
 
 <h3>Return value:</h3>
-<ul>1 on success, or nil + error message</ul>
+<ul>1 on success, or <code>nil + error message</code></ul>
 
 
 
@@ -230,7 +236,7 @@ Stops a UPnP device. Unregisters the device with the lib to disable network comm
 
 <dt><a name="upnp.subscribe"></a><strong>upnp.subscribe</strong>&nbsp;()</dt>
 <dd>
-Subscribe to events of upnp library. These are not individual device/service event, but library event.
+Subscribe to events of upnp library. These are not individual device/service event, but library events.
 
 
 

@@ -298,7 +298,7 @@ Initializes the upnpbase object. Will be called upon instantiation of an object,
 
 <dt><a name="upnpbase:start"></a><strong>upnpbase:start</strong>&nbsp;()</dt>
 <dd>
-Startup handler. Called for the event <code>upnp.events.UPnPstarted</code> (event through the Copas Timer eventer mechanism) This method will only be called on objects WITHOUT a parent (root devices). If an object has children, it should call the <code>start</code> method on its children if required, they will not be called automatically.
+Startup handler. Called for the event <code>upnp.events.UPnPstarted</code> (event through the Copas Timer eventer mechanism) This method will only be called on objects WITHOUT a parent (root devices). If an object has children, it should call the <code>start()</code> method on its children if required, they will not be called automatically.
 
 
 
@@ -315,7 +315,7 @@ Startup handler. Called for the event <code>upnp.events.UPnPstarted</code> (even
 
 <dt><a name="upnpbase:stop"></a><strong>upnpbase:stop</strong>&nbsp;()</dt>
 <dd>
-Shutdown handler. Called for the event <code>upnp.events.UPnPstopping</code> (event through the Copas Timer eventer mechanism) This method will only be called on objects WITHOUT a parent (root devices). If an object has children, it should call the <code>stop</code> method on its children if required, they will not be called automatically.
+Shutdown handler. Called for the event <code>upnp.events.UPnPstopping</code> (event through the Copas Timer eventer mechanism) This method will only be called on objects WITHOUT a parent (root devices). If an object has children, it should call the <code>stop()</code> method on its children if required, they will not be called automatically.
 
 
 
@@ -349,6 +349,9 @@ Creates a descendant class in the table provided.
 
 
 
+<h3>Return value:</h3>
+<ul>object that represent a new class that provides the features defined by table and that inherits from the class called upon. Changes on the object returned by this function implies changes reflected on all its instances.</ul>
+
 
 
 </dd>
@@ -375,6 +378,9 @@ Check whether the object is a subclass of another class
 
 
 
+<h3>Return value:</h3>
+<ul><code>true</code> if the object is a subclass of <code>super</code></ul>
+
 
 
 </dd>
@@ -391,6 +397,9 @@ Returns the superclass of an object.
 
 
 
+
+<h3>Return value:</h3>
+<ul>the super-class of class or <code>nil</code> if class is not a class of the model or does not define a super class.</ul>
 
 
 

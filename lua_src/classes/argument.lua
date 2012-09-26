@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------
--- The base object for UPnP Action arguments.
+-- The base object for UPnP action arguments.
 -- @class module
 -- @name upnp.argument
 -- @copyright 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>
@@ -53,7 +53,7 @@ end
 -- @param service the service to attach to. Required because the parent relationships in the
 -- hierarchy haven't been set yet while parsing and the argument needs to access the statevariable
 -- list to check whether the related statevariable actually exists
--- @returns argument object or <code>nil + error message</code>
+-- @return argument object or <code>nil + error message</code>
 function argument:parsefromxml(xmldoc, creator, parent, service)
     assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
     creator = creator or function() end -- empty function if not provided
@@ -99,7 +99,7 @@ end
 -- Formats the argument value in upnp format.
 -- @param value the Lua typed value to be formatted as UPnP type, according to the UPnP type set
 -- in the related statevariable for this argument
--- @returns The value in UPnP format as a Lua string.
+-- @return The value in UPnP format as a Lua string.
 function argument:getupnp(value)
     assert(self.statevariable, "No statevariable has been set")
     assert(value ~= nil, "Expected value, got nil")
@@ -112,9 +112,9 @@ end
 -- This will coerce booleans and numbers, including min/max/step values. Only
 -- values not convertable will return an error.
 -- @param value the argument value
--- @returns value (in corresponding lua type) on success, <code>nil</code> on failure
--- @returns error string, if failure
--- @returns error number, if failure
+-- @return value (in corresponding lua type) on success, <code>nil</code> on failure
+-- @return error string, if failure
+-- @return error number, if failure
 function argument:check(value)
     assert(self.statevariable, "No statevariable has been set")
     assert(value ~= nil, "Expected value, got nil")

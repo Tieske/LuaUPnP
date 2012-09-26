@@ -78,7 +78,7 @@ end
 -- @param xmldoc an IXML object containing the 'action' element
 -- @param creator callback function to create individual sub objects, see <a href="upnp.device.html#creator"><code>creator()</code></a>.
 -- @param parent the parent service object for the action to be created
--- @returns action object or nil + error message
+-- @return action object or <code>nil + error message</code>
 function action:parsefromxml(xmldoc, creator, parent)
     logger:debug("Entering action:parsefromxml()...")
     assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
@@ -196,11 +196,11 @@ end
 -- from the descedant overridden method, DO NOT call the ancestor method, as it will only return the error)
 -- <br/><strong>NOTE 2</strong>: this method is wrapped by <code>action:_execute()</code> from which it will be 
 -- called. So never call this method directly, if you need to execute, call <code>_execute()</code>. If called 
--- externally, it is best to call <code>service:executeaction()</code> as that will also return the proper UPnP
--- error if the action doesn't exist.
+-- externally, it is best to call <a href="upnp.service.html#service:executeaction"><code>service:executeaction()</code></a>
+-- as that will also return the proper UPnP error if the action doesn't exist.
 -- @param params table with named arguments (each argument indexed
 -- by its name). Before calling the arguments will have been checked, converted and counted.
--- @returns table with named return values (each indexed by its name). The
+-- @return table with named return values (each indexed by its name). The
 -- returned values can be the Lua types, will be converted to UPnP types (and validated) before sending.
 -- Upon an error the function should return; <code>nil, errorstring, errornumber</code> (see
 -- the 6xx error codes in the UPnP 1.0 architecture document, section 3.2.2)
@@ -221,7 +221,7 @@ end
 -- <br/>So to implement device behaviour, override the <code>action:execute()</code> method, to execute the action
 -- call <code>action:_execute()</code>.
 -- @param params table with argument values, indexed by argument name.
--- @returns 2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure
+-- @return 2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure
 -- @see action:execute
 -- @see service:executeaction()
 function action:_execute(params)

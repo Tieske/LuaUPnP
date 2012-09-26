@@ -209,11 +209,12 @@ function service:addaction(action)
 end
 
 -----------------------------------------------------------------------------------------
--- Execute an action of the service. This will call basically the <code>action:_execute()</code> 
+-- Execute an action of the service. This will call basically the 
+-- <a href="upnp.action.html#action:execute"><code>action:_execute()</code></a> 
 -- method, but additionally, if the action does not exist, it will return the proper UPnP error.
 -- @param actionname (string) name of action to execute
 -- @param params (table) table of parameter values, keyed by parameter names
--- @returns 2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure
+-- @return 2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure
 function service:executeaction(actionname, params)
     params = params or {}
     actionname = string.lower(tostring(actionname or ""))
@@ -229,8 +230,8 @@ end
 
 -----------------------------------------------------------------------------------------
 -- Creates a list of all variables and values, to be provided when a subscription is accepted
--- @returns list with variablenames
--- @returns list with variablevalues (order matching the name list)
+-- @return list with variablenames
+-- @return list with variablevalues (order matching the name list)
 function service:getupnpvalues()
     local names = {}
     local values = {}

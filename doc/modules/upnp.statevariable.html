@@ -169,7 +169,7 @@
 
 <dt><a name="statevariable:afterset"></a><strong>statevariable:afterset</strong>&nbsp;(oldval)</dt>
 <dd>
-Handler called after the new value has been set. The newvalue will have been checked and converted before this handler is called. <br/><strong>NOTE:</strong> this will only be called when the value has actually changed, so setting the current value again will not trigger it! Override in descendant classes to implement device behaviour.
+Handler called after the new value has been set. <br/><strong>NOTE:</strong> this will only be called when the value has actually changed, so setting the current value again will not trigger it! Override in descendant classes to implement device behaviour.
 
 
 <h3>Parameters:</h3>
@@ -188,6 +188,16 @@ Handler called after the new value has been set. The newvalue will have been che
 
 
 
+<h3>See also:</h3>
+<ul>
+	
+	<!-- <li><a href="#statevariable:beforeset"> -->
+	<li><a href="#statevariable:beforeset">
+		statevariable:beforeset</li>
+	</a>
+	
+</ul>
+
 </dd>
 
 
@@ -195,14 +205,14 @@ Handler called after the new value has been set. The newvalue will have been che
 
 <dt><a name="statevariable:beforeset"></a><strong>statevariable:beforeset</strong>&nbsp;(newval)</dt>
 <dd>
-Handler called before the new value is set. The newvalue will have been checked and converted before this handler is called. Override in descendant classes to implement device behaviour.
+Handler called before the new value is set. The new value will have been checked and converted before this handler is called. Override in descendant classes to implement device behaviour. While the <code>afterset()</code> will only be called when the value being set is actually different from the current value, the <code>beforeset()</code> will always be run. Hence, <code>beforeset()</code> has the opportunity to change the value being set.
 
 
 <h3>Parameters:</h3>
 <ul>
 	
 	<li>
-	  <code><em>newval</em></code>: the new value to be set (this handler has the opportunity to change the value being set!)
+	  <code><em>newval</em></code>: the new value to be set
 	</li>
 	
 </ul>
@@ -212,7 +222,20 @@ Handler called before the new value is set. The newvalue will have been checked 
 
 
 
+<h3>Return value:</h3>
+<ul>newval to be set (Lua type) or <code>nil, error message, error number</code> upon failure</ul>
 
+
+
+<h3>See also:</h3>
+<ul>
+	
+	<!-- <li><a href="#statevariable:afterset"> -->
+	<li><a href="#statevariable:afterset">
+		statevariable:afterset</li>
+	</a>
+	
+</ul>
 
 </dd>
 
@@ -237,6 +260,17 @@ Check a value against the statevariable. Will coerce booelans and numbers, inclu
 
 
 
+
+<h3>Return values:</h3>
+<ol>
+	
+	<li>value (in corresponding lua type) on success, <code>nil</code> on failure</li>
+	
+	<li>error string, if failure</li>
+	
+	<li>UPnP error number, if failure</li>
+	
+</ol>
 
 
 
@@ -304,6 +338,9 @@ Gets the variable value in upnp format.
 
 
 
+<h3>Return value:</h3>
+<ul>(string) The statevariable value in UPnP format</ul>
+
 
 
 </dd>
@@ -355,6 +392,9 @@ StateVariable constructor method, creates a new variable, parsed from an XML 'st
 
 
 
+<h3>Return value:</h3>
+<ul>statevariable object</ul>
+
 
 
 </dd>
@@ -384,6 +424,17 @@ Sets the statevariable value. Any value provided will be converted to the corres
 
 
 
+
+<h3>Return values:</h3>
+<ol>
+	
+	<li>value (in corresponding lua type) on success, <code>nil</code> on failure</li>
+	
+	<li>error string, if failure</li>
+	
+	<li>UPnP error number, if failure</li>
+	
+</ol>
 
 
 
@@ -440,11 +491,11 @@ Sets the variable UPnP type
 	</li>
 	
 	<li>
-	  _value: internal field holding the value, use <code>get(), set()</code> and <code>getupnp()</code> methods for access
+	  _value: internal field holding the value, use <a href="#statevariable:get"><code>get()</code></a>, <a href="#statevariable:set"><code>set()</code></a> and <a href="#statevariable:getupnp"><code>getupnp()</code></a> methods for access
 	</li>
 	
 	<li>
-	  _datatype: internal field holding the UPnP type, use <code>getdatatype()</code> and <code>setdatatype()</code> methods for access
+	  _datatype: internal field holding the UPnP type, use <a href="#statevariable:getdatatype"><code>getdatatype()</code></a> and <a href="#statevariable:setdatatype"><code>setdatatype()</code></a> methods for access
 	</li>
 	
 </ul>

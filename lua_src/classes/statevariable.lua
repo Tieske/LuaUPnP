@@ -91,8 +91,8 @@ end
 -- @name statevariable fields/properties
 -- @field name name of the statevariable
 -- @field sendevents indicator for the variable to be an evented statevariable
--- @field _value internal field holding the value, use <code>get(), set()</code> and <code>getupnp()</code> methods for access
--- @field _datatype internal field holding the UPnP type, use <code>getdatatype()</code> and <code>setdatatype()</code> methods for access
+-- @field _value internal field holding the value, use <a href="#statevariable:get"><code>get()</code></a>, <a href="#statevariable:set"><code>set()</code></a> and <a href="#statevariable:getupnp"><code>getupnp()</code></a> methods for access
+-- @field _datatype internal field holding the UPnP type, use <a href="#statevariable:getdatatype"><code>getdatatype()</code></a> and <a href="#statevariable:setdatatype"><code>setdatatype()</code></a> methods for access
 local statevariable = super:subclass()
 
 -----------------------------------------------------------------------------------------
@@ -186,7 +186,7 @@ end
 -- @param xmldoc an IXML object containing the 'stateVariable' element
 -- @param creator callback function to create individual sub objects, see <a href="upnp.device.html#creator"><code>creator()</code></a>.
 -- @param parent the parent object for the variable to be created
--- @returns statevariable object
+-- @return statevariable object
 function statevariable:parsefromxml(xmldoc, creator, parent)
     logger:debug("Entering statevariable:parsefromxml()...")
     assert(creator == nil or type(creator) == "function", "parameter creator should be a function or be nil, got " .. type(creator))
@@ -276,7 +276,7 @@ end
 -- @param value (optional) the value to convert to the UPnP format of this variable. If
 -- omitted, then the current value of the statevariable will be used (this parameters main
 -- use is returning properly formatted results for action arguments during a call)
--- @returns The statevariable value in UPnP format as a Lua string.
+-- @return (string) The statevariable value in UPnP format
 function statevariable:getupnp(value)
     logger:debug("reporting upnp value for '%s', with internal value '%s' and provided value '%s'", tostring(self._name), tostring(self._value), tostring(value))
     value = value or self._value
@@ -300,9 +300,9 @@ end
 -- Will coerce booelans and numbers, including min/max/step values.  Only
 -- values not convertable will return an error.
 -- @param value the value to check against the statevariable
--- @returns value (in corresponding lua type) on success, <code>nil</code> on failure
--- @returns error string, if failure
--- @returns UPnP error number, if failure
+-- @return value (in corresponding lua type) on success, <code>nil</code> on failure
+-- @return error string, if failure
+-- @return UPnP error number, if failure
 function statevariable:check(value)
     if value == nil then
         return nil, "Argument Value Out of Range; 'nil' is not a valid value", 601
@@ -381,21 +381,24 @@ function statevariable:check(value)
 end
 
 -----------------------------------------------------------------------------------------
--- Handler called before the new value is set. The newvalue will have been checked and converted
+-- Handler called before the new value is set. The new value will have been checked and converted
 -- before this handler is called.
--- Override in descendant classes to implement device behaviour.
--- @param newval the new value to be set (this handler has the opportunity to change the value being set!)
--- @returns newval to be set (Lua type) or <code>nil, error message, error number</code> upon failure
+-- Override in descendant classes to implement device behaviour. While the <code>afterset()</code> will only
+-- be called when the value being set is actually different from the current value, the <code>beforeset()</code>
+-- will always be run. Hence, <code>beforeset()</code> has the opportunity to change the value being set.
+-- @param newval the new value to be set
+-- @return newval to be set (Lua type) or <code>nil, error message, error number</code> upon failure
+-- @see statevariable:afterset
 function statevariable:beforeset(newval)
     return newval
 end
 
 -----------------------------------------------------------------------------------------
--- Handler called after the new value has been set. The newvalue will have been checked and converted
--- before this handler is called. <br/><strong>NOTE:</strong> this will only be called when the value 
+-- Handler called after the new value has been set. <br/><strong>NOTE:</strong> this will only be called when the value 
 -- has actually changed, so setting the current value again will not trigger it!
 -- Override in descendant classes to implement device behaviour.
 -- @param oldval the previous value of the statevariable
+-- @see statevariable:beforeset
 function statevariable:afterset(oldval)
 end
 
@@ -405,9 +408,9 @@ end
 -- @param value the new value for the statevariable
 -- @param noevent boolean indicating whether an event should be blocked for evented
 -- statevariables
--- @returns value (in corresponding lua type) on success, <code>nil</code> on failure
--- @returns error string, if failure
--- @returns UPnP error number, if failure
+-- @return value (in corresponding lua type) on success, <code>nil</code> on failure
+-- @return error string, if failure
+-- @return UPnP error number, if failure
 function statevariable:set(value, noevent)
     -- check provided values
     local newval, errstr, errnr = self:check(value)
