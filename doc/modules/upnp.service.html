@@ -1,19 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml"> 
 <head>
     <title>upnp.service: Module Index</title>
     <link rel="stylesheet" href="../luadoc.css" type="text/css" />
-	<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+    <!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
 </head>
 
 <body>
 <div id="container">
 
 <div id="product">
-	<div id="product_logo"></div>
-	<div id="product_name"><big><b></b></big></div>
-	<div id="product_description"></div>
+    <div id="product_logo"></div>
+    <div id="product_name"><big><b></b></big></div>
+    <div id="product_description"></div>
 </div> <!-- id="product" -->
 
 <div id="main">
@@ -21,7 +22,7 @@
 <div id="navigation">
 
 
-<h1>LuaDoc</h1>
+<h2>LuaDoc</h2>
 <ul>
 	
 	<li><a href="../index.html">Index</a></li>
@@ -31,7 +32,7 @@
 
 <!-- Module list -->
 
-<h1>Modules</h1>
+<h2>Modules</h2>
 <ul>
 
 	<li>
@@ -66,6 +67,43 @@
 
 <!-- File list -->
 
+<h2>Files</h2>
+<ul>
+
+	<li>
+		<a href="../files/lua_src/classes/action.html">lua_src/classes/action.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/classes/argument.html">lua_src/classes/argument.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/classes/device.html">lua_src/classes/device.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/classes/service.html">lua_src/classes/service.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/classes/statevariable.html">lua_src/classes/statevariable.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/classes/upnpbase.html">lua_src/classes/upnpbase.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/device_config.html">lua_src/device_config.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/init.html">lua_src/init.lua</a>
+	</li>
+
+</ul>
+
 
 
 
@@ -75,7 +113,7 @@
 
 <div id="content">
 
-<h1>Module <code>upnp.service</code></h1>
+<h1>Module "upnp.service"</h1>
 
 <p>The base object for UPnP services.</p>
 
@@ -84,44 +122,6 @@
 
 
 <p><small><b>Release:</b> Version 0.1, LuaUPnP</small></p>
-
-
-
-<h2>Functions</h2>
-<table class="function_list">
-
-	<tr>
-	<td class="name" nowrap><a href="#service:addaction">service:addaction</a>&nbsp;(action)</td>
-	<td class="summary">Adds an action to the service actionlist.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#service:addstatevariable">service:addstatevariable</a>&nbsp;(statevar)</td>
-	<td class="summary">Adds a statevariable to the service statetable.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#service:executeaction">service:executeaction</a>&nbsp;(actionname, params)</td>
-	<td class="summary">Execute an action of the service.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#service:getupnpvalues">service:getupnpvalues</a>&nbsp;()</td>
-	<td class="summary">Creates a list of all variables and values, to be provided when a subscription is accepted </td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#service:initialize">service:initialize</a>&nbsp;()</td>
-	<td class="summary">Initializes the service object.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#service:parsefromxml">service:parsefromxml</a>&nbsp;(xmldoc, creator, parent, plist)</td>
-	<td class="summary">Service constructor method, creates a new service, parsed from a service xml.</td>
-	</tr>
-
-</table>
-
 
 
 
@@ -137,8 +137,85 @@
 
 
 
+<h2>Functions</h2>
+<table class="function_list">
+
+    <tr>
+    <td class="name" nowrap><a href="#service:addaction">service:addaction</a>&nbsp;(action)</td>
+    <td class="summary">Adds an action to the service actionlist.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#service:addstatevariable">service:addstatevariable</a>&nbsp;(statevar)</td>
+    <td class="summary">Adds a statevariable to the service statetable.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#service:executeaction">service:executeaction</a>&nbsp;(actionname, params)</td>
+    <td class="summary">Execute an action of the service.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#service:getupnpvalues">service:getupnpvalues</a>&nbsp;()</td>
+    <td class="summary">Creates a list of all variables and values, to be provided when a subscription is accepted </td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#service:initialize">service:initialize</a>&nbsp;()</td>
+    <td class="summary">Initializes the service object.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#service:parsefromxml">service:parsefromxml</a>&nbsp;(xmldoc, creator, parent, plist)</td>
+    <td class="summary">Service constructor method, creates a new service, parsed from a service xml.</td>
+    </tr>
+
+</table>
+
+
 <br/>
 <br/>
+
+
+<h2><a name="tables"></a>Tables</h2>
+<dl class="table">
+
+<dt><a name="service fields/properties"></a><strong>service fields/properties</strong></dt>
+<dd>Members of the service object
+
+
+<h3>Fields</h3>
+<ul>
+	
+	<li>
+	  <code><em>servicetype</em></code>: type of the service
+	</li>
+	
+	<li>
+	  <code><em>serviceid</em></code>: id of the service
+	</li>
+	
+	<li>
+	  <code><em>parent</em></code>: the device owning this service
+	</li>
+	
+	<li>
+	  <code><em>actionlist</em></code>: list of actions, indexed by their name
+	</li>
+	
+	<li>
+	  <code><em>statetable</em></code>: list of statevariables, indexed by their name
+	</li>
+	
+</ul>
+
+
+
+
+</dd>
+
+
+</dl>
 
 
 
@@ -221,9 +298,14 @@ Execute an action of the service. This will call basically the <a href="upnp.act
 
 
 
+<div>
 
-<h3>Return value:</h3>
-<ul>2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure</ul>
+
+<h3 class="inline-block">Return value:</h3>
+2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure
+
+</div>
+
 
 
 
@@ -241,6 +323,8 @@ Creates a list of all variables and values, to be provided when a subscription i
 
 
 
+<div>
+
 
 <h3>Return values:</h3>
 <ol>
@@ -250,6 +334,9 @@ Creates a list of all variables and values, to be provided when a subscription i
 	<li>list with variablevalues (order matching the name list)</li>
 	
 </ol>
+
+</div>
+
 
 
 
@@ -305,9 +392,14 @@ Service constructor method, creates a new service, parsed from a service xml. Th
 
 
 
+<div>
 
-<h3>Return value:</h3>
-<ul>service object or <code>nil + error message</code></ul>
+
+<h3 class="inline-block">Return value:</h3>
+service object or <code>nil + error message</code>
+
+</div>
+
 
 
 
@@ -315,48 +407,6 @@ Service constructor method, creates a new service, parsed from a service xml. Th
 
 
 </dl>
-
-
-
-
-<h2><a name="tables"></a>Tables</h2>
-<dl class="table">
-
-<dt><a name="service fields/properties"></a><strong>service fields/properties</strong></dt>
-<dd>Members of the service object
-
-
-<h3>Fields</h3>
-<ul>
-	
-	<li>
-	  servicetype: type of the service
-	</li>
-	
-	<li>
-	  serviceid: id of the service
-	</li>
-	
-	<li>
-	  parent: the device owning this service
-	</li>
-	
-	<li>
-	  actionlist: list of actions, indexed by their name
-	</li>
-	
-	<li>
-	  statetable: list of statevariables, indexed by their name
-	</li>
-	
-</ul>
-
-
-</dd>
-
-
-</dl>
-
 
 
 </div> <!-- id="content" -->
@@ -364,9 +414,9 @@ Service constructor method, creates a new service, parsed from a service xml. Th
 </div> <!-- id="main" -->
 
 <div id="about">
-	<p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+    <p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
 </div> <!-- id="about" -->
 
-</div> <!-- id="container" -->	
+</div> <!-- id="container" -->
 </body>
 </html>

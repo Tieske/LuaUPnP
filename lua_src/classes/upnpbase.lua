@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------
--- The base object for UPnP objects. This object provides hierarchy traversal 
+-- The base object for UPnP objects. This object provides hierarchy traversal
 -- and starting/stopping devices through eventhandlers
 -- @class module
 -- @name upnp.upnpbase
@@ -80,7 +80,7 @@ end
 
 -----------------------------------------------------------------------------------------
 -- Creates a descendant class in the table provided.
--- @tbl table with properties to turn into a new object class
+-- @param tbl table with properties to turn into a new object class
 -- @return object that represent a new class that provides the features defined by table and
 -- that inherits from the class called upon. Changes on the object returned by this function
 -- implies changes reflected on all its instances.

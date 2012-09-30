@@ -48,12 +48,12 @@ end
 -- Parse an IXML 'argumentList' element (alist) in the parent (action object), while using 'creator' to generate objects
 -- service = parent service, because the 'parent' relations ships haven't been set yet and the argument creation needs
 -- the variablelist to check if the related statevariable exists
--- @param alist ixml object holding the argumentlist
--- @param creator creator function that creates the argument objects
--- @param parent the parent argument object
--- @param service the owning service, because the xml is being parsed, the owning service has not been set 
+-- *param alist ixml object holding the argumentlist
+-- *param creator creator function that creates the argument objects
+-- *param parent the parent argument object
+-- *param service the owning service, because the xml is being parsed, the owning service has not been set
 -- yet and access to the service is required to check wether the related statevariables exist
--- @return 1 on success or nil + error message
+-- *return 1 on success or nil + error message
 local parseargumentlist = function(alist, creator, parent, service)
     local success, arg, err
     local elem = alist:getFirstChild()
@@ -194,8 +194,8 @@ end
 -- Override in descendant classes to implement the actual device behaviour. <br/><strong>NOTE 1</strong>: if not
 -- overridden, the default result will be an error; <code>602, Optional Action Not Implemented</code> (hence;
 -- from the descedant overridden method, DO NOT call the ancestor method, as it will only return the error)
--- <br/><strong>NOTE 2</strong>: this method is wrapped by <code>action:_execute()</code> from which it will be 
--- called. So never call this method directly, if you need to execute, call <code>_execute()</code>. If called 
+-- <br/><strong>NOTE 2</strong>: this method is wrapped by <code>action:_execute()</code> from which it will be
+-- called. So never call this method directly, if you need to execute, call <code>_execute()</code>. If called
 -- externally, it is best to call <a href="upnp.service.html#service:executeaction"><code>service:executeaction()</code></a>
 -- as that will also return the proper UPnP error if the action doesn't exist.
 -- @param params table with named arguments (each argument indexed
@@ -205,7 +205,7 @@ end
 -- Upon an error the function should return; <code>nil, errorstring, errornumber</code> (see
 -- the 6xx error codes in the UPnP 1.0 architecture document, section 3.2.2)
 -- @see action:_execute
--- @see service:executeaction()
+-- @see service:executeaction
 function action:execute(params)
     logger:warning("Action '%s' has not been implemented!", tostring(self._name))
     return nil, "Optional Action Not Implemented; " .. tostring(self._name), 602
@@ -213,7 +213,7 @@ end
 
 -----------------------------------------------------------------------------------------
 -- Executes the action while checking inputs and outputs. Parameter values may be in either UPnP or Lua format.
--- The actual implementation is in <code>action:execute()</code> which will be called by this method. 
+-- The actual implementation is in <code>action:execute()</code> which will be called by this method.
 -- <br/>Actual execution order;
 -- <br/>1) <code>action:_execute()</code> verifies correctness of all arguments provided and converts them to Lua equivalents
 -- <br/>2) <code>action:execute()</code> gets called to perform actual device behaviour
@@ -223,7 +223,7 @@ end
 -- @param params table with argument values, indexed by argument name.
 -- @return 2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure
 -- @see action:execute
--- @see service:executeaction()
+-- @see service:executeaction
 function action:_execute(params)
     logger:info("Entering action:_execute() for action '%s'", tostring(self._name))
     local names, values, success

@@ -1,19 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml"> 
 <head>
     <title>upnp.device: Module Index</title>
     <link rel="stylesheet" href="../luadoc.css" type="text/css" />
-	<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+    <!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
 </head>
 
 <body>
 <div id="container">
 
 <div id="product">
-	<div id="product_logo"></div>
-	<div id="product_name"><big><b></b></big></div>
-	<div id="product_description"></div>
+    <div id="product_logo"></div>
+    <div id="product_name"><big><b></b></big></div>
+    <div id="product_description"></div>
 </div> <!-- id="product" -->
 
 <div id="main">
@@ -21,7 +22,7 @@
 <div id="navigation">
 
 
-<h1>LuaDoc</h1>
+<h2>LuaDoc</h2>
 <ul>
 	
 	<li><a href="../index.html">Index</a></li>
@@ -31,7 +32,7 @@
 
 <!-- Module list -->
 
-<h1>Modules</h1>
+<h2>Modules</h2>
 <ul>
 
 	<li>
@@ -66,6 +67,43 @@
 
 <!-- File list -->
 
+<h2>Files</h2>
+<ul>
+
+	<li>
+		<a href="../files/lua_src/classes/action.html">lua_src/classes/action.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/classes/argument.html">lua_src/classes/argument.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/classes/device.html">lua_src/classes/device.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/classes/service.html">lua_src/classes/service.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/classes/statevariable.html">lua_src/classes/statevariable.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/classes/upnpbase.html">lua_src/classes/upnpbase.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/device_config.html">lua_src/device_config.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/init.html">lua_src/init.lua</a>
+	</li>
+
+</ul>
+
 
 
 
@@ -75,7 +113,7 @@
 
 <div id="content">
 
-<h1>Module <code>upnp.device</code></h1>
+<h1>Module "upnp.device"</h1>
 
 <p>The base object for UPnP devices.</p>
 
@@ -84,59 +122,6 @@
 
 
 <p><small><b>Release:</b> Version 0.1, LuaUPnP</small></p>
-
-
-
-<h2>Functions</h2>
-<table class="function_list">
-
-	<tr>
-	<td class="name" nowrap><a href="#creator">creator</a>&nbsp;(plist, classname, parent)</td>
-	<td class="summary">Description of the "creator" callback function as it has to be provided to <code>parsefromxml()</code>.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#device:adddevice">device:adddevice</a>&nbsp;(device)</td>
-	<td class="summary">Adds a sub-device to the device.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#device:addservice">device:addservice</a>&nbsp;(service)</td>
-	<td class="summary">Adds a service to the device.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#device:getudn">device:getudn</a>&nbsp;()</td>
-	<td class="summary">Gets the udn (unique device name; UUID) of the device.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#device:initialize">device:initialize</a>&nbsp;()</td>
-	<td class="summary">Initializes the device object.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#device:parsefromxml">device:parsefromxml</a>&nbsp;(xmldoc, creator, parent)</td>
-	<td class="summary">Device constructor method, creates a new device, parsed from a device xml.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#device:setudn">device:setudn</a>&nbsp;(newudn)</td>
-	<td class="summary">Sets the udn (unique device name; UUID) of the device.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#device:start">device:start</a>&nbsp;()</td>
-	<td class="summary">Startup handler.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#device:stop">device:stop</a>&nbsp;()</td>
-	<td class="summary">Shutdown handler.</td>
-	</tr>
-
-</table>
-
 
 
 
@@ -152,8 +137,96 @@
 
 
 
+<h2>Functions</h2>
+<table class="function_list">
+
+    <tr>
+    <td class="name" nowrap><a href="#creator">creator</a>&nbsp;(plist, classname, parent)</td>
+    <td class="summary">Description of the "creator" callback function as it has to be provided to <code>parsefromxml()</code>.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#device:adddevice">device:adddevice</a>&nbsp;(device)</td>
+    <td class="summary">Adds a sub-device to the device.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#device:addservice">device:addservice</a>&nbsp;(service)</td>
+    <td class="summary">Adds a service to the device.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#device:getudn">device:getudn</a>&nbsp;()</td>
+    <td class="summary">Gets the udn (unique device name; UUID) of the device.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#device:initialize">device:initialize</a>&nbsp;()</td>
+    <td class="summary">Initializes the device object.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#device:parsefromxml">device:parsefromxml</a>&nbsp;(xmldoc, creator, parent)</td>
+    <td class="summary">Device constructor method, creates a new device, parsed from a device xml.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#device:setudn">device:setudn</a>&nbsp;(newudn)</td>
+    <td class="summary">Sets the udn (unique device name; UUID) of the device.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#device:start">device:start</a>&nbsp;()</td>
+    <td class="summary">Startup handler.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#device:stop">device:stop</a>&nbsp;()</td>
+    <td class="summary">Shutdown handler.</td>
+    </tr>
+
+</table>
+
+
 <br/>
 <br/>
+
+
+<h2><a name="tables"></a>Tables</h2>
+<dl class="table">
+
+<dt><a name="device fields/properties"></a><strong>device fields/properties</strong></dt>
+<dd>Members of the device object
+
+
+<h3>Fields</h3>
+<ul>
+	
+	<li>
+	  <code><em>_udn</em></code>: device udn (unique device name; UUID). Do not access directly, use <code>device:getudn(), device:setudn()</code>
+	</li>
+	
+	<li>
+	  <code><em>parent</em></code>: owning device, or <code>nil</code> if it is a root device
+	</li>
+	
+	<li>
+	  <code><em>devicelist</em></code>: list of sub-devices, ordered by their UDN
+	</li>
+	
+	<li>
+	  <code><em>servicelist</em></code>: list of services, ordered by their serviceid
+	</li>
+	
+</ul>
+
+
+
+
+</dd>
+
+
+</dl>
 
 
 
@@ -188,9 +261,14 @@ Description of the "creator" callback function as it has to be provided to <code
 
 
 
+<div>
 
-<h3>Return value:</h3>
-<ul>object type as requested, to be created by calling <code>objectbaseclass:new(plist)</code>, which will instantiate a new class and set the properties from plist accordingly. EXCEPTION: if class <code>servicexml</code> is requested, a string with the service xml should be returned, the string should be parseable by the <a href="upnp.html#upnp.getxml"><code>upnp.getxml()</code></a> function. If <code>nil</code> is returned, then a standard baseclass of the requested type will be instatiated. If <code>"servicexml"</code> was requested, and <code>nil</code> is returned, an attempt will be made to combine the <code>upnp.webroot</code> value with the <code>SCPDURL</code> element from the device description to locate the xml.</ul>
+
+<h3 class="inline-block">Return value:</h3>
+object type as requested, to be created by calling <code>objectbaseclass:new(plist)</code>, which will instantiate a new class and set the properties from plist accordingly. EXCEPTION: if class <code>servicexml</code> is requested, a string with the service xml should be returned, the string should be parseable by the <a href="upnp.html#upnp.getxml"><code>upnp.getxml()</code></a> function. If <code>nil</code> is returned, then a standard baseclass of the requested type will be instatiated. If <code>"servicexml"</code> was requested, and <code>nil</code> is returned, an attempt will be made to combine the <code>upnp.webroot</code> value with the <code>SCPDURL</code> element from the device description to locate the xml.
+
+</div>
+
 
 
 
@@ -260,9 +338,14 @@ Gets the udn (unique device name; UUID) of the device.
 
 
 
+<div>
 
-<h3>Return value:</h3>
-<ul>udn of the device</ul>
+
+<h3 class="inline-block">Return value:</h3>
+udn of the device
+
+</div>
+
 
 
 
@@ -314,21 +397,29 @@ Device constructor method, creates a new device, parsed from a device xml. The d
 
 
 
-
-<h3>Return value:</h3>
-<ul>device object or <code>nil + error message</code></ul>
+<div>
 
 
+<h3 class="inline-block">Return value:</h3>
+device object or <code>nil + error message</code>
+
+</div>
+
+
+
+<div>
 
 <h3>See also:</h3>
 <ul>
 	
-	<!-- <li><a href="#../modules/upnp.device.html#creatorcreator"> -->
-	<li><a href="#creator">
-		creator</li>
-	</a>
+	<li><a href="../modules/upnp.device.html#creator">
+		creator
+	</a></li>
 	
 </ul>
+
+</div>
+
 
 </dd>
 
@@ -396,52 +487,14 @@ Shutdown handler. Called by <code>upnpbase</code> ancestor object for the event 
 </dl>
 
 
-
-
-<h2><a name="tables"></a>Tables</h2>
-<dl class="table">
-
-<dt><a name="device fields/properties"></a><strong>device fields/properties</strong></dt>
-<dd>Members of the device object
-
-
-<h3>Fields</h3>
-<ul>
-	
-	<li>
-	  _udn: device udn (unique device name; UUID). Do not access directly, use <code>device:getudn(), device:setudn()</code>
-	</li>
-	
-	<li>
-	  parent: owning device, or <code>nil</code> if it is a root device
-	</li>
-	
-	<li>
-	  devicelist: list of sub-devices, ordered by their UDN
-	</li>
-	
-	<li>
-	  servicelist: list of services, ordered by their serviceid
-	</li>
-	
-</ul>
-
-
-</dd>
-
-
-</dl>
-
-
-
 </div> <!-- id="content" -->
 
 </div> <!-- id="main" -->
 
 <div id="about">
-	<p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+    <p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
 </div> <!-- id="about" -->
 
-</div> <!-- id="container" -->	
+</div> <!-- id="container" -->
 </body>
 </html>

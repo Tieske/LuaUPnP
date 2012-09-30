@@ -1,19 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml"> 
 <head>
     <title>upnp.argument: Module Index</title>
     <link rel="stylesheet" href="../luadoc.css" type="text/css" />
-	<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+    <!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
 </head>
 
 <body>
 <div id="container">
 
 <div id="product">
-	<div id="product_logo"></div>
-	<div id="product_name"><big><b></b></big></div>
-	<div id="product_description"></div>
+    <div id="product_logo"></div>
+    <div id="product_name"><big><b></b></big></div>
+    <div id="product_description"></div>
 </div> <!-- id="product" -->
 
 <div id="main">
@@ -21,7 +22,7 @@
 <div id="navigation">
 
 
-<h1>LuaDoc</h1>
+<h2>LuaDoc</h2>
 <ul>
 	
 	<li><a href="../index.html">Index</a></li>
@@ -31,7 +32,7 @@
 
 <!-- Module list -->
 
-<h1>Modules</h1>
+<h2>Modules</h2>
 <ul>
 
 	<li>
@@ -66,6 +67,43 @@
 
 <!-- File list -->
 
+<h2>Files</h2>
+<ul>
+
+	<li>
+		<a href="../files/lua_src/classes/action.html">lua_src/classes/action.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/classes/argument.html">lua_src/classes/argument.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/classes/device.html">lua_src/classes/device.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/classes/service.html">lua_src/classes/service.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/classes/statevariable.html">lua_src/classes/statevariable.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/classes/upnpbase.html">lua_src/classes/upnpbase.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/device_config.html">lua_src/device_config.lua</a>
+	</li>
+
+	<li>
+		<a href="../files/lua_src/init.html">lua_src/init.lua</a>
+	</li>
+
+</ul>
+
 
 
 
@@ -75,7 +113,7 @@
 
 <div id="content">
 
-<h1>Module <code>upnp.argument</code></h1>
+<h1>Module "upnp.argument"</h1>
 
 <p>The base object for UPnP action arguments.</p>
 
@@ -84,34 +122,6 @@
 
 
 <p><small><b>Release:</b> Version 0.1, LuaUPnP</small></p>
-
-
-
-<h2>Functions</h2>
-<table class="function_list">
-
-	<tr>
-	<td class="name" nowrap><a href="#argument:check">argument:check</a>&nbsp;(value)</td>
-	<td class="summary">Check a value against the arguments related statevariable.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#argument:getupnp">argument:getupnp</a>&nbsp;(value)</td>
-	<td class="summary">Formats the argument value in upnp format.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#argument:initialize">argument:initialize</a>&nbsp;()</td>
-	<td class="summary">Initializes the argument object.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#argument:parsefromxml">argument:parsefromxml</a>&nbsp;(xmldoc, creator, parent, service)</td>
-	<td class="summary">Argument constructor method, creates a new argument, parsed from an XML 'argument' element.</td>
-	</tr>
-
-</table>
-
 
 
 
@@ -127,8 +137,75 @@
 
 
 
+<h2>Functions</h2>
+<table class="function_list">
+
+    <tr>
+    <td class="name" nowrap><a href="#argument:check">argument:check</a>&nbsp;(value)</td>
+    <td class="summary">Check a value against the arguments related statevariable.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#argument:getupnp">argument:getupnp</a>&nbsp;(value)</td>
+    <td class="summary">Formats the argument value in upnp format.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#argument:initialize">argument:initialize</a>&nbsp;()</td>
+    <td class="summary">Initializes the argument object.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#argument:parsefromxml">argument:parsefromxml</a>&nbsp;(xmldoc, creator, parent, service)</td>
+    <td class="summary">Argument constructor method, creates a new argument, parsed from an XML 'argument' element.</td>
+    </tr>
+
+</table>
+
+
 <br/>
 <br/>
+
+
+<h2><a name="tables"></a>Tables</h2>
+<dl class="table">
+
+<dt><a name="Argument fields/properties"></a><strong>Argument fields/properties</strong></dt>
+<dd>Members of the argument object
+
+
+<h3>Fields</h3>
+<ul>
+	
+	<li>
+	  <code><em>name</em></code>: name of the argument
+	</li>
+	
+	<li>
+	  <code><em>parent</em></code>: the owning action object
+	</li>
+	
+	<li>
+	  <code><em>direction</em></code>: of the argument either <code>'in'</code> or <code>'out'</code>
+	</li>
+	
+	<li>
+	  <code><em>statevariable</em></code>: the related statevariable object
+	</li>
+	
+	<li>
+	  <code><em>position</em></code>: position on the argument list of the owning action
+	</li>
+	
+</ul>
+
+
+
+
+</dd>
+
+
+</dl>
 
 
 
@@ -155,6 +232,8 @@ Check a value against the arguments related statevariable. This will coerce bool
 
 
 
+<div>
+
 
 <h3>Return values:</h3>
 <ol>
@@ -166,6 +245,9 @@ Check a value against the arguments related statevariable. This will coerce bool
 	<li>error number, if failure</li>
 	
 </ol>
+
+</div>
+
 
 
 
@@ -192,9 +274,14 @@ Formats the argument value in upnp format.
 
 
 
+<div>
 
-<h3>Return value:</h3>
-<ul>The value in UPnP format as a Lua string.</ul>
+
+<h3 class="inline-block">Return value:</h3>
+The value in UPnP format as a Lua string.
+
+</div>
+
 
 
 
@@ -250,9 +337,14 @@ Argument constructor method, creates a new argument, parsed from an XML 'argumen
 
 
 
+<div>
 
-<h3>Return value:</h3>
-<ul>argument object or <code>nil + error message</code></ul>
+
+<h3 class="inline-block">Return value:</h3>
+argument object or <code>nil + error message</code>
+
+</div>
+
 
 
 
@@ -260,48 +352,6 @@ Argument constructor method, creates a new argument, parsed from an XML 'argumen
 
 
 </dl>
-
-
-
-
-<h2><a name="tables"></a>Tables</h2>
-<dl class="table">
-
-<dt><a name="Argument fields/properties"></a><strong>Argument fields/properties</strong></dt>
-<dd>Members of the argument object
-
-
-<h3>Fields</h3>
-<ul>
-	
-	<li>
-	  name: name of the argument
-	</li>
-	
-	<li>
-	  parent: the owning action object
-	</li>
-	
-	<li>
-	  direction: of the argument either <code>'in'</code> or <code>'out'</code>
-	</li>
-	
-	<li>
-	  statevariable: the related statevariable object
-	</li>
-	
-	<li>
-	  position: position on the argument list of the owning action
-	</li>
-	
-</ul>
-
-
-</dd>
-
-
-</dl>
-
 
 
 </div> <!-- id="content" -->
@@ -309,9 +359,9 @@ Argument constructor method, creates a new argument, parsed from an XML 'argumen
 </div> <!-- id="main" -->
 
 <div id="about">
-	<p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+    <p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
 </div> <!-- id="about" -->
 
-</div> <!-- id="container" -->	
+</div> <!-- id="container" -->
 </body>
 </html>

@@ -394,7 +394,7 @@ function statevariable:beforeset(newval)
 end
 
 -----------------------------------------------------------------------------------------
--- Handler called after the new value has been set. <br/><strong>NOTE:</strong> this will only be called when the value 
+-- Handler called after the new value has been set. <br/><strong>NOTE:</strong> this will only be called when the value
 -- has actually changed, so setting the current value again will not trigger it!
 -- Override in descendant classes to implement device behaviour.
 -- @param oldval the previous value of the statevariable
