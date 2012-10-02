@@ -18,7 +18,7 @@ local M = {}
 
 ----------------------------------------------------------------------------
 -- function to do output
-local outfunc = "io.write"
+local outfunc = "return"
 
 --
 -- Builds a piece of Lua code which outputs the (part of the) given string.
@@ -70,7 +70,8 @@ end
 
 ----------------------------------------------------------------------------
 -- Defines the name of the output function.
--- @param f String with the name of the function which produces output.
+-- @param f String with the name of the function which produces output. Default
+-- value is "return".
 
 function M.setoutfunc (f)
 	outfunc = f
@@ -121,7 +122,8 @@ end
 -- Once compiled the template function will be cached, based on the filename.
 -- @param env Table with the environment to run the resulting function.
 -- If <code>nil</code> then the current environment will be used
--- @return the results of the function set by lp.setoutfunc()
+-- @return the results of the function set by lp.setoutfunc(), but might also
+-- throw an error
 
 function M.includefile (filename, env)
   local prog = cache[filename]
@@ -134,11 +136,18 @@ function M.includefile (filename, env)
     prog = M.compile (src, '@'..filename)
     cache[filename] = prog
   end
-	local _env
-	if env then
-		_env = getfenv (prog)
-		setfenv (prog, env)
-	end
+
+	env = env or {}
+	env.table = table
+	env.io = io
+	env.lp = M
+  env.pairs = pairs
+	env.ipairs = ipairs
+	env.tonumber = tonumber
+	env.tostring = tostring
+	env.type = type
+	setfenv (prog, env)
+
 	return prog ()
 end
 
@@ -150,8 +159,9 @@ end
 -- @param template String with the name of the module containing the template.
 -- @param env Table with the environment to run the resulting function.
 -- If <code>nil</code> then a new environment will be used, both the new and
--- the provided enviornment will be equiped with the basic Lua functions.
--- @return the results of the function set by lp.setoutfunc()
+-- the provided environment will be equipped with the basic Lua functions.
+-- @return the results of the function set by lp.setoutfunc(), but might also
+-- throw an error
 
 function M.includemodule(template, env)
 	-- search using package.path (modified to search .lp instead of .lua
@@ -159,17 +169,27 @@ function M.includemodule(template, env)
 	local templatepath = search(search_path, template)
 	assert(templatepath, string.format("template `%s' not found", template))
 
-	env = env or {}
-	env.table = table
-	env.io = io
-	env.lp = M
-  env.pairs = pairs
-	env.ipairs = ipairs
-	env.tonumber = tonumber
-	env.tostring = tostring
-	env.type = type
-
 	return M.includefile(templatepath, env)
 end
+
+----------------------------------------------------------------------------
+-- Translates and executes a template in a given 'module' or file. This method
+-- enables to call directly on the module table. It will first call 
+-- lp.includefile(), and if that fails lp.includemodule()
+-- @name __call
+-- @class function
+-- @param name the file or module name.
+-- @param env Table with the environment to run the resulting function.
+-- If <code>nil</code> then a new environment will be used, both the new and
+-- the provided environment will be equipped with the basic Lua functions.
+-- @return the results or <code>nil + errormsg</code>
+setmetatable(M, { __call = function(self, name, env)
+    local success, result = pcall(self.includefile, name, env)
+    if not success then
+      success, result = self.includemodule(self.includemodule, name, env)
+    end
+    if success then return result end
+    return nil, result  -- it's an error
+  end})
 
 return M
