@@ -121,7 +121,8 @@ end
 -- @param filename String with the name of the file containing the template.
 -- Once compiled the template function will be cached, based on the filename.
 -- @param env Table with the environment to run the resulting function.
--- If <code>nil</code> then the current environment will be used
+-- If <code>nil</code> then a new environment will be used, both the new and
+-- the provided environment will be equipped with the basic Lua functions.
 -- @return the results of the function set by lp.setoutfunc(), but might also
 -- throw an error
 
@@ -158,8 +159,6 @@ end
 -- optionally given environment (will call the includefile() function).
 -- @param template String with the name of the module containing the template.
 -- @param env Table with the environment to run the resulting function.
--- If <code>nil</code> then a new environment will be used, both the new and
--- the provided environment will be equipped with the basic Lua functions.
 -- @return the results of the function set by lp.setoutfunc(), but might also
 -- throw an error
 
@@ -180,8 +179,6 @@ end
 -- @class function
 -- @param name the file or module name.
 -- @param env Table with the environment to run the resulting function.
--- If <code>nil</code> then a new environment will be used, both the new and
--- the provided environment will be equipped with the basic Lua functions.
 -- @return the results or <code>nil + errormsg</code>
 setmetatable(M, { __call = function(self, name, env)
     local success, result = pcall(self.includefile, name, env)
