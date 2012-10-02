@@ -85,13 +85,11 @@ function lp.setoutfunc (f)
 	outfunc = f
 end
 
--------------------------------------------------------------------------------
 -- Looks for a file `name' in given path. Removed from compat-5.1
 -- @param path String with the path.
 -- @param name String with the name to look for.
 -- @return String with the complete path of the file found
 --	or nil in case the file is not found.
-
 local function search (path, name)
   for c in string.gfind(path, "[^;]+") do
     c = gsub(c, "%?", name)

@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"> 
+<head>
+    <title>upnp.lp: Module Index</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+    <!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+    <div id="product_logo"></div>
+    <div id="product_name"><big><b></b></big></div>
+    <div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h2>LuaDoc</h2>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h2>Modules</h2>
+<ul>
+
+	<li>
+		<a href="../modules/upnp.html">upnp</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.action.html">upnp.action</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.argument.html">upnp.argument</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.device.html">upnp.device</a>
+	</li>
+
+	<li><strong>upnp.lp</strong></li>
+	
+	<li>
+		<a href="../modules/upnp.service.html">upnp.service</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.statevariable.html">upnp.statevariable</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.upnpbase.html">upnp.upnpbase</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module "<code>upnp.lp</code>"</h1>
+
+<p>Lua Pages template engine. Code was taken from LuaDoc and adapted for LuaUPnP.</p>
+
+
+<p>Copyright &copy; 2004-2007 The Kepler Project, LuaUPnP modifications 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a></p>
+
+
+<p><small><b>Release:</b> Version 0.x, LuaUPnP.</small></p>
+
+
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+    <tr>
+    <td class="name" nowrap><a href="#__call">__call</a>&nbsp;(name, env)</td>
+    <td class="summary">Translates and executes a template in a given 'module' or file.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#lp.compile">lp.compile</a>&nbsp;(str, chunkname)</td>
+    <td class="summary">Translates a template into a compiled Lua function.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#lp.includefile">lp.includefile</a>&nbsp;(filename, env)</td>
+    <td class="summary">Translates and executes a template in a given file.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#lp.includemodule">lp.includemodule</a>&nbsp;(template, env)</td>
+    <td class="summary">Translates and executes a template in a given 'module'.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#lp.setoutfunc">lp.setoutfunc</a>&nbsp;(f)</td>
+    <td class="summary">Defines the name of the output function.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#lp.translate">lp.translate</a>&nbsp;(s)</td>
+    <td class="summary">Translate the template to Lua code.</td>
+    </tr>
+
+</table>
+
+
+<br/>
+<br/>
+
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="__call"></a><strong>__call</strong>&nbsp;(name, env)</dt>
+<dd>
+Translates and executes a template in a given 'module' or file. This method enables to call directly on the module table. It will first call <code>lp.includefile()</code>, and if that fails <code>lp.includemodule()</code>
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>name</em></code>: the file or module name.
+	</li>
+	
+	<li>
+	  <code><em>env</em></code>: Table with the environment to run the resulting function.
+	</li>
+	
+</ul>
+
+
+
+
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+the results or <code>nil + errormsg</code>
+
+</div>
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="lp.compile"></a><strong>lp.compile</strong>&nbsp;(str, chunkname)</dt>
+<dd>
+Translates a template into a compiled Lua function. Does NOT execute the resulting function.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>str</em></code>: String with the template to be translated.
+	</li>
+	
+	<li>
+	  <code><em>chunkname</em></code>: String with the name of the chunk, for debugging purposes.
+	</li>
+	
+</ul>
+
+
+
+
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+Function with the resulting translation.
+
+</div>
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="lp.includefile"></a><strong>lp.includefile</strong>&nbsp;(filename, env)</dt>
+<dd>
+Translates and executes a template in a given file. The translation creates a Lua function which will be executed in an optionally given environment.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>filename</em></code>: String with the name of the file containing the template. Once compiled the template function will be cached, based on the filename.
+	</li>
+	
+	<li>
+	  <code><em>env</em></code>: Table with the environment to run the resulting function. If <code>nil</code> then a new environment will be used, both the new and the provided environment will be equipped with the basic Lua functions.
+	</li>
+	
+</ul>
+
+
+
+
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+the results of the function set by <code>lp.setoutfunc()</code>, but might also throw an error
+
+</div>
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="lp.includemodule"></a><strong>lp.includemodule</strong>&nbsp;(template, env)</dt>
+<dd>
+Translates and executes a template in a given 'module'. It will search for a file located in the module path. It will look for a <code>'.upnp'</code> extension The translation creates a Lua function which will be executed in an optionally given environment (will call the <code>lp.includefile()</code> function).
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>template</em></code>: String with the name of the module containing the template.
+	</li>
+	
+	<li>
+	  <code><em>env</em></code>: Table with the environment to run the resulting function.
+	</li>
+	
+</ul>
+
+
+
+
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+the results of the function set by <code>lp.setoutfunc()</code>, but might also throw an error
+
+</div>
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="lp.setoutfunc"></a><strong>lp.setoutfunc</strong>&nbsp;(f)</dt>
+<dd>
+Defines the name of the output function.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>f</em></code>: String with the name of the function which produces output. Default value is <code>"return"</code>.
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="lp.translate"></a><strong>lp.translate</strong>&nbsp;(s)</dt>
+<dd>
+Translate the template to Lua code.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>s</em></code>: String to translate.
+	</li>
+	
+</ul>
+
+
+
+
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+String with translated, but not compiled, code. 
+
+</div>
+
+
+
+
+
+
+
+</dd>
+
+
+</dl>
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+    <p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+</body>
+</html>
