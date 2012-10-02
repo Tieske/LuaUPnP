@@ -11,18 +11,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ]]
 
 
-local assert, error, getfenv, loadstring, setfenv = assert, error, getfenv, loadstring, setfenv
 local find, format, gsub, strsub = string.find, string.format, string.gsub, string.sub
-local concat, tinsert = table.concat, table.insert
-local open = io.open
 
-module (...)
+local M = {}
 
 ----------------------------------------------------------------------------
 -- function to do output
 local outfunc = "io.write"
--- accepts the old expression field: `$| <Lua expression> |$'
-local compatmode = true
 
 --
 -- Builds a piece of Lua code which outputs the (part of the) given string.
@@ -47,32 +42,28 @@ end
 -- @param s String to translate.
 -- @return String with translated code.
 ----------------------------------------------------------------------------
-function translate (s)
-	if compatmode then
-		s = gsub(s, "$|(.-)|%$", "<?lua = %1 ?>")
-		s = gsub(s, "<!%-%-$$(.-)$$%-%->", "<?lua %1 ?>")
-	end
+function M.translate (s)
 	s = gsub(s, "<%%(.-)%%>", "<?lua %1 ?>")
 	local res = {}
 	local start = 1   -- start of untranslated part in `s'
 	while true do
 		local ip, fp, target, exp, code = find(s, "<%?(%w*)[ \t]*(=?)(.-)%?>", start)
 		if not ip then break end
-		tinsert(res, out(s, start, ip-1))
+		table.insert(res, out(s, start, ip-1))
 		if target ~= "" and target ~= "lua" then
 			-- not for Lua; pass whole instruction to the output
-			tinsert(res, out(s, ip, fp))
+			table.insert(res, out(s, ip, fp))
 		else
 			if exp == "=" then   -- expression?
-				tinsert(res, format(" %s(%s);", outfunc, code))
+				table.insert(res, format(" %s(%s);", outfunc, code))
 			else  -- command
-				tinsert(res, format(" %s ", code))
+				table.insert(res, format(" %s ", code))
 			end
 		end
 		start = fp + 1
 	end
-	tinsert(res, out(s, start))
-	return concat(res)
+	table.insert(res, out(s, start))
+	return table.concat(res)
 end
 
 
@@ -80,16 +71,8 @@ end
 -- Defines the name of the output function.
 -- @param f String with the name of the function which produces output.
 
-function setoutfunc (f)
+function M.setoutfunc (f)
 	outfunc = f
-end
-
-----------------------------------------------------------------------------
--- Turns on or off the compatibility with old CGILua 3.X behavior.
--- @param c Boolean indicating if the compatibility mode should be used.
-
-function setcompatmode (c)
-	compatmode = c
 end
 
 ----------------------------------------------------------------------------
@@ -105,10 +88,10 @@ local cache = {}
 -- @param chunkname String with the name of the chunk, for debugging purposes.
 -- @return Function with the resulting translation.
 
-function compile (string, chunkname)
+function M.compile (string, chunkname)
 	local f, err = cache[string]
 	if f then return f end
-	f, err = loadstring (translate (string), chunkname)
+	f, err = loadstring (M.translate (string), chunkname)
 	if not f then error (err, 3) end
 	cache[string] = f
 	return f
@@ -121,13 +104,13 @@ end
 -- @param filename String with the name of the file containing the template.
 -- @param env Table with the environment to run the resulting function.
 
-function include (filename, env)
+function M.include (filename, env)
 	-- read the whole contents of the file
-	local fh = assert (open (filename))
+	local fh = assert (io.open (filename))
 	local src = fh:read("*a")
 	fh:close()
 	-- translates the file into a function
-	local prog = compile (src, '@'..filename)
+	local prog = M.compile (src, '@'..filename)
 	local _env
 	if env then
 		_env = getfenv (prog)
@@ -135,3 +118,5 @@ function include (filename, env)
 	end
 	prog ()
 end
+
+return M
