@@ -1,5 +1,6 @@
 --[[
 Original file from LuaDoc, included 2-Oct-2012
+merged from 'lp.lua' and 'html.lua'
 
 Copyright © 2004-2007 The Kepler Project.
 
@@ -75,6 +76,25 @@ function M.setoutfunc (f)
 	outfunc = f
 end
 
+-------------------------------------------------------------------------------
+-- Looks for a file `name' in given path. Removed from compat-5.1
+-- @param path String with the path.
+-- @param name String with the name to look for.
+-- @return String with the complete path of the file found
+--	or nil in case the file is not found.
+
+local function search (path, name)
+  for c in string.gfind(path, "[^;]+") do
+    c = gsub(c, "%?", name)
+    local f = io.open(c)
+    if f then   -- file exist?
+      f:close()
+      return c
+    end
+  end
+  return nil    -- file not found
+end
+
 ----------------------------------------------------------------------------
 -- Internal compilation cache.
 
@@ -83,17 +103,13 @@ local cache = {}
 ----------------------------------------------------------------------------
 -- Translates a template into a Lua function.
 -- Does NOT execute the resulting function.
--- Uses a cache of templates.
 -- @param string String with the template to be translated.
 -- @param chunkname String with the name of the chunk, for debugging purposes.
 -- @return Function with the resulting translation.
 
-function M.compile (string, chunkname)
-	local f, err = cache[string]
-	if f then return f end
-	f, err = loadstring (M.translate (string), chunkname)
+function M.compile (str, chunkname)
+	local f, err = loadstring (M.translate (str), chunkname)
 	if not f then error (err, 3) end
-	cache[string] = f
 	return f
 end
 
@@ -102,21 +118,58 @@ end
 -- The translation creates a Lua function which will be executed in an
 -- optionally given environment.
 -- @param filename String with the name of the file containing the template.
+-- Once compiled the template function will be cached, based on the filename.
 -- @param env Table with the environment to run the resulting function.
+-- If <code>nil</code> then the current environment will be used
+-- @return the results of the function set by lp.setoutfunc()
 
-function M.include (filename, env)
-	-- read the whole contents of the file
-	local fh = assert (io.open (filename))
-	local src = fh:read("*a")
-	fh:close()
-	-- translates the file into a function
-	local prog = M.compile (src, '@'..filename)
+function M.includefile (filename, env)
+  local prog = cache[filename]
+  if not prog then
+    -- read the whole contents of the file
+    local fh = assert (io.open (filename))
+    local src = fh:read("*a")
+    fh:close()
+    -- translates the file into a function
+    prog = M.compile (src, '@'..filename)
+    cache[filename] = prog
+  end
 	local _env
 	if env then
 		_env = getfenv (prog)
 		setfenv (prog, env)
 	end
-	prog ()
+	return prog ()
+end
+
+----------------------------------------------------------------------------
+-- Translates and executes a template in a given 'module'. It will search 
+-- for a file located in the module path. It will look for a '.upnp' extension
+-- The translation creates a Lua function which will be executed in an
+-- optionally given environment (will call the includefile() function).
+-- @param template String with the name of the module containing the template.
+-- @param env Table with the environment to run the resulting function.
+-- If <code>nil</code> then a new environment will be used, both the new and
+-- the provided enviornment will be equiped with the basic Lua functions.
+-- @return the results of the function set by lp.setoutfunc()
+
+function M.includemodule(template, env)
+	-- search using package.path (modified to search .lp instead of .lua
+	local search_path = string.gsub(package.path, "%.lua", "%.upnp")
+	local templatepath = search(search_path, template)
+	assert(templatepath, string.format("template `%s' not found", template))
+
+	env = env or {}
+	env.table = table
+	env.io = io
+	env.lp = M
+  env.pairs = pairs
+	env.ipairs = ipairs
+	env.tonumber = tonumber
+	env.tostring = tostring
+	env.type = type
+
+	return M.includefile(templatepath, env)
 end
 
 return M
