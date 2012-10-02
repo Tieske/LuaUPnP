@@ -13,7 +13,7 @@ rem =================================================================
 rem
 
 rem go to source directory and start LuaDoc
-"%LUA_SOURCEPATH%\luadoc_start.lua" -r readme.md -d .\doc .\lua_src
+"%LUA_SOURCEPATH%\luadoc_start.lua" --nofiles -r readme.md -d .\doc .\lua_src
 start .\doc\index.html
 pause
 

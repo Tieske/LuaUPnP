@@ -67,43 +67,6 @@
 
 <!-- File list -->
 
-<h2>Files</h2>
-<ul>
-
-	<li>
-		<a href="../files/lua_src/classes/action.html">lua_src/classes/action.lua</a>
-	</li>
-
-	<li>
-		<a href="../files/lua_src/classes/argument.html">lua_src/classes/argument.lua</a>
-	</li>
-
-	<li>
-		<a href="../files/lua_src/classes/device.html">lua_src/classes/device.lua</a>
-	</li>
-
-	<li>
-		<a href="../files/lua_src/classes/service.html">lua_src/classes/service.lua</a>
-	</li>
-
-	<li>
-		<a href="../files/lua_src/classes/statevariable.html">lua_src/classes/statevariable.lua</a>
-	</li>
-
-	<li>
-		<a href="../files/lua_src/classes/upnpbase.html">lua_src/classes/upnpbase.lua</a>
-	</li>
-
-	<li>
-		<a href="../files/lua_src/device_config.html">lua_src/device_config.lua</a>
-	</li>
-
-	<li>
-		<a href="../files/lua_src/init.html">lua_src/init.lua</a>
-	</li>
-
-</ul>
-
 
 
 
@@ -272,6 +235,9 @@ object type as requested, to be created by calling <code>objectbaseclass:new(pli
 
 
 
+
+
+
 </dd>
 
 
@@ -290,6 +256,9 @@ Adds a sub-device to the device.
 	</li>
 	
 </ul>
+
+
+
 
 
 
@@ -324,6 +293,9 @@ Adds a service to the device.
 
 
 
+
+
+
 </dd>
 
 
@@ -349,6 +321,9 @@ udn of the device
 
 
 
+
+
+
 </dd>
 
 
@@ -357,6 +332,9 @@ udn of the device
 <dt><a name="device:initialize"></a><strong>device:initialize</strong>&nbsp;()</dt>
 <dd>
 Initializes the device object. Will be called upon instantiation of an object, override this method to set default values for all properties.
+
+
+
 
 
 
@@ -407,6 +385,9 @@ device object or <code>nil + error message</code>
 
 
 
+
+
+
 <div>
 
 <h3>See also:</h3>
@@ -447,6 +428,9 @@ Sets the udn (unique device name; UUID) of the device. Adds the device to the gl
 
 
 
+
+
+
 </dd>
 
 
@@ -464,6 +448,9 @@ Startup handler. Called by <code>upnpbase</code> ancestor object for the event <
 
 
 
+
+
+
 </dd>
 
 
@@ -472,6 +459,9 @@ Startup handler. Called by <code>upnpbase</code> ancestor object for the event <
 <dt><a name="device:stop"></a><strong>device:stop</strong>&nbsp;()</dt>
 <dd>
 Shutdown handler. Called by <code>upnpbase</code> ancestor object for the event <code>upnp.events.UPnPstopping</code> (event through the Copas Timer eventer mechanism) When called it will call the <code>stop()</code> method on all sub-devices. Override in child classes to add specific shutdown functionality (stopping hardware comms for example) See also <a href="upnp.upnpbase.html#upnpbase:start"><code>upnpbase:stop()</code></a>
+
+
+
 
 
 

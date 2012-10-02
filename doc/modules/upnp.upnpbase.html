@@ -67,43 +67,6 @@
 
 <!-- File list -->
 
-<h2>Files</h2>
-<ul>
-
-	<li>
-		<a href="../files/lua_src/classes/action.html">lua_src/classes/action.lua</a>
-	</li>
-
-	<li>
-		<a href="../files/lua_src/classes/argument.html">lua_src/classes/argument.lua</a>
-	</li>
-
-	<li>
-		<a href="../files/lua_src/classes/device.html">lua_src/classes/device.lua</a>
-	</li>
-
-	<li>
-		<a href="../files/lua_src/classes/service.html">lua_src/classes/service.lua</a>
-	</li>
-
-	<li>
-		<a href="../files/lua_src/classes/statevariable.html">lua_src/classes/statevariable.lua</a>
-	</li>
-
-	<li>
-		<a href="../files/lua_src/classes/upnpbase.html">lua_src/classes/upnpbase.lua</a>
-	</li>
-
-	<li>
-		<a href="../files/lua_src/device_config.html">lua_src/device_config.lua</a>
-	</li>
-
-	<li>
-		<a href="../files/lua_src/init.html">lua_src/init.lua</a>
-	</li>
-
-</ul>
-
 
 
 
@@ -254,6 +217,9 @@ Clears all the lazy-elements set. Applies to <code>getaction(), getservice(), ge
 
 
 
+
+
+
 </dd>
 
 
@@ -262,6 +228,9 @@ Clears all the lazy-elements set. Applies to <code>getaction(), getservice(), ge
 <dt><a name="upnpbase:getaction"></a><strong>upnpbase:getaction</strong>&nbsp;()</dt>
 <dd>
 Gets the owning action. Only applicable for arguments.
+
+
+
 
 
 
@@ -288,6 +257,9 @@ Gets the owning device.
 
 
 
+
+
+
 </dd>
 
 
@@ -296,6 +268,9 @@ Gets the owning device.
 <dt><a name="upnpbase:gethandle"></a><strong>upnpbase:gethandle</strong>&nbsp;()</dt>
 <dd>
 Gets the handle of the owning rootdevice.
+
+
+
 
 
 
@@ -322,6 +297,9 @@ Gets the owning rootdevice.
 
 
 
+
+
+
 </dd>
 
 
@@ -330,6 +308,9 @@ Gets the owning rootdevice.
 <dt><a name="upnpbase:getservice"></a><strong>upnpbase:getservice</strong>&nbsp;()</dt>
 <dd>
 Gets the owning service.
+
+
+
 
 
 
@@ -356,6 +337,9 @@ Initializes the upnpbase object. Will be called upon instantiation of an object,
 
 
 
+
+
+
 </dd>
 
 
@@ -373,6 +357,9 @@ Startup handler. Called for the event <code>upnp.events.UPnPstarted</code> (even
 
 
 
+
+
+
 </dd>
 
 
@@ -381,6 +368,9 @@ Startup handler. Called for the event <code>upnp.events.UPnPstarted</code> (even
 <dt><a name="upnpbase:stop"></a><strong>upnpbase:stop</strong>&nbsp;()</dt>
 <dd>
 Shutdown handler. Called for the event <code>upnp.events.UPnPstopping</code> (event through the Copas Timer eventer mechanism) This method will only be called on objects WITHOUT a parent (root devices). If an object has children, it should call the <code>stop()</code> method on its children if required, they will not be called automatically.
+
+
+
 
 
 
@@ -424,6 +414,9 @@ object that represent a new class that provides the features defined by table an
 
 
 
+
+
+
 </dd>
 
 
@@ -458,6 +451,9 @@ Check whether the object is a subclass of another class
 
 
 
+
+
+
 </dd>
 
 
@@ -479,6 +475,9 @@ Returns the superclass of an object.
 the super-class of class or <code>nil</code> if class is not a class of the model or does not define a super class.
 
 </div>
+
+
+
 
 
 
