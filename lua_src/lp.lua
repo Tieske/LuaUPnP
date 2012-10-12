@@ -169,7 +169,7 @@ end
 -- throw an error
 
 function lp.includemodule(template, env)
-	-- search using package.path (modified to search .lp instead of .lua
+	-- search using package.path (modified to search .upnp instead of .lua
 	local search_path = string.gsub(package.path, "%.lua", "%.upnp")
 	local templatepath = search(search_path, template)
 	assert(templatepath, string.format("template `%s' not found", template))

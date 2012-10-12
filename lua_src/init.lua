@@ -26,8 +26,10 @@
 -- @class table
 -- @field classes holds a list of classes for upnp devices; upnpbase, device, service, etc.
 -- @field devices list of registered devices indexed by their UDN
+-- @field logger the logger in use by the upnp module (all <code>print()</code> commands will be rerouted here)
 -- @field webroot path of the web-root directory
 -- @field baseurl base url pointing to the web-root directory
+-- @field configroot base directory for configuration information
 -- @field lib contains the mapped functions of pupnp library
 -- @field lib.web contains the mapped functions of upnp web methods
 -- @field lib.http contains the mapped functions of upnp http methods
@@ -68,6 +70,7 @@ local lib = require("upnp.core")            -- load UPnP core module (C code)
 -- create a global table
 logger:debug("Setting up globals and classes")
 upnp = {}   -- create a global table
+upnp.logger = logger
 upnp.classes               = upnp.classes or {}
 --upnp.classes.base          = require("upnp.classes.base")
 upnp.classes.upnpbase      = require("upnp.classes.upnpbase")
@@ -78,6 +81,7 @@ upnp.classes.action        = require("upnp.classes.action")
 upnp.classes.argument      = require("upnp.classes.argument")
 upnp.devices = {}          -- global list of UPnP devices, by their UDN
 upnp.lib = lib             -- export the core UPnP lib
+upnp.configroot = "."     -- base directory for configuration information
 
 -- webserver setup
 logger:debug("Configuring webserver")
@@ -348,6 +352,60 @@ function upnp.stopdevice(hdl)
 end
 
 -----------------------------------------------------------------------------------------
+-- Read a configfile. The configfile must be a lua table format, starting with '<code>
+-- return {</code>' and ending with '<code>}</code>'.
+-- @param configname configuration filename to load. This should only be a filename
+-- (no path), and it will be sought for in the <code>upnp.configroot</code> directory.
+-- @return table with configuration loaded, or <code>nil + error</code> if it failed
+-- @see upnp.configroot
+function readconfigfile(configname)
+  local path = upnp.configroot:gsub("\\","/")
+  if #path>0 and path:sub(-1,-1) ~= "/" then
+    path = path .. "/"
+  end
+  while configname:sub(1,1) == "/" do
+    configname = configname:sub(2, -1)
+  end
+  path = path .. configname
+
+  logger:debug("upnp.readconfigfile, reading from: " .. path)
+  local success, result = pcall(dofile, path)
+  if not success then
+    logger:error("upnp.readconfigfile: " .. tostring(result))
+    return nil, result  -- return error
+  end
+  return result
+end
+
+-----------------------------------------------------------------------------------------
+-- Write a configfile. The configfile must be a string in Lua table format, starting with '<code>
+-- return {</code>' and ending with '<code>}</code>'.
+-- @param configname configuration filename to write to. This should only be a filename only
+-- (no path), and it will be stored in the <code>upnp.configroot</code> directory.
+-- @param content the content to write, must be valid Lua code returning a table.
+-- @return 1 on success, <code>nil + errormsg</code> upon failure
+-- @see upnp.configroot
+function writeconfigfile(configname, content)
+  local path = upnp.configroot:gsub("\\","/")
+  if #path>0 and path:sub(-1,-1) ~= "/" then
+    path = path .. "/"
+  end
+  while configname:sub(1,1) == "/" do
+    configname = configname:sub(2, -1)
+  end
+  path = path .. configname
+
+  logger:debug("upnp.writeconfigfile, writing to: " .. path)
+  local file, err = io.open(path, "w")
+  if not file then
+    logger:error("upnp.readconfigfile: " .. tostring(err))
+    return nil, err  -- return error
+  end
+  file:write(content)
+  file:close()
+  return 1
+end
+-----------------------------------------------------------------------------------------
 -- Gets an xml document. It will try to get the xml from several things; 1) filename,
 -- 2) literal xml, 3) IXML object. If a filename is given, it will first try to open, if
 -- it fails it will try again relative to the <code>upnp.webroot</code> directory.
@@ -432,9 +490,9 @@ unsubscribe = nil
 -- @see upnp.unsubscribe
 -- @class table
 -- @name upnp.events
--- @field UPnPstarting This event is started on the <code>copas.events.loopstarted</code> event and executes before any UPnP code is being run. Only when this event is complete (all handlers spawned have finished) the UPnP code will start.
--- @field UPnPstarted Runs after the UPnP library has been initiated and is running
--- @field UPnPstopping This event is started from the <code>copas.events.loopstopping</code> event and executes before any UPnP code is being torn down. Only when this event is complete (all handlers spawned have finished) the UPnP code will initiate the teardown.
+-- @field UPnPstarting This event is started on the <code>copas.events.loopstarted</code> event and executes before any UPnP code is being run. Only when this event is complete (all handlers spawned have finished) the UPnP code will start. Use this event to setup any UPnP devices.
+-- @field UPnPstarted Runs after the UPnP library has been initiated and is running. The device object typically start themselves on this event and will announce themselves.
+-- @field UPnPstopping This event is started from the <code>copas.events.loopstopping</code> event and executes before any UPnP code is being torn down. Only when this event is complete (all handlers spawned have finished) the UPnP code will initiate the teardown. The device object typically will stop itself on this event.
 -- @field UPnPstopped Runs after the UPnP code has been stopped
 events = { "UPnPstarting", "UPnPstarted", "UPnPstopping", "UPnPstopped"}
 
