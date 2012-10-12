@@ -40,7 +40,7 @@ local creategeneric = function(element, domain, elemtype, typename, version)
   fulltype = typecheck(domain, elemtype, typename, version)
   if not fulltype then return nil, string.format("cannot create %s, typecheck failed", tostring(elemtype)) end
   
-  local success, creator = pcall(require, "upnp."..elemtype.."."..fulltype:gsub("%:","_"))
+  local success, creator = pcall(require, "upnp."..elemtype.."."..fulltype:gsub("%:","_"):gsub("%.","_")
   if not success then
     return nil, string.format("cannot create '%s', no module found for it or error loading. ErrMsg: %s", tostring(devtype), tostring(creator))
   end
