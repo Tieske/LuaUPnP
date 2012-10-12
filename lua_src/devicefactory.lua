@@ -97,4 +97,71 @@ devicefactory.createservice = function(service, domain, servicetype, version)
   return unpack(results)
 end
 
+--------------------------------------------------------------------------------------
+-- Drops optional elements (statevariables and/or actions) from a service.
+-- @return service table, but it will have been modified, might also throw an error
+-- @param service the service table where elements need to be dropped from
+-- @param droptable a table containing the elements to drop by name, with value <code>false</code>
+-- @example# -- example droplist for a 'urn:schemas-upnp-org:service:Dimming:1' service
+-- local droplist = devicefactory.emptyservice()
+-- droplist.serviceStateTable.StepDelta = false
+-- droplist.actionList.StepUp = false
+-- droplist.actionList.StepDown = false
+devicefactory.dropservice = function(service, droptable)
+  if droptable == nil then return service end
+  if droptable.serviceStateTable and next(droptable.serviceStateTable) then
+    for k,v in pairs(service.serviceStateTable or {}) do
+      if droptable.serviceStateTable[v.name] == false then service.serviceStateTable[k] = nil end
+    end
+  end
+  if droptable.actionList and next(droptable.actionList) then
+    for k,v in pairs(service.actionList or {}) do
+      if droptable.actionList[v.name] == false then service.actionList[k] = nil end
+    end
+  end
+  return service
+end
+
+--------------------------------------------------------------------------------------
+-- Drops optional elements from a device.
+-- Includes any underlying services and sub-devices.
+-- <br/>NOTE: the subdevices are indexed by <code>serviceType</code> in the droptable
+-- hence if a device contains 2 sub-devices of the same type, things might go berserk!
+-- @return device table, but it will have been modified, might also throw an error
+-- @param device the device table where elements need to be dropped from
+-- @param droptable a table containing the elements to drop by <code>serviceId</code> (for services)
+-- or <code>deviceType</code> (for devices), with value <code>false</code>.
+-- @example# -- example droplist for a 'urn:schemas-upnp-org:device:DimmableLight:1' device
+-- local droplist = devicefactory.emptydevice()
+-- droplist.serviceList["urn:upnp-org:serviceId:Dimming:1"] = devicefactory.emptyservice()
+-- droplist.serviceList["urn:upnp-org:serviceId:Dimming:1"].serviceStateTable.StepDelta = false
+-- droplist.serviceList["urn:upnp-org:serviceId:Dimming:1"].actionList.StepUp = false
+-- droplist.serviceList["urn:upnp-org:serviceId:Dimming:1"].actionList.StepDown = false
+devicefactory.dropdevice = function(device, droptable)
+  if droptable == nil then return device end
+  for k,v in pairs(device) do
+    if droptable[k] == false then device[k] = nil end
+  end
+  if droptable.serviceList and next(droptable.serviceList) then
+    for k,v in pairs(device.serviceList or {}) do
+      if droptable.serviceList[v.serviceId] == false then 
+        device.serviceList[k] = nil
+      else
+        devicefactory.dropservice(v, droptable.serviceList[v.serviceId])
+      end
+    end
+  end
+  if droptable.deviceList and next(droptable.deviceList) then
+    for k,v in pairs(device.deviceList or {}) do
+      if droptable.deviceList[v.deviceType] == false then 
+        device.deviceList[k] = nil 
+      else
+        devicefactory.dropdevice(v, droptable.deviceList[v.deviceType])
+      end
+    end
+  end
+  return device
+end
+
+
 return devicefactory
