@@ -1,6 +1,8 @@
 
-local function newdevice()
-return {
+local export = {}
+
+export.newdevice = function()
+  return {
 		deviceType = "urn:schemas-upnp-org:device:Basic:1",
 		friendlyName = "short user-friendly title",
 		manufacturer = "manufacturer name",
@@ -20,3 +22,6 @@ return {
     },
     -- presentationURL = "",
   }
+end
+
+return export

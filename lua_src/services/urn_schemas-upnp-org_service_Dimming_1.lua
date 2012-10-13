@@ -1,268 +1,218 @@
--- Returns an IXML document node containing the xml below
-return require("upnp").lib.ixml.ParseBuffer( [===[
-<?xml version="1.0"?>
-<scpd xmlns="urn:schemas-upnp-org:service-1-0">
-	<specVersion>
-		<major>1</major>
-		<minor>0</minor>
-	</specVersion>
-	<actionList>
-		<action>
-			<name>SetLoadLevelTarget</name>
-			<argumentList>
-				<argument>
-					<name>newLoadlevelTarget</name>
-					<direction>in</direction>
-					<relatedStateVariable>LoadLevelTarget</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>GetLoadLevelTarget</name>
-			<argumentList>
-				<argument>
-					<name>retLoadlevelTarget</name>
-					<direction>out</direction>
-					<retval />
-					<relatedStateVariable>LoadLevelTarget</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>GetLoadLevelStatus</name>
-			<argumentList>
-				<argument>
-					<name>retLoadlevelStatus</name>
-					<direction>out</direction>
-					<retval />
-					<relatedStateVariable>LoadLevelStatus</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>SetOnEffectLevel</name>
-			<argumentList>
-				<argument>
-					<name>newOnEffectLevel</name>
-					<direction>in</direction>
-					<relatedStateVariable>OnEffectLevel</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>SetOnEffect</name>
-			<argumentList>
-				<argument>
-					<name>newOnEffect</name>
-					<direction>in</direction>
-					<relatedStateVariable>OnEffect</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>GetOnEffectParameters</name>
-			<argumentList>
-				<argument>
-					<name>retOnEffect</name>
-					<direction>out</direction>
-					<relatedStateVariable>OnEffect</relatedStateVariable>
-				</argument>
-				<argument>
-					<name>retOnEffectLevel</name>
-					<direction>out</direction>
-					<relatedStateVariable>OnEffectLevel</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>StepUp</name>
-		</action>
-		<action>
-			<name>StepDown</name>
-		</action>
-		<action>
-			<name>StartRampUp</name>
-		</action>
-		<action>
-			<name>StartRampDown</name>
-		</action>
-		<action>
-			<name>StopRamp</name>
-		</action>
-		<action>
-			<name>StartRampToLevel</name>
-			<argumentList>
-				<argument>
-					<name>newLoadLevelTarget</name>
-					<direction>in</direction>
-					<relatedStateVariable>LoadLevelTarget</relatedStateVariable>
-				</argument>
-				<argument>
-					<name>newRampTime</name>
-					<direction>in</direction>
-					<relatedStateVariable>RampTime</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>SetStepDelta</name>
-			<argumentList>
-				<argument>
-					<name>newStepDelta</name>
-					<direction>in</direction>
-					<relatedStateVariable>StepDelta</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>GetStepDelta</name>
-			<argumentList>
-				<argument>
-					<name>retStepDelta</name>
-					<direction>out</direction>
-					<retval />
-					<relatedStateVariable>StepDelta</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>SetRampRate</name>
-			<argumentList>
-				<argument>
-					<name>newRampRate</name>
-					<direction>in</direction>
-					<relatedStateVariable>RampRate</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>GetRampRate</name>
-			<argumentList>
-				<argument>
-					<name>retRampRatename</name>
-					<direction>out</direction>
-					<retval />
-					<relatedStateVariable>RampRate</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>PauseRamp</name>
-		</action>
-		<action>
-			<name>ResumeRamp</name>
-		</action>
-		<action>
-			<name>GetIsRamping</name>
-			<argumentList>
-				<argument>
-				<name>retIsRamping</name>
-					<direction>out</direction>
-					<retval />
-					<relatedStateVariable>IsRamping</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>GetRampPaused</name>
-			<argumentList>
-				<argument>
-					<name>retRampPaused</name>
-					<direction>out</direction>
-					<retval	/>
-					<relatedStateVariable>RampPaused</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>GetRampTime</name>
-			<argumentList>
-				<argument>
-					<name>retRampTime</name>
-					<direction>out</direction>
-					<retval />
-					<relatedStateVariable>RampTime</relatedStateVariable>
-				</argument>
-			</argumentList>
-			</action>
-	<!-- Declarations for other actions added by UPnP vendor (if any) go here -->
-	</actionList>
-	<serviceStateTable>
-		<stateVariable sendEvents="no">
-			<name>LoadLevelTarget</name>
-			<dataType>ui1</dataType>
-			<defaultValue>0</defaultValue>
-			<allowedValueRange>
-				<minimum>0</minimum>
-				<maximum>100</maximum>
-			</allowedValueRange>
-		</stateVariable>
-		<stateVariable sendEvents="yes">
-			<name>LoadLevelStatus</name>
-			<dataType>ui1</dataType>
-			<defaultValue>0</defaultValue>
-			<allowedValueRange>
-				<minimum>0</minimum>
-				<maximum>100</maximum>
-			</allowedValueRange>
-		</stateVariable>
-		<stateVariable sendEvents="no">
-			<name>OnEffectLevel</name>
-			<dataType>ui1</dataType>
-			<defaultValue>100</defaultValue>
-			<allowedValueRange>
-				<minimum>0</minimum>
-				<maximum>100</maximum>
-			</allowedValueRange>
-		</stateVariable>
-		<stateVariable sendEvents="no">
-			<name>OnEffect</name>
-			<dataType>string</dataType>
-			<defaultValue>Default</defaultValue>
-			<allowedValueList>
-				<allowedValue>OnEffectLevel</allowedValue>
-				<allowedValue>LastSetting</allowedValue>
-				<allowedValue>Default</allowedValue>
-			</allowedValueList>
-		</stateVariable>
-		<stateVariable sendEvents="yes">
-			<name>StepDelta</name>
-			<dataType>ui1</dataType>
-			<defaultValue> Manufacturer defined default value </defaultValue>
-			<allowedValueRange>
-				<minimum>1</minimum>
-				<maximum>100</maximum>
-			</allowedValueRange>
-		</stateVariable>
-		<stateVariable sendEvents="yes">
-			<name>RampRate</name>
-			<dataType>ui1</dataType>
-			<defaultValue>0</defaultValue>
-			<allowedValueRange>
-				<minimum>0</minimum>
-				<maximum>100</maximum>
-			</allowedValueRange>
-		</stateVariable>
-		<stateVariable sendEvents="no">
-			<name>RampTime</name>
-			<dataType>ui4</dataType>
-			<defaultValue>0</defaultValue>
-			<allowedValueRange>
-				<minimum>0</minimum>
-				<maximum>4294967295</maximum>
-			</allowedValueRange>
-		</stateVariable>
-		<stateVariable sendEvents="yes">
-			<name>IsRamping</name>
-			<dataType>boolean</dataType>
-			<defaultValue>0</defaultValue>
-		</stateVariable>
-		<stateVariable sendEvents="yes">
-			<name>RampPaused</name>
-			<dataType>boolean</dataType>
-			<defaultValue>0</defaultValue>
-		</stateVariable>
-	</serviceStateTable>
-	<!-- Declarations for other state variables added by UPnP vendor (if any)go here -->
-</scpd>
-]===])
+
+local export = {}
+
+export.newservice = function()
+  return {
+    serviceType = "urn:schemas-upnp-org:service:Dimming:1",
+    actionList = {
+      { name = "SetLoadLevelTarget",
+			  argumentList = {
+					{ name = "newLoadlevelTarget",
+					  direction = "in", 
+					  relatedStateVariable = "LoadLevelTarget",
+          },
+				},
+      },
+			{ name = "GetLoadLevelTarget",
+			  argumentList = {
+          { name = "retLoadlevelTarget",
+					  direction = "out", 
+					  retval = true,
+					  relatedStateVariable = "LoadLevelTarget",
+          },
+				},
+      },
+			{ name = "GetLoadLevelStatus",
+			  argumentList = {
+					{ name = "retLoadlevelStatus",
+					  direction = "out",
+					  retval = true,
+					  relatedStateVariable = "LoadLevelStatus",
+          },
+				},
+      },
+      { name = "SetOnEffectLevel",
+			  argumentList = {
+          { name = "newOnEffectLevel",
+					  direction = "in", 
+					  relatedStateVariable = "OnEffectLevel",
+          },
+				},
+			},
+      { name = "SetOnEffect",
+			  argumentList = {
+			    { name = "newOnEffect",
+            direction = "in",
+            relatedStateVariable = "OnEffect",
+          },
+        },
+      },
+      { name = "GetOnEffectParameters", 
+        argumentList = {
+          { name = "retOnEffect",
+            direction = "out",
+            relatedStateVariable = "OnEffect",
+          },
+          { name = "retOnEffectLevel", 
+            direction = "out",
+            relatedStateVariable = "OnEffectLevel",
+          },
+        },
+      },
+      { name = "StepUp" },
+      { name = "StepDown" },
+      { name = "StartRampUp" },
+      { name = "StartRampDown" },
+      { name = "StopRamp" },
+      { name = "StartRampToLevel",
+        argumentList = {
+          { name = "newLoadLevelTarget",
+            direction = "in",
+            relatedStateVariable = "LoadLevelTarget",
+          },
+          { name = "newRampTime",
+            direction = "in",
+            relatedStateVariable = "RampTime",
+          },
+        },
+      },
+      { name = "SetStepDelta",
+        argumentList = {
+          { name = "newStepDelta",
+            direction = "in",
+            relatedStateVariable = "StepDelta",
+          },
+        },
+      },
+      { name = "GetStepDelta",
+        argumentList = {
+          { name = "retStepDelta",
+            direction = "out",
+            retval = true,
+            relatedStateVariable = "StepDelta",
+          },
+        },
+      },
+      { name = "SetRampRate",
+        argumentList = {
+          { name = "newRampRate",
+            direction = "in", 
+            relatedStateVariable = "RampRate",
+          },
+        },
+      },
+      { name = "GetRampRate",
+        argumentList = {
+          { name = "retRampRatename",
+            direction = "out",
+            retval = true,
+            relatedStateVariable = "RampRate",
+          },
+        },
+      },
+      { name = "PauseRamp" },
+      { name = "ResumeRamp" },
+      { name = "GetIsRamping",
+        argumentList = {
+          { name = "retIsRamping",
+            direction = "out",
+            retval = true,
+            relatedStateVariable = "IsRamping",
+          },
+        },
+      },
+      { name = "GetRampPaused",
+        argumentList = {
+          { name = "retRampPaused",
+            direction = "out",
+            retval =  true,
+            relatedStateVariable = "RampPaused",
+          },
+        },
+      },
+      { name = "GetRampTime",
+        argumentList = {
+          { name = "retRampTime",
+            direction = "out",
+            retval = true,
+            relatedStateVariable = "RampTime",
+          },
+        },
+      },
+    },
+    serviceStateTable = {
+      { name = "LoadLevelTarget",
+        sendEvents = false,
+        dataType = "ui1",
+        defaultValue = "0",
+        allowedValueRange = {
+          minimum = "0",
+          maximum = "100",
+        },
+      },
+      { name = "LoadLevelStatus",
+        sendEvents = true,
+        dataType = "ui1",
+        defaultValue = "0",
+        allowedValueRange = {
+          minimum = "0",
+          maximum = "100",
+        },
+      },
+      { name = "OnEffectLevel",
+        sendEvents = false,
+        dataType = "ui1",
+        defaultValue = "100",
+        allowedValueRange = {
+          minimum = "0",
+          maximum = "100",
+        },
+      },
+      { name = "OnEffect",
+        sendEvents = false,
+        dataType = "string",
+        defaultValue = "Default",
+        allowedValueList = { "OnEffectLevel", "LastSetting", "Default" },
+      },
+      { name = "StepDelta",
+        sendEvents = true,
+        dataType = "ui1",
+        defaultValue = " Manufacturer defined default value ",
+        allowedValueRange = {
+          minimum = "1",
+          maximum = "100",
+        },
+      },
+      { name = "RampRate",
+        sendEvents = true,
+        dataType = "ui1",
+        defaultValue = "0",
+        allowedValueRange = {
+          minimum = "0",
+          maximum = "100",
+        },
+      },
+      { name = "RampTime",
+        sendEvents = false,
+        dataType = "ui4",
+        defaultValue = "0",
+        allowedValueRange = {
+          minimum = "0",
+          maximum = "4294967295",
+        },
+      },
+      { name = "IsRamping",
+        sendEvents = true,
+        dataType = "boolean",
+        defaultValue = "0",
+      },
+      { name = "RampPaused",
+        sendEvents = true,
+        dataType = "boolean",
+        defaultValue = "0",
+      },
+    },
+  }
+end
+
+return export

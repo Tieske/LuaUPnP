@@ -7,6 +7,7 @@
 
 local lp = require("upnp.lp")
 local upnp = require("upnp")
+local lfs = require ("lfs")
 local logger = upnp.logger
 local xmlfactory = {}
 
@@ -171,6 +172,44 @@ xmlfactory.rootxml = function(rootdev)
   servicelist[rootpath] = xml
 
   return servicelist
+end
+
+------------------------------------------------------
+-- Writes the xmlfiles as received from <code>xmlfactory.rootxml()</code> to
+-- the webserver.
+-- @param filelist list with filenames and file contents
+-- @see xmlfactory.rootxml
+xmlfactory.writetoweb = function(filelist)
+  logger:debug("xmlfactory.writetoweb: writing filelist")
+  -- grab path from device xml name
+  local path = filelist[1]:find("^(.-)%/device%.xml")
+  -- append it to webroot
+  if upnp.webroot:sub(-1,-1) == "\\" or upnp.webroot:sub(-1,-1) == "/" then
+    path = upnp.webroot .. path
+  else
+    path = upnp.webroot .. "/" .. path
+  end
+  -- normalize all slashes to platform default
+  path = path:gsub("%/", package.config:sub(1,1)):gsub("%\\", package.config:sub(1,1))
+  -- make directory
+  local result, err = lfs.mkdir(path)
+  if not result then
+    -- warn only, it might already exist
+    logger:warn("xmlfactory.writetoweb: failed to create device directory '%s' with error; %s", path, tostring(err))
+  end
+  -- append final slash to path
+  path = path .. package.config:sub(1,1)
+  -- write all files
+  for _, filename in ipairs(filelist) do
+    local file, err = io.open(path .. filename,"w")
+    if not file then
+      logger:error("xmlfactory.writetoweb: failed to write file '%s' to the webroot path. Error: %s", filename, tostring(err))
+    else
+      file:write(filelist[filename])
+      file:close()
+    end
+  end
+  logger:debug("xmlfactory.writetoweb: finished writing filelist")
 end
 
 return xmlfactory

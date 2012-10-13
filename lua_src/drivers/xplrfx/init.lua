@@ -155,7 +155,8 @@ local xpldev = xpl.classes.xpldevice:new({    -- create a generic xPL device
 -- command.
 -- @param self UPnP device, must contain a key 'xplrfx' holding the deviceconfig table
 -- @param value boolean in case of "power" or number (0-100) in case of "dim"
--- @param lastvalue optional old value, see return value.
+-- @param lastvalue optional old value, see return value (set to <code>nil</code> to force
+-- sending a command even if the same as the last.
 -- @return the value for the device being set. Use this in next call to prevent
 -- sending messages (% difference, but same level) unnecessary.
 local sendcommand = function(self, value, lastvalue)
