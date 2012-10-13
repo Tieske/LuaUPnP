@@ -11,7 +11,6 @@ local lfs = require ("lfs")
 local logger = upnp.logger
 local xmlfactory = {}
 
------------------------------------------------------------------------------
 -- Compiles and runs a module template. In case of error, it will be logged
 -- @param template the modulename of the template to use
 -- @param env the environment table to use

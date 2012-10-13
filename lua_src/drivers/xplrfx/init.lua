@@ -150,7 +150,6 @@ local xpldev = xpl.classes.xpldevice:new({    -- create a generic xPL device
     
 })
 
-----------------------------------------------------
 -- sends an xpl message to the xPLRFX device. Either a power on/off or set dimm level
 -- command.
 -- @param self UPnP device, must contain a key 'xplrfx' holding the deviceconfig table

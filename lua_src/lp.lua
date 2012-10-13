@@ -131,7 +131,6 @@ end
 -- the provided environment will be equipped with the basic Lua functions.
 -- @return the results of the function set by <code>lp.setoutfunc()</code>, but might also
 -- throw an error
-
 function lp.includefile (filename, env)
   local prog = cache[filename]
   if not prog then
@@ -167,7 +166,6 @@ end
 -- @param env Table with the environment to run the resulting function.
 -- @return the results of the function set by <code>lp.setoutfunc()</code>, but might also
 -- throw an error
-
 function lp.includemodule(template, env)
 	-- search using package.path (modified to search .upnp instead of .lua
 	local search_path = string.gsub(package.path, "%.lua", "%.upnp")

@@ -357,7 +357,7 @@ end
 -- @param configname configuration filename to load. This should only be a filename
 -- (no path), and it will be sought for in the <code>upnp.configroot</code> directory.
 -- @return table with configuration loaded, or <code>nil + error</code> if it failed
--- @see upnp.configroot
+-- @see upnp.configroot #upnp members and namespaces
 function readconfigfile(configname)
   local path = upnp.configroot:gsub("\\","/")
   if #path>0 and path:sub(-1,-1) ~= "/" then
@@ -384,7 +384,7 @@ end
 -- (no path), and it will be stored in the <code>upnp.configroot</code> directory.
 -- @param content the content to write, must be valid Lua code returning a table.
 -- @return 1 on success, <code>nil + errormsg</code> upon failure
--- @see upnp.configroot
+-- @see upnp.configroot #upnp members and namespaces
 function writeconfigfile(configname, content)
   local path = upnp.configroot:gsub("\\","/")
   if #path>0 and path:sub(-1,-1) ~= "/" then
