@@ -1,19 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml"> 
 <head>
     <title>upnp.action: Module Index</title>
     <link rel="stylesheet" href="../luadoc.css" type="text/css" />
-	<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+    <!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
 </head>
 
 <body>
 <div id="container">
 
 <div id="product">
-	<div id="product_logo"></div>
-	<div id="product_name"><big><b></b></big></div>
-	<div id="product_description"></div>
+    <div id="product_logo"></div>
+    <div id="product_name"><big><b></b></big></div>
+    <div id="product_description"></div>
 </div> <!-- id="product" -->
 
 <div id="main">
@@ -21,7 +22,7 @@
 <div id="navigation">
 
 
-<h1>LuaDoc</h1>
+<h2>LuaDoc</h2>
 <ul>
 	
 	<li><a href="../index.html">Index</a></li>
@@ -31,7 +32,7 @@
 
 <!-- Module list -->
 
-<h1>Modules</h1>
+<h2>Modules</h2>
 <ul>
 
 	<li>
@@ -49,6 +50,18 @@
 	</li>
 
 	<li>
+		<a href="../modules/upnp.devicefactory.html">upnp.devicefactory</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.drivers.xplrfx.html">upnp.drivers.xplrfx</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.lp.html">upnp.lp</a>
+	</li>
+
+	<li>
 		<a href="../modules/upnp.service.html">upnp.service</a>
 	</li>
 
@@ -58,6 +71,10 @@
 
 	<li>
 		<a href="../modules/upnp.upnpbase.html">upnp.upnpbase</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.xmlfactory.html">upnp.xmlfactory</a>
 	</li>
 
 </ul>
@@ -75,48 +92,15 @@
 
 <div id="content">
 
-<h1>Module <code>upnp.action</code></h1>
+<h1>Module "<code>upnp.action</code>"</h1>
 
 <p>The base object for UPnP actions.</p>
 
 
-<p>Copyright&copy; 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a></p>
+<p>Copyright &copy; 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a></p>
 
 
 <p><small><b>Release:</b> Version 0.1, LuaUPnP</small></p>
-
-
-
-<h2>Functions</h2>
-<table class="function_list">
-
-	<tr>
-	<td class="name" nowrap><a href="#action:_execute">action:_execute</a>&nbsp;(params)</td>
-	<td class="summary">Executes the action while checking inputs and outputs.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#action:addargument">action:addargument</a>&nbsp;(argument)</td>
-	<td class="summary">Adds an argument to the actions argument list.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#action:execute">action:execute</a>&nbsp;(params)</td>
-	<td class="summary">Executes the action.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#action:initialize">action:initialize</a>&nbsp;()</td>
-	<td class="summary">Initializes the action object.</td>
-	</tr>
-
-	<tr>
-	<td class="name" nowrap><a href="#action:parsefromxml">action:parsefromxml</a>&nbsp;(xmldoc, creator, parent)</td>
-	<td class="summary">Action constructor method, creates a new action, parsed from an XML 'action' element.</td>
-	</tr>
-
-</table>
-
 
 
 
@@ -132,8 +116,79 @@
 
 
 
+<h2>Functions</h2>
+<table class="function_list">
+
+    <tr>
+    <td class="name" nowrap><a href="#action:_execute">action:_execute</a>&nbsp;(params)</td>
+    <td class="summary">Executes the action while checking inputs and outputs.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#action:addargument">action:addargument</a>&nbsp;(argument)</td>
+    <td class="summary">Adds an argument to the actions argument list.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#action:execute">action:execute</a>&nbsp;(params)</td>
+    <td class="summary">Executes the action.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#action:initialize">action:initialize</a>&nbsp;()</td>
+    <td class="summary">Initializes the action object.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#action:parsefromxml">action:parsefromxml</a>&nbsp;(xmldoc, creator, parent)</td>
+    <td class="summary">Action constructor method, creates a new action, parsed from an XML 'action' element.</td>
+    </tr>
+
+</table>
+
+
 <br/>
 <br/>
+
+
+<h2><a name="tables"></a>Tables</h2>
+<dl class="table">
+
+<dt><a name="Action fields/properties"></a><strong>Action fields/properties</strong></dt>
+<dd>Members of the action object
+
+
+<h3>Fields</h3>
+<ul>
+	
+	<li>
+	  <code><em>name</em></code>: name of the action
+	</li>
+	
+	<li>
+	  <code><em>parent</em></code>: the owning upnpservice object
+	</li>
+	
+	<li>
+	  <code><em>argumentlist</em></code>: list with arguments, indexed both by name and number (order in the list)
+	</li>
+	
+	<li>
+	  <code><em>argumentcount</em></code>: number of arguments for the action
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+</dd>
+
+
+</dl>
 
 
 
@@ -160,23 +215,36 @@ Executes the action while checking inputs and outputs. Parameter values may be i
 
 
 
+<div>
 
 
+<h3 class="inline-block">Return value:</h3>
+2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure
+
+</div>
+
+
+
+
+
+
+<div>
 
 <h3>See also:</h3>
 <ul>
 	
-	<!-- <li><a href="#action:execute"> -->
-	<li><a href="#action:execute">
-		action:execute</li>
-	</a>
+	<li><a href="../modules/upnp.action.html#action:execute">
+		action:execute
+	</a></li>
 	
-	<!-- <li><a href="#service:executeaction()"> -->
-	<li><a href="#service:executeaction()">
-		service:executeaction()</li>
-	</a>
+	<li><a href="../modules/upnp.service.html#service:executeaction">
+		service:executeaction
+	</a></li>
 	
 </ul>
+
+</div>
+
 
 </dd>
 
@@ -204,6 +272,9 @@ Adds an argument to the actions argument list. This will append an argument, so 
 
 
 
+
+
+
 </dd>
 
 
@@ -211,7 +282,7 @@ Adds an argument to the actions argument list. This will append an argument, so 
 
 <dt><a name="action:execute"></a><strong>action:execute</strong>&nbsp;(params)</dt>
 <dd>
-Executes the action. Override in descendant classes to implement the actual device behaviour. <br/><strong>NOTE 1</strong>: if not overridden, the default result will be an error; <code>602, Optional Action Not Implemented</code> (hence; from the descedant overridden method, DO NOT call the ancestor method, as it will only return the error) <br/><strong>NOTE 2</strong>: this method is wrapped by <code>action:_execute()</code> from which it will be called. So never call this method directly, if you need to execute, call <code>_execute()</code>. If called externally, it is best to call <code>service:executeaction()</code> as that will also return the proper UPnP error if the action doesn't exist.
+Executes the action. Override in descendant classes to implement the actual device behaviour. <br/><strong>NOTE 1</strong>: if not overridden, the default result will be an error; <code>602, Optional Action Not Implemented</code> (hence; from the descedant overridden method, DO NOT call the ancestor method, as it will only return the error) <br/><strong>NOTE 2</strong>: this method is wrapped by <code>action:_execute()</code> from which it will be called. So never call this method directly, if you need to execute, call <code>_execute()</code>. If called externally, it is best to call <a href="upnp.service.html#service:executeaction"><code>service:executeaction()</code></a> as that will also return the proper UPnP error if the action doesn't exist.
 
 
 <h3>Parameters:</h3>
@@ -227,23 +298,36 @@ Executes the action. Override in descendant classes to implement the actual devi
 
 
 
+<div>
 
 
+<h3 class="inline-block">Return value:</h3>
+table with named return values (each indexed by its name). The returned values can be the Lua types, will be converted to UPnP types (and validated) before sending. Upon an error the function should return; <code>nil, errorstring, errornumber</code> (see the 6xx error codes in the UPnP 1.0 architecture document, section 3.2.2)
+
+</div>
+
+
+
+
+
+
+<div>
 
 <h3>See also:</h3>
 <ul>
 	
-	<!-- <li><a href="#action:_execute"> -->
-	<li><a href="#action:_execute">
-		action:_execute</li>
-	</a>
+	<li><a href="../modules/upnp.action.html#action:_execute">
+		action:_execute
+	</a></li>
 	
-	<!-- <li><a href="#service:executeaction()"> -->
-	<li><a href="#service:executeaction()">
-		service:executeaction()</li>
-	</a>
+	<li><a href="../modules/upnp.service.html#service:executeaction">
+		service:executeaction
+	</a></li>
 	
 </ul>
+
+</div>
+
 
 </dd>
 
@@ -253,6 +337,9 @@ Executes the action. Override in descendant classes to implement the actual devi
 <dt><a name="action:initialize"></a><strong>action:initialize</strong>&nbsp;()</dt>
 <dd>
 Initializes the action object. Will be called upon instantiation of an object, override this method to set default values for all properties.
+
+
+
 
 
 
@@ -293,51 +380,24 @@ Action constructor method, creates a new action, parsed from an XML 'action' ele
 
 
 
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+action object or <code>nil + error message</code>
+
+</div>
 
 
 
-</dd>
 
 
-</dl>
-
-
-
-
-<h2><a name="tables"></a>Tables</h2>
-<dl class="table">
-
-<dt><a name="Action fields/properties"></a><strong>Action fields/properties</strong></dt>
-<dd>Members of the action object
-
-
-<h3>Fields</h3>
-<ul>
-	
-	<li>
-	  name: name of the action
-	</li>
-	
-	<li>
-	  parent: the owning upnpservice object
-	</li>
-	
-	<li>
-	  argumentlist: list with arguments, indexed both by name and number (order in the list)
-	</li>
-	
-	<li>
-	  argumentcount: number of arguments for the action
-	</li>
-	
-</ul>
 
 
 </dd>
 
 
 </dl>
-
 
 
 </div> <!-- id="content" -->
@@ -345,9 +405,9 @@ Action constructor method, creates a new action, parsed from an XML 'action' ele
 </div> <!-- id="main" -->
 
 <div id="about">
-	<p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+    <p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
 </div> <!-- id="about" -->
 
-</div> <!-- id="container" -->	
+</div> <!-- id="container" -->
 </body>
 </html>
