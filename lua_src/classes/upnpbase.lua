@@ -2,7 +2,7 @@
 -- The base object for UPnP objects. This object provides hierarchy traversal
 -- and starting/stopping devices through eventhandlers
 -- @class module
--- @name upnp.upnpbase
+-- @name upnp.classes.upnpbase
 -- @copyright 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>
 -- @release Version 0.1, LuaUPnP
 

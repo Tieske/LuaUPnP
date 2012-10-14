@@ -8,6 +8,7 @@
 
 
 local upnp = require("upnp")
+local xmlfactory = require("upnp.xmlfactory")
 local logger = upnp.logger
 local devicefactory = {}
 
@@ -108,9 +109,9 @@ end
 -- afterset</code> functions.
 -- @return service table, but it will have been modified, might also throw an error
 -- @see devicefactory.createservice
--- @see upnp.action:execute
--- @see upnp.statevariable:beforeset
--- @see upnp.statevariable:afterset
+-- @see upnp.classes.action:execute
+-- @see upnp.classes.statevariable:beforeset
+-- @see upnp.classes.statevariable:afterset
 -- @example# -- example customtable for a 'urn:schemas-upnp-org:service:Dimming:1' service
 -- local customtable = devicefactory.emptyservice()
 -- -- remove a variable and an action
@@ -162,8 +163,8 @@ end
 -- and actions, see <code>devicefactory.customizeservice</code>
 -- <br/>NOTE: the subdevices are indexed by <code>deviceType</code> in the customtable
 -- hence if a device contains 2 sub-devices of the same type, things might go berserk!
--- @see upnp.device:start
--- @see upnp.device:stop
+-- @see upnp.classes.device:start
+-- @see upnp.classes.device:stop
 -- @return device table, but it will have been modified, might also throw an error
 -- @param device the device table where elements need to be dropped from (typically
 -- this is the table returned from <code>devicefactory.createdevice()</code>).
@@ -175,10 +176,12 @@ end
 -- -- customize device level first
 -- customtable.friendlyName = "This is my new UPnP device"
 -- customtable.start = function(self)
+--       self:superclass().start(self)
 --       print("myDevice is now starting...")
 --     end) 
 -- customtable.stop = function(self)
 --       print("myDevice is now stopped")
+--       self:superclass().stop(self)
 --     end) 
 --
 -- -- prepare a service to be customized
@@ -209,7 +212,7 @@ devicefactory.customizedevice = function(device, customtable)
       if customtable.serviceList[v.serviceId] == false then 
         table.remove(device.serviceList, i)
       else
-        devicefactory.dropservice(v, customtable.serviceList[v.serviceId])
+        devicefactory.customizeservice(v, customtable.serviceList[v.serviceId])
       end
     end
   end
@@ -218,12 +221,56 @@ devicefactory.customizedevice = function(device, customtable)
       if customtable.deviceList[v.deviceType] == false then 
         table.remove(device.deviceList, i)
       else
-        devicefactory.dropdevice(v, customtable.deviceList[v.deviceType])
+        devicefactory.customizedevice(v, customtable.deviceList[v.deviceType])
       end
     end
   end
   return device
 end
 
+--------------------------------------------------------------------------------------
+-- Creates a standard device, customizes it, generates xml's, parses them and returns the UPnP device object.
+-- @param domain domainname of the type to create, alternatively, the full <code>deviceType</code> contents
+-- @param devicetype name of the type to create, or nil if the domain contains the full type identifier
+-- @param version version number of the type to create, or nil if the domain contains the full type identifier
+-- @param customtable table with customizations (see <code>devicefactory.customizedevice()</code>)
+-- @return device a <code>upnp.classes.device</code> object representing the device, or <code>nil + errormsg</code>
+devicefactory.builddevice = function(domain, devicetype, version, customtable)
+  local devtable, xmllist, device, err, err2, success
+  
+  -- create device table for the standardized device
+  success, devtable, err = pcall(devicefactory.createdevice, domain, servicetype, version)
+  if not success then return nil, devtable end -- pcall; devtable holds error
+  if dev == nil then return nil, err end -- contained error (nil + errmsg)
+  
+  -- customize the standard device
+  success, devtable, err = pcall(devicefactory.customizedevice, devtable, customtable)
+  if not success then return nil, devtable end -- pcall; devtable holds error
+  if devtable == nil then return nil, err end -- contained error (nil + errmsg)
+
+  -- generate xml list
+  success, xmllist, err = pcall(xmlfactory.rootxml, devtable)
+  if not success then return nil, xmllist end -- pcall; xmllist holds error
+  if xmllist == nil then return nil, err end -- contained error (nil + errmsg)
+    
+  -- write webserver files
+  success, err, err2 = xmlfactory.writetoweb(xmllist)
+  if not success then return nil, err end -- pcall; err holds error
+  if err2 ~= nil then return nil, err2 end -- contained error (nil + errmsg)
+
+  -- creator function
+  local creator = function(plist, classname, parent)
+    to be done
+  end
+  
+  -- parse xml into an object structure representing the device
+  success, device, err = pcall(upnp.classes.device.parsefromxml, upnp.classes.device, xmllist[1], creator, nil)
+  if not success then return nil, device end -- pcall; device holds error
+  if device == nil then return nil, err end -- contained error (nil + errmsg)
+  
+  -- set xml location in device (required by upnp.startdevice()) and return the device
+  device.devicexmlurl = xmllist[1]
+  return device
+end
 
 return devicefactory

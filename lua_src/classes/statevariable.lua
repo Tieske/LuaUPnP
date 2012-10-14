@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------
 -- The base object for UPnP statevariable.
 -- @class module
--- @name upnp.statevariable
+-- @name upnp.classes.statevariable
 -- @copyright 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>
 -- @release Version 0.1, LuaUPnP
 
