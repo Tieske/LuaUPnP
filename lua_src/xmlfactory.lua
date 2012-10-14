@@ -1,5 +1,5 @@
 -----------------------------------------------------------------------------
--- xml factory.
+-- XML factory for generating device and service XML's which can be written to the webserver.
 -- This module has methods for creating service xmls and device xmls from
 -- Lua tables.
 -- @class module

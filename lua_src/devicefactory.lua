@@ -1,5 +1,5 @@
 -----------------------------------------------------------------------------
--- device factory.
+-- Device factory for generating standardized services and devices (xml's + implementation code).
 -- This module has methods for creating services and devices from standard
 -- elements (provided the required modules to support that device/service)
 -- are available.
@@ -34,18 +34,17 @@ local typecheck = function(domain, elementtype, typename, version)
 end
 
 
--- @param element table containing the data to use to create it
 -- @param elemtype is either "device" or "service"
-local creategeneric = function(element, domain, elemtype, typename, version)
+local creategeneric = function(domain, elemtype, typename, version)
   fulltype = typecheck(domain, elemtype, typename, version)
   if not fulltype then return nil, string.format("cannot create %s, typecheck failed", tostring(elemtype)) end
   
-  local success, creator = pcall(require, "upnp."..elemtype.."s."..fulltype:gsub("%:","_"):gsub("%.","_")
+  local success, creator = pcall(require, "upnp."..elemtype.."s."..fulltype:gsub("%:","_"):gsub("%.","_"))
   if not success then
     return nil, string.format("cannot create '%s', no module found for it or error loading. ErrMsg: %s", tostring(devtype), tostring(creator))
   end
   
-  return creator(element)
+  return creator()
 end
 
 --------------------------------------------------------------------------------------
@@ -61,22 +60,20 @@ devicefactory.emptydevice = function()
 end
 
 --------------------------------------------------------------------------------------
--- Creates the requested device (if available). The output can be used as input for the
+-- Creates the requested device table (if available). The output can be used as input for the
 -- <code>xmlfactory</code>.
 -- For the parameters check the device property <code>deviceType</code> in the device xml of the
 -- UPnP architecture documents.
--- @param device table with device data used to create it
 -- @param domain domainname of the type to create, alternatively, the full <code>deviceType</code> contents
 -- @param devicetype name of the type to create, or nil if the domain contains the full type identifier
 -- @param version version number of the type to create, or nil if the domain contains the full type identifier
 -- @return device table, or nil + errormsg
--- @example# device = {  -- put device table here
---     }
--- devicefactory.createdevice(device, "schemas.upnp.org", "BinaryLight", "1")
+-- @example# -- two ways to create the same device
+-- devicefactory.createdevice("schemas.upnp.org", "BinaryLight", "1")
 --   -- or
--- devicefactory.createdevice(device, "urn:schemas-upnp-org:device:BinaryLight:1")
-devicefactory.createdevice = function(device, domain, devicetype, version)
-  local results = { creategeneric(device, domain, "device", devicetype, version) }
+-- devicefactory.createdevice("urn:schemas-upnp-org:device:BinaryLight:1")
+devicefactory.createdevice = function(domain, devicetype, version)
+  local results = { creategeneric(domain, "device", devicetype, version) }
   if not results[1] then
     logger:error("devicefactory.createdevice: " .. tostring(results[2]))
     return nil, results[2]
@@ -85,11 +82,15 @@ devicefactory.createdevice = function(device, domain, devicetype, version)
 end
 
 --------------------------------------------------------------------------------------
--- Creates the requested service (if available). The output can be used as input for the
+-- Creates the requested service table (if available). The output can be used as input for the
 -- <code>xmlfactory</code>. See <code>createdevice()</code> for more details.
+-- @param domain domainname of the type to create, alternatively, the full <code>serviceType</code> contents
+-- @param servicetype name of the type to create, or nil if the domain contains the full type identifier
+-- @param version version number of the type to create, or nil if the domain contains the full type identifier
+-- @return service table, or nil + errormsg
 -- @see devicefactory.createdevice
-devicefactory.createservice = function(service, domain, servicetype, version)
-  local results = { creategeneric(service, domain, "service", servicetype, version) }
+devicefactory.createservice = function(domain, servicetype, version)
+  local results = { creategeneric(domain, "service", servicetype, version) }
   if not results[1] then
     logger:error("devicefactory.createservice: " .. tostring(results[2]))
     return nil, results[2]
@@ -98,65 +99,126 @@ devicefactory.createservice = function(service, domain, servicetype, version)
 end
 
 --------------------------------------------------------------------------------------
--- Drops optional elements (statevariables and/or actions) from a service.
+-- Customizes a service by dropping optional elements (statevariables and/or actions) and
+-- adding the implementation functions/methods. 
+-- @param service the service table to be customized (typically
+-- this is the table returned from <code>devicefactory.createservice()</code>).
+-- @param customtable a table containing the elements to customize by name, with value
+-- <code>false</code> to drop, or a table containing the <code>execute, beforeset, 
+-- afterset</code> functions.
 -- @return service table, but it will have been modified, might also throw an error
--- @param service the service table where elements need to be dropped from
--- @param droptable a table containing the elements to drop by name, with value <code>false</code>
--- @example# -- example droplist for a 'urn:schemas-upnp-org:service:Dimming:1' service
--- local droplist = devicefactory.emptyservice()
--- droplist.serviceStateTable.StepDelta = false
--- droplist.actionList.StepUp = false
--- droplist.actionList.StepDown = false
-devicefactory.dropservice = function(service, droptable)
-  if droptable == nil then return service end
-  if droptable.serviceStateTable and next(droptable.serviceStateTable) then
-    for k,v in pairs(service.serviceStateTable or {}) do
-      if droptable.serviceStateTable[v.name] == false then service.serviceStateTable[k] = nil end
+-- @see devicefactory.createservice
+-- @see upnp.action:execute
+-- @see upnp.statevariable:beforeset
+-- @see upnp.statevariable:afterset
+-- @example# -- example customtable for a 'urn:schemas-upnp-org:service:Dimming:1' service
+-- local customtable = devicefactory.emptyservice()
+-- -- remove a variable and an action
+-- customtable.serviceStateTable.StepDelta = false
+-- customtable.actionList.StepUp = false
+-- -- implement the 'execute' method for an action
+-- customtable.actionList.StepDown = { execute = function(self) 
+--        print ("method being executed now!")
+--      end } 
+devicefactory.customizeservice = function(service, customtable)
+  if customtable == nil then return service end
+  if customtable.serviceStateTable and next(customtable.serviceStateTable) then
+    for i,v in ipairs(service.serviceStateTable or {}) do
+      local variable = customtable.serviceStateTable[v.name]
+      if variable == false then 
+        -- drop optional variable
+        table.remove(service.serviceStateTable, i)
+      elseif type(variable) == "table" then
+        -- add methods
+        v.beforeset = variable.beforeset or v.beforeset
+        v.afterset = variable.afterset or v.afterset
+      end
     end
   end
-  if droptable.actionList and next(droptable.actionList) then
-    for k,v in pairs(service.actionList or {}) do
-      if droptable.actionList[v.name] == false then service.actionList[k] = nil end
+  if customtable.actionList and next(customtable.actionList) then
+    for i,v in ipairs(service.actionList or {}) do
+      local action = customtable.actionList[v.name]
+      if action == false then 
+        -- drop optional action
+        table.remove(service.actionList, i)
+      elseif type(variable) == "table" then
+        -- add method
+        v.execute = variable.execute or v.execute
+      end
     end
   end
   return service
 end
 
 --------------------------------------------------------------------------------------
--- Drops optional elements from a device.
--- Includes any underlying services and sub-devices.
--- <br/>NOTE: the subdevices are indexed by <code>serviceType</code> in the droptable
+-- Customizes a device by dropping optional elements (statevariables and/or actions) and
+-- adding the implementation functions/methods. 
+-- Includes any underlying services and sub-devices. On device level you can set
+-- device properties like <code>friendlyName</code>, etc. A service can be dropped by including an 
+-- element with its <code>serviceId</code>, set to <code>false</code>. A device can be dropped by including an
+-- element with its <code>deviceType</code>, set to <code>false</code>. The <code>start()</code> and <code>stop()</code>
+-- methods on device level can also be provided.
+-- For implementing code for statevariables
+-- and actions, see <code>devicefactory.customizeservice</code>
+-- <br/>NOTE: the subdevices are indexed by <code>deviceType</code> in the customtable
 -- hence if a device contains 2 sub-devices of the same type, things might go berserk!
+-- @see upnp.device:start
+-- @see upnp.device:stop
 -- @return device table, but it will have been modified, might also throw an error
--- @param device the device table where elements need to be dropped from
--- @param droptable a table containing the elements to drop by <code>serviceId</code> (for services)
+-- @param device the device table where elements need to be dropped from (typically
+-- this is the table returned from <code>devicefactory.createdevice()</code>).
+-- @param customtable a table containing the elements to drop by <code>serviceId</code> (for services)
 -- or <code>deviceType</code> (for devices), with value <code>false</code>.
--- @example# -- example droplist for a 'urn:schemas-upnp-org:device:DimmableLight:1' device
--- local droplist = devicefactory.emptydevice()
--- droplist.serviceList["urn:upnp-org:serviceId:Dimming:1"] = devicefactory.emptyservice()
--- droplist.serviceList["urn:upnp-org:serviceId:Dimming:1"].serviceStateTable.StepDelta = false
--- droplist.serviceList["urn:upnp-org:serviceId:Dimming:1"].actionList.StepUp = false
--- droplist.serviceList["urn:upnp-org:serviceId:Dimming:1"].actionList.StepDown = false
-devicefactory.dropdevice = function(device, droptable)
-  if droptable == nil then return device end
+-- @see devicefactory.createdevice
+-- @example# -- example customtable for a 'urn:schemas-upnp-org:device:DimmableLight:1' device
+-- local customtable = devicefactory.emptydevice()
+-- -- customize device level first
+-- customtable.friendlyName = "This is my new UPnP device"
+-- customtable.start = function(self)
+--       print("myDevice is now starting...")
+--     end) 
+-- customtable.stop = function(self)
+--       print("myDevice is now stopped")
+--     end) 
+--
+-- -- prepare a service to be customized
+-- customtable.serviceList["urn:upnp-org:serviceId:Dimming:1"] = devicefactory.emptyservice()
+-- -- remove a variable and an action
+-- customtable.serviceList["urn:upnp-org:serviceId:Dimming:1"].serviceStateTable.StepDelta = false
+-- customtable.serviceList["urn:upnp-org:serviceId:Dimming:1"].actionList.StepUp = false
+-- -- implement the 'execute' method for an action
+-- customtable.serviceList["urn:upnp-org:serviceId:Dimming:1"].actionList.StepDown = { execute = function(self) 
+--        print ("method being executed now!")
+--     end } 
+-- 
+-- -- go create a dimmable light and then customize it
+-- local myDevTable = devicefactory.customizedevice(devicefactory.createdevice("schemas.upnp.org", "DimmableLight", "1") , customtable)
+devicefactory.customizedevice = function(device, customtable)
+  if customtable == nil then return device end
   for k,v in pairs(device) do
-    if droptable[k] == false then device[k] = nil end
+    if customtable[k] == false then
+      device[k] = nil
+    elseif (type(v) == "string" or type(v) == "nil") and type(customtable[k]) == "string"  then
+      device[k] = customtable[k]
+    end
   end
-  if droptable.serviceList and next(droptable.serviceList) then
-    for k,v in pairs(device.serviceList or {}) do
-      if droptable.serviceList[v.serviceId] == false then 
-        device.serviceList[k] = nil
+  if type(customtable.start) == "function" then device.start = customtable.start end
+  if type(customtable.stop) == "function" then device.stop = customtable.stop end
+  if customtable.serviceList and next(customtable.serviceList) then
+    for i,v in ipairs(device.serviceList or {}) do
+      if customtable.serviceList[v.serviceId] == false then 
+        table.remove(device.serviceList, i)
       else
-        devicefactory.dropservice(v, droptable.serviceList[v.serviceId])
+        devicefactory.dropservice(v, customtable.serviceList[v.serviceId])
       end
     end
   end
-  if droptable.deviceList and next(droptable.deviceList) then
-    for k,v in pairs(device.deviceList or {}) do
-      if droptable.deviceList[v.deviceType] == false then 
-        device.deviceList[k] = nil 
+  if customtable.deviceList and next(customtable.deviceList) then
+    for i,v in ipairs(device.deviceList or {}) do
+      if customtable.deviceList[v.deviceType] == false then 
+        table.remove(device.deviceList, i)
       else
-        devicefactory.dropdevice(v, droptable.deviceList[v.deviceType])
+        devicefactory.dropdevice(v, customtable.deviceList[v.deviceType])
       end
     end
   end

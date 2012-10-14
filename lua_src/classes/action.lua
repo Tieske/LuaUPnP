@@ -219,7 +219,8 @@ end
 -- <br/>2) <code>action:execute()</code> gets called to perform actual device behaviour
 -- <br/>3) <code>action:_execute()</code> verifies the return values and converts them to UPnP formats
 -- <br/>So to implement device behaviour, override the <code>action:execute()</code> method, to execute the action
--- call <code>action:_execute()</code>.
+-- call <code>action:_execute()</code> or even better call <a href="upnp.service.html#service:executeaction"><code>service:executeaction()</code></a>
+-- as that will also return the proper UPnP error if the action doesn't exist.
 -- @param params table with argument values, indexed by argument name.
 -- @return 2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure
 -- @see action:execute
