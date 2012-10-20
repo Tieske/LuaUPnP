@@ -50,12 +50,14 @@ end
 
 --------------------------------------------------------------------------------------
 -- Creates an empty service table.
+-- @return new table with two empty subtables; <code>actionList</code> and <code>serviceStateTable</code>.
 devicefactory.emptyservice = function()
   return { actionList = {}, serviceStateTable = {} }
 end
 
 --------------------------------------------------------------------------------------
 -- Creates an empty device table.
+-- @return new table with two empty subtables; <code>serviceList</code> and <code>deviceList</code>.
 devicefactory.emptydevice = function()
   return { serviceList = {}, deviceList = {} }
 end
@@ -230,13 +232,38 @@ end
 
 --------------------------------------------------------------------------------------
 -- Creates a standard device, customizes it, generates xml's, parses them and returns the UPnP device object.
--- @param domain domainname of the type to create, alternatively, the full <code>deviceType</code> contents
--- @param devicetype name of the type to create, or nil if the domain contains the full type identifier
--- @param version version number of the type to create, or nil if the domain contains the full type identifier
--- @param customtable table with customizations (see <code>devicefactory.customizedevice()</code>)
+-- This method takes a number of steps to create a fully functional device;</p>
+-- <ol>
+-- <li>Creates a device table for a standard device (<code>devicefactory.createdevice()</code>)</li>
+-- <li>Drops optionals as set in the <code>customtable</code> parameter (<code>devicefactory.customizedevice()</code>)</li>
+-- <li>Creates the XML's for the device and its services (<code>xmlfactory.rootxml()</code>)</li>
+-- <li>Writes the XML's to the webroot directory, so they are accessible (<code>xmlfactory.writetoweb()</code>)</li>
+-- <li>Parses the XML's into a root-device object structure, whilst adding the custom implementations as set in the <code>customtable</code> parameter (<code>upnp.classes.device:parsefromxml()</code>)</li>
+-- <li>sets the <code>devicexmlurl</code> on the device and returns the device object</li>
+-- <ol><p>
+-- @see devicefactory.createdevice
+-- @see devicefactory.customizedevice
+-- @see xmlfactory.rootxml
+-- @see xmlfactory.writetoweb
+-- @see upnp.classes.device:parsefromxml
+-- @param domain domainname of the type to create, alternatively, the full <code>deviceType</code> contents. In the latter case the <code>devicetype</code> and <code>version</code> arguments can be omitted.
+-- @param devicetype [optional] name of the type to create, or nil if the domain contains the full type identifier
+-- @param version [optional] version number of the type to create, or nil if the domain contains the full type identifier
+-- @param customtable [optional] table with customizations (see <code>devicefactory.customizedevice()</code>)
 -- @return device a <code>upnp.classes.device</code> object representing the device, or <code>nil + errormsg</code>
+-- @example# -- two ways to create the same device, both without customization/implementation
+-- devicefactory.builddevice("schemas.upnp.org", "BinaryLight", "1", {} )
+--   -- or full schema and no customtable
+-- devicefactory.builddevice("urn:schemas-upnp-org:device:BinaryLight:1")
 devicefactory.builddevice = function(domain, devicetype, version, customtable)
   local devtable, xmllist, device, err, err2, success
+  
+  if type(devicetype) ~= "string" and customtable == nil then
+    -- the optionals not provided, reshuffle arguments
+    customtable = devicetype
+    devicetype = nil
+  end
+  customtable = customtable or {}
   
   -- create device table for the standardized device
   success, devtable, err = pcall(devicefactory.createdevice, domain, servicetype, version)
