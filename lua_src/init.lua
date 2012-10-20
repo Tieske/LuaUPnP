@@ -33,7 +33,7 @@
 -- @field lib contains the mapped functions of pupnp library
 -- @field lib.web contains the mapped functions of upnp web methods
 -- @field lib.http contains the mapped functions of upnp http methods
--- @field lib.util contains the mapped functions of upnp util methods
+-- @field lib.util contains the mapped functions of upnp util methods + CreateUUID
 -- @field lib.ixml contains the mapped functions of upnp ixml methods
 
 local logging = require ("logging")
@@ -103,6 +103,33 @@ copas.addserver(dss.getsocket(), function(skt)
             hdlr(skt)
         end
     end)
+
+
+local oldCreateUUID = upnp.lib.util.CreateUUID
+---------------------------------------------------------------------
+-- wraps original function to work even when library is not started
+upnp.lib.util.CreateUUID =  function()
+  local success, uuid = pcall(oldCreateUUID)
+  if not success and uuid == "UPNP_E_FINISH" then
+    -- library not started, so start, do UUID, and stop again.
+    upnp.lib.Init(function() end)
+    success, uuid = pcall(oldCreateUUID)
+    upnp.lib.Finish()
+  end
+  if not success then
+    error(uuid)
+  end
+  return uuid
+end
+
+
+local oldOSExit = os.exit
+---------------------------------------------------------------------
+-- wraps original os.exit() function to make sure UPnP lib is always properly stopped
+os.exit = function(...)
+  pcall(upnp.lib.Finish)
+  oldOSExit(...)
+end
 
 ---------------------------------------------------------------------
 -- Logs an error and then returns it. See usage, it will log the error
