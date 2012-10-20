@@ -36,6 +36,7 @@
 -- @field lib.util contains the mapped functions of upnp util methods
 -- @field lib.ixml contains the mapped functions of upnp ixml methods
 
+local logging = require ("logging")
 require ("logging.console")
 logger = logging.console()
 logger:setLevel (logging.DEBUG)

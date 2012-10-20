@@ -6,7 +6,7 @@ REM for Windows directory, set the path below correct
 REM ===================================================
 
 SET T_LUAPATH=C:\Users\Public\lua\5.1
-rem change actiev directory, to the one containing this batch file
+rem change active directory, to the one containing this batch file
 cd /d %~dp0
 
 REM ========== LUA sources ============================
@@ -22,7 +22,9 @@ echo Create Clib\upnp\ directory
 md "%T_LUAPATH%\clibs\upnp"
 echo Copying upnp dll's
 copy "libupnp\pthread*.*" "%T_LUAPATH%\clibs\upnp"
+copy "libupnp\pthread*.*" "%T_LUAPATH%\"
 copy "libupnp\libupnp.*" "%T_LUAPATH%\clibs\upnp"
+copy "libupnp\libupnp.*" "%T_LUAPATH%\"
 
 echo Copying file 'LuaUPnP.*' (dll + debug files)
 copy "Debug\core.*" "%T_LUAPATH%\clibs\upnp"
