@@ -1,3 +1,13 @@
+---------------------------------------------------------------------------
+-- Standard service; urn:schemas-upnp-org:SwitchPower:1.
+-- Requires to implement the following elements;
+-- </p>
+-- <ul>
+-- <li><code>service.serviceStateTable.Target.afterset = function(self, oldval) ... end</code> to process the changed Target value</li>
+-- </ul>
+-- <p>
+-- @class module
+-- @name urn_schemas-upnp-org_SwitchPower_1
 
 local export = {}
 
@@ -12,6 +22,12 @@ export.newservice = function()
             direction = "in",
           },
         },
+        execute = function(self, params)
+          local val, errstr, errnr = self.parent.statetable.target:set(params.newtargetvalue)
+          if not val then
+              return nil, errstr, errnr       -- report error
+          end
+        end,
       },
       { name = "GetTarget",
         argumentList = {
@@ -20,6 +36,9 @@ export.newservice = function()
             direction = "out",
           },
         },
+        execute = function(self, params)
+          return { rettargetvalue = self.parent.statetable.target:get() }
+        end,
       },
       { name = "GetStatus",
         argumentList = {
@@ -28,6 +47,9 @@ export.newservice = function()
             direction = "out",
           },
         },
+        execute = function(self, params)
+          return { resultstatus = self.parent.statetable.status:get() }
+        end,
       },
     },
     serviceStateTable = {
