@@ -12,3 +12,7 @@ LuaDoc generated documentation is available here; http://tieske.github.com/LuaUP
 Copyright & license
 =======
 Copyright 2012 Thijs Schreijer (http://www.thijsschreijer.nl), licensed under GPLv3, see http://www.gnu.org/licenses/gpl-3.0.html
+
+Contributions
+=============
+Please read the [contributing guidelines](https://github.com/Tieske/LuaUPnP/blob/master/CONTRIBUTING.md) first
