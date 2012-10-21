@@ -7,7 +7,10 @@ local basic = require("upnp.devices.urn_schemas-upnp-org_device_Basic_1")
 export.newdevice = function()
   local dev = basic.newdevice()
   dev.deviceType = "urn:schemas-upnp-org:device:BinaryLight:1"
-  table.insert(dev.serviceList, switch.newservice())
+  
+  local serv = switch.newservice()
+  serv.ServiceId = "urn:upnp-org:device:SwitchPower:1"
+  table.insert(dev.serviceList, serv)
   return dev
 end
 
