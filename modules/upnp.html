@@ -38,15 +38,27 @@
 	<li><strong>upnp</strong></li>
 	
 	<li>
-		<a href="../modules/upnp.action.html">upnp.action</a>
+		<a href="../modules/upnp.classes.action.html">upnp.classes.action</a>
 	</li>
 
 	<li>
-		<a href="../modules/upnp.argument.html">upnp.argument</a>
+		<a href="../modules/upnp.classes.argument.html">upnp.classes.argument</a>
 	</li>
 
 	<li>
-		<a href="../modules/upnp.device.html">upnp.device</a>
+		<a href="../modules/upnp.classes.device.html">upnp.classes.device</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.service.html">upnp.classes.service</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.statevariable.html">upnp.classes.statevariable</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.upnpbase.html">upnp.classes.upnpbase</a>
 	</li>
 
 	<li>
@@ -62,19 +74,11 @@
 	</li>
 
 	<li>
-		<a href="../modules/upnp.service.html">upnp.service</a>
-	</li>
-
-	<li>
-		<a href="../modules/upnp.statevariable.html">upnp.statevariable</a>
-	</li>
-
-	<li>
-		<a href="../modules/upnp.upnpbase.html">upnp.upnpbase</a>
-	</li>
-
-	<li>
 		<a href="../modules/upnp.xmlfactory.html">upnp.xmlfactory</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_SwitchPower_1.html">urn_schemas-upnp-org_SwitchPower_1</a>
 	</li>
 
 </ul>
@@ -125,6 +129,11 @@
 <table class="function_list">
 
     <tr>
+    <td class="name" nowrap><a href="#os.exit">os.exit</a>&nbsp;(...)</td>
+    <td class="summary">wraps original os.exit() function to make sure UPnP lib is always properly stopped </td>
+    </tr>
+
+    <tr>
     <td class="name" nowrap><a href="#readconfigfile">readconfigfile</a>&nbsp;(configname)</td>
     <td class="summary">Read a configfile.</td>
     </tr>
@@ -132,6 +141,11 @@
     <tr>
     <td class="name" nowrap><a href="#upnp.getxml">upnp.getxml</a>&nbsp;(xmldoc)</td>
     <td class="summary">Gets an xml document.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#upnp.lib.util.CreateUUID">upnp.lib.util.CreateUUID</a>&nbsp;()</td>
+    <td class="summary">wraps original function to work even when library is not started </td>
     </tr>
 
     <tr>
@@ -213,7 +227,7 @@
 	</li>
 	
 	<li>
-	  <code><em>lib.util</em></code>: contains the mapped functions of upnp util methods
+	  <code><em>lib.util</em></code>: contains the mapped functions of upnp util methods + CreateUUID
 	</li>
 	
 	<li>
@@ -288,6 +302,35 @@
 
 <h2><a name="functions"></a>Functions</h2>
 <dl class="function">
+
+
+
+<dt><a name="os.exit"></a><strong>os.exit</strong>&nbsp;(...)</dt>
+<dd>
+wraps original os.exit() function to make sure UPnP lib is always properly stopped
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>...</em></code>: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+</dd>
+
 
 
 
@@ -366,6 +409,26 @@ Gets an xml document. It will try to get the xml from several things; 1) filenam
 IXML object or <code>nil + errormessage</code>
 
 </div>
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="upnp.lib.util.CreateUUID"></a><strong>upnp.lib.util.CreateUUID</strong>&nbsp;()</dt>
+<dd>
+wraps original function to work even when library is not started
+
+
+
+
+
 
 
 

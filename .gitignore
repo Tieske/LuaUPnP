@@ -17,3 +17,4 @@
 /libupnp/libupnp.pdb
 Debug
 /*.session
+/lib_src/LuaUPnP.vcxproj.user

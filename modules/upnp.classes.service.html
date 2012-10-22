@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml"> 
 <head>
-    <title>Luadocs for lua_src/classes/service.lua</title>
-    <link rel="stylesheet" href="../../../luadoc.css" type="text/css" />
+    <title>upnp.classes.service: Module Index</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
     <!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
 </head>
 
@@ -25,7 +25,7 @@
 <h2>LuaDoc</h2>
 <ul>
 	
-	<li><a href="../../../index.html">Index</a></li>
+	<li><a href="../index.html">Index</a></li>
 	
 </ul>
 
@@ -36,31 +36,49 @@
 <ul>
 
 	<li>
-		<a href="../../../modules/upnp.html">upnp</a>
+		<a href="../modules/upnp.html">upnp</a>
 	</li>
 
 	<li>
-		<a href="../../../modules/upnp.action.html">upnp.action</a>
+		<a href="../modules/upnp.classes.action.html">upnp.classes.action</a>
 	</li>
 
 	<li>
-		<a href="../../../modules/upnp.argument.html">upnp.argument</a>
+		<a href="../modules/upnp.classes.argument.html">upnp.classes.argument</a>
 	</li>
 
 	<li>
-		<a href="../../../modules/upnp.device.html">upnp.device</a>
+		<a href="../modules/upnp.classes.device.html">upnp.classes.device</a>
+	</li>
+
+	<li><strong>upnp.classes.service</strong></li>
+	
+	<li>
+		<a href="../modules/upnp.classes.statevariable.html">upnp.classes.statevariable</a>
 	</li>
 
 	<li>
-		<a href="../../../modules/upnp.service.html">upnp.service</a>
+		<a href="../modules/upnp.classes.upnpbase.html">upnp.classes.upnpbase</a>
 	</li>
 
 	<li>
-		<a href="../../../modules/upnp.statevariable.html">upnp.statevariable</a>
+		<a href="../modules/upnp.devicefactory.html">upnp.devicefactory</a>
 	</li>
 
 	<li>
-		<a href="../../../modules/upnp.upnpbase.html">upnp.upnpbase</a>
+		<a href="../modules/upnp.drivers.xplrfx.html">upnp.drivers.xplrfx</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.lp.html">upnp.lp</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.xmlfactory.html">upnp.xmlfactory</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_SwitchPower_1.html">urn_schemas-upnp-org_SwitchPower_1</a>
 	</li>
 
 </ul>
@@ -69,58 +87,21 @@
 
 <!-- File list -->
 
-<h2>Files</h2>
-<ul>
-
-	<li>
-		<a href="../../../files/lua_src/classes/action.html">lua_src/classes/action.lua</a>
-	</li>
-
-	<li>
-		<a href="../../../files/lua_src/classes/argument.html">lua_src/classes/argument.lua</a>
-	</li>
-
-	<li>
-		<a href="../../../files/lua_src/classes/device.html">lua_src/classes/device.lua</a>
-	</li>
-
-	<li><strong>lua_src/classes/service.lua</strong></li>
-	
-	<li>
-		<a href="../../../files/lua_src/classes/statevariable.html">lua_src/classes/statevariable.lua</a>
-	</li>
-
-	<li>
-		<a href="../../../files/lua_src/classes/upnpbase.html">lua_src/classes/upnpbase.lua</a>
-	</li>
-
-	<li>
-		<a href="../../../files/lua_src/device_config.html">lua_src/device_config.lua</a>
-	</li>
-
-	<li>
-		<a href="../../../files/lua_src/init.html">lua_src/init.lua</a>
-	</li>
-
-</ul>
 
 
 
 
 
-
-</div> <!-- id="navigation" -->
+</div><!-- id="navigation" -->
 
 <div id="content">
 
-<h1>File <code>lua_src/classes/service.lua</code></h1>
-
+<h1>Module "<code>upnp.classes.service</code>"</h1>
 
 <p>The base object for UPnP services.</p>
 
 
-
-<p>Copyright &copy;2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a></p>
+<p>Copyright &copy; 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a></p>
 
 
 <p><small><b>Release:</b> Version 0.1, LuaUPnP</small></p>
@@ -214,6 +195,9 @@
 
 
 
+
+
+
 </dd>
 
 
@@ -246,7 +230,7 @@ Adds an action to the service actionlist.
 
 
 
- 
+
 
 
 
@@ -275,7 +259,7 @@ Adds a statevariable to the service statetable.
 
 
 
- 
+
 
 
 
@@ -316,7 +300,7 @@ Execute an action of the service. This will call basically the <a href="upnp.act
 
 
 
- 
+
 
 
 
@@ -350,7 +334,7 @@ Creates a list of all variables and values, to be provided when a subscription i
 
 
 
- 
+
 
 
 
@@ -370,7 +354,7 @@ Initializes the service object. Will be called upon instantiation of an object, 
 
 
 
- 
+
 
 
 
@@ -419,7 +403,7 @@ service object or <code>nil + error message</code>
 
 
 
- 
+
 
 
 

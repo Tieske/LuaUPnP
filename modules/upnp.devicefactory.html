@@ -40,15 +40,27 @@
 	</li>
 
 	<li>
-		<a href="../modules/upnp.action.html">upnp.action</a>
+		<a href="../modules/upnp.classes.action.html">upnp.classes.action</a>
 	</li>
 
 	<li>
-		<a href="../modules/upnp.argument.html">upnp.argument</a>
+		<a href="../modules/upnp.classes.argument.html">upnp.classes.argument</a>
 	</li>
 
 	<li>
-		<a href="../modules/upnp.device.html">upnp.device</a>
+		<a href="../modules/upnp.classes.device.html">upnp.classes.device</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.service.html">upnp.classes.service</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.statevariable.html">upnp.classes.statevariable</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.upnpbase.html">upnp.classes.upnpbase</a>
 	</li>
 
 	<li><strong>upnp.devicefactory</strong></li>
@@ -62,19 +74,11 @@
 	</li>
 
 	<li>
-		<a href="../modules/upnp.service.html">upnp.service</a>
-	</li>
-
-	<li>
-		<a href="../modules/upnp.statevariable.html">upnp.statevariable</a>
-	</li>
-
-	<li>
-		<a href="../modules/upnp.upnpbase.html">upnp.upnpbase</a>
-	</li>
-
-	<li>
 		<a href="../modules/upnp.xmlfactory.html">upnp.xmlfactory</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_SwitchPower_1.html">urn_schemas-upnp-org_SwitchPower_1</a>
 	</li>
 
 </ul>
@@ -94,7 +98,7 @@
 
 <h1>Module "<code>upnp.devicefactory</code>"</h1>
 
-<p>device factory. This module has methods for creating services and devices from standard elements (provided the required modules to support that device/service) are available.</p>
+<p>Device factory for generating standardized services and devices (xml's + implementation code). This module has methods for creating services and devices from standard elements (provided the required modules to support that device/service) are available.</p>
 
 
 
@@ -106,23 +110,28 @@
 <table class="function_list">
 
     <tr>
-    <td class="name" nowrap><a href="#devicefactory.createdevice">devicefactory.createdevice</a>&nbsp;(device, domain, devicetype, version)</td>
-    <td class="summary">Creates the requested device (if available).</td>
+    <td class="name" nowrap><a href="#devicefactory.builddevice">devicefactory.builddevice</a>&nbsp;(domain, devicetype, version, customtable)</td>
+    <td class="summary">Creates a standard device, customizes it, generates xml's, parses them and returns the UPnP device object.</td>
     </tr>
 
     <tr>
-    <td class="name" nowrap><a href="#devicefactory.createservice">devicefactory.createservice</a>&nbsp;(service, domain, servicetype, version)</td>
-    <td class="summary">Creates the requested service (if available).</td>
+    <td class="name" nowrap><a href="#devicefactory.createdevice">devicefactory.createdevice</a>&nbsp;(domain, devicetype, version)</td>
+    <td class="summary">Creates the requested device table (if available).</td>
     </tr>
 
     <tr>
-    <td class="name" nowrap><a href="#devicefactory.dropdevice">devicefactory.dropdevice</a>&nbsp;(device, droptable)</td>
-    <td class="summary">Drops optional elements from a device.</td>
+    <td class="name" nowrap><a href="#devicefactory.createservice">devicefactory.createservice</a>&nbsp;(domain, servicetype, version)</td>
+    <td class="summary">Creates the requested service table (if available).</td>
     </tr>
 
     <tr>
-    <td class="name" nowrap><a href="#devicefactory.dropservice">devicefactory.dropservice</a>&nbsp;(service, droptable)</td>
-    <td class="summary">Drops optional elements (statevariables and/or actions) from a service.</td>
+    <td class="name" nowrap><a href="#devicefactory.customizedevice">devicefactory.customizedevice</a>&nbsp;(device, customtable)</td>
+    <td class="summary">Customizes a device by dropping optional elements (statevariables and/or actions) and adding the implementation functions/methods.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#devicefactory.customizeservice">devicefactory.customizeservice</a>&nbsp;(service, customtable)</td>
+    <td class="summary">Customizes a service by dropping optional elements (statevariables and/or actions) and adding the implementation functions/methods.</td>
     </tr>
 
     <tr>
@@ -149,17 +158,98 @@
 
 
 
-<dt><a name="devicefactory.createdevice"></a><strong>devicefactory.createdevice</strong>&nbsp;(device, domain, devicetype, version)</dt>
+<dt><a name="devicefactory.builddevice"></a><strong>devicefactory.builddevice</strong>&nbsp;(domain, devicetype, version, customtable)</dt>
 <dd>
-Creates the requested device (if available). The output can be used as input for the <code>xmlfactory</code>. For the parameters check the device property <code>deviceType</code> in the device xml of the UPnP architecture documents.
+Creates a standard device, customizes it, generates xml's, parses them and returns the UPnP device object. This method takes a number of steps to create a fully functional device;</p> <ol> <li>Creates a device table for a standard device (<code>devicefactory.createdevice()</code>)</li> <li>Drops optionals as set in the <code>customtable</code> parameter (<code>devicefactory.customizedevice()</code>) and adds the implementations of device/variable/action methods from the <code>customtable</code> to the device table</li> <li>Creates the XML's for the device and its services (<code>xmlfactory.rootxml()</code>)</li> <li>Writes the XML's to the webroot directory, so they are accessible (<code>xmlfactory.writetoweb()</code>)</li> <li>Parses the XML's into a root-device object structure, whilst adding the custom implementations as set in the devicetable (<code>upnp.classes.device:parsefromxml()</code>)</li> <li>sets the <code>devicexmlurl</code> on the device and returns the device object</li> <ol><p>
 
 
 <h3>Parameters:</h3>
 <ul>
 	
 	<li>
-	  <code><em>device</em></code>: table with device data used to create it
+	  <code><em>domain</em></code>: domainname of the type to create, alternatively, the full <code>deviceType</code> contents. In the latter case the <code>devicetype</code> and <code>version</code> arguments can be omitted.
 	</li>
+	
+	<li>
+	  <code><em>devicetype</em></code>: [optional] name of the type to create, or nil if the domain contains the full type identifier
+	</li>
+	
+	<li>
+	  <code><em>version</em></code>: [optional] version number of the type to create, or nil if the domain contains the full type identifier
+	</li>
+	
+	<li>
+	  <code><em>customtable</em></code>: [optional] table with customizations (see <code>devicefactory.customizedevice()</code>)
+	</li>
+	
+</ul>
+
+
+
+
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+device a <code>upnp.classes.device</code> object representing the device, or <code>nil + errormsg</code>
+
+</div>
+
+
+
+ 
+<div>
+
+<h3 class="inline-block">Example:</h3>
+<pre class="example">-- two ways to create the same device, both without customization/implementation<br/>devicefactory.builddevice("schemas.upnp.org", "BinaryLight", "1", {} )<br/>&nbsp;&nbsp;-- or full schema and no customtable<br/>devicefactory.builddevice("urn:schemas-upnp-org:device:BinaryLight:1")</pre>
+
+</div>
+
+
+
+<div>
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="../modules/upnp.devicefactory.html#devicefactory.createdevice">
+		devicefactory.createdevice
+	</a></li>
+	
+	<li><a href="../modules/upnp.devicefactory.html#devicefactory.customizedevice">
+		devicefactory.customizedevice
+	</a></li>
+	
+	<li><a href="../modules/upnp.xmlfactory.html#xmlfactory.rootxml">
+		xmlfactory.rootxml
+	</a></li>
+	
+	<li><a href="../modules/upnp.xmlfactory.html#xmlfactory.writetoweb">
+		xmlfactory.writetoweb
+	</a></li>
+	
+	<li><a href="../modules/upnp.classes.device.html#device:parsefromxml">
+		upnp.classes.device:parsefromxml
+	</a></li>
+	
+</ul>
+
+</div>
+
+
+</dd>
+
+
+
+
+<dt><a name="devicefactory.createdevice"></a><strong>devicefactory.createdevice</strong>&nbsp;(domain, devicetype, version)</dt>
+<dd>
+Creates the requested device table (if available). The output can be used as input for the <code>xmlfactory</code>. For the parameters check the device property <code>deviceType</code> in the device xml of the UPnP architecture documents.
+
+
+<h3>Parameters:</h3>
+<ul>
 	
 	<li>
 	  <code><em>domain</em></code>: domainname of the type to create, alternatively, the full <code>deviceType</code> contents
@@ -193,7 +283,7 @@ device table, or nil + errormsg
 <div>
 
 <h3 class="inline-block">Example:</h3>
-<pre class="example">device = {  -- put device table here<br/>&nbsp;&nbsp;&nbsp;&nbsp;}<br/>devicefactory.createdevice(device, "schemas.upnp.org", "BinaryLight", "1")<br/>&nbsp;&nbsp;-- or<br/>devicefactory.createdevice(device, "urn:schemas-upnp-org:device:BinaryLight:1")</pre>
+<pre class="example">-- two ways to create the same device<br/>devicefactory.createdevice("schemas.upnp.org", "BinaryLight", "1")<br/>&nbsp;&nbsp;-- or<br/>devicefactory.createdevice("urn:schemas-upnp-org:device:BinaryLight:1")</pre>
 
 </div>
 
@@ -205,28 +295,24 @@ device table, or nil + errormsg
 
 
 
-<dt><a name="devicefactory.createservice"></a><strong>devicefactory.createservice</strong>&nbsp;(service, domain, servicetype, version)</dt>
+<dt><a name="devicefactory.createservice"></a><strong>devicefactory.createservice</strong>&nbsp;(domain, servicetype, version)</dt>
 <dd>
-Creates the requested service (if available). The output can be used as input for the <code>xmlfactory</code>. See <code>createdevice()</code> for more details.
+Creates the requested service table (if available). The output can be used as input for the <code>xmlfactory</code>. See <code>createdevice()</code> for more details.
 
 
 <h3>Parameters:</h3>
 <ul>
 	
 	<li>
-	  <code><em>service</em></code>: 
+	  <code><em>domain</em></code>: domainname of the type to create, alternatively, the full <code>serviceType</code> contents
 	</li>
 	
 	<li>
-	  <code><em>domain</em></code>: 
+	  <code><em>servicetype</em></code>: name of the type to create, or nil if the domain contains the full type identifier
 	</li>
 	
 	<li>
-	  <code><em>servicetype</em></code>: 
-	</li>
-	
-	<li>
-	  <code><em>version</em></code>: 
+	  <code><em>version</em></code>: version number of the type to create, or nil if the domain contains the full type identifier
 	</li>
 	
 </ul>
@@ -234,6 +320,14 @@ Creates the requested service (if available). The output can be used as input fo
 
 
 
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+service table, or nil + errormsg
+
+</div>
 
 
 
@@ -259,20 +353,20 @@ Creates the requested service (if available). The output can be used as input fo
 
 
 
-<dt><a name="devicefactory.dropdevice"></a><strong>devicefactory.dropdevice</strong>&nbsp;(device, droptable)</dt>
+<dt><a name="devicefactory.customizedevice"></a><strong>devicefactory.customizedevice</strong>&nbsp;(device, customtable)</dt>
 <dd>
-Drops optional elements from a device. Includes any underlying services and sub-devices. <br/>NOTE: the subdevices are indexed by <code>serviceType</code> in the droptable hence if a device contains 2 sub-devices of the same type, things might go berserk!
+Customizes a device by dropping optional elements (statevariables and/or actions) and adding the implementation functions/methods. Includes any underlying services and sub-devices. On device level you can set device properties like <code>friendlyName</code>, etc. A service can be dropped by including an element with its <code>serviceId</code>, set to <code>false</code>. A device can be dropped by including an element with its <code>deviceType</code>, set to <code>false</code>. The <code>start()</code> and <code>stop()</code> methods on device level can also be provided. For implementing code for statevariables and actions, see <code>devicefactory.customizeservice</code> <br/>NOTE: the subdevices are indexed by <code>deviceType</code> in the customtable hence if a device contains 2 sub-devices of the same type, things might go berserk!
 
 
 <h3>Parameters:</h3>
 <ul>
 	
 	<li>
-	  <code><em>device</em></code>: the device table where elements need to be dropped from
+	  <code><em>device</em></code>: the device table where elements need to be dropped from (typically this is the table returned from <code>devicefactory.createdevice()</code>).
 	</li>
 	
 	<li>
-	  <code><em>droptable</em></code>: a table containing the elements to drop by <code>serviceId</code> (for services) or <code>deviceType</code> (for devices), with value <code>false</code>.
+	  <code><em>customtable</em></code>: a table containing the elements to drop by <code>serviceId</code> (for services) or <code>deviceType</code> (for devices), with value <code>false</code>.
 	</li>
 	
 </ul>
@@ -295,11 +389,32 @@ device table, but it will have been modified, might also throw an error
 <div>
 
 <h3 class="inline-block">Example:</h3>
-<pre class="example">-- example droplist for a 'urn:schemas-upnp-org:device:DimmableLight:1' device<br/>local droplist = devicefactory.emptydevice()<br/>droplist.serviceList["urn:upnp-org:serviceId:Dimming:1"] = devicefactory.emptyservice()<br/>droplist.serviceList["urn:upnp-org:serviceId:Dimming:1"].serviceStateTable.StepDelta = false<br/>droplist.serviceList["urn:upnp-org:serviceId:Dimming:1"].actionList.StepUp = false<br/>droplist.serviceList["urn:upnp-org:serviceId:Dimming:1"].actionList.StepDown = false</pre>
+<pre class="example">-- example customtable for a 'urn:schemas-upnp-org:device:DimmableLight:1' device<br/>local customtable = {<br/>&nbsp;&nbsp;&nbsp;&nbsp;-- customize device level first<br/>&nbsp;&nbsp;&nbsp;&nbsp;friendlyName = "This is my new UPnP device",<br/>&nbsp;&nbsp;&nbsp;&nbsp;start = function(self)   -- implement startup behaviour<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self:superclass().start(self)<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print("myDevice is now starting...")<br/>&nbsp;&nbsp;&nbsp;&nbsp;end,<br/>&nbsp;&nbsp;&nbsp;&nbsp;stop = function(self)    -- implement device shutdown behaviour<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print("myDevice is now stopped")<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self:superclass().stop(self)<br/>&nbsp;&nbsp;&nbsp;&nbsp;end,<br/>&nbsp;&nbsp;&nbsp;&nbsp;-- customize services next<br/>&nbsp;&nbsp;&nbsp;&nbsp;serviceList = {<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;["urn:upnp-org:serviceId:Dimming:1"] = {<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;serviceStateTable = {<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StepDelta = false,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;actionList = {<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StepUp = false,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StepDown = {<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;execute = function(self, params)<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print ("method being executed now!")<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;end,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},  -- actionList<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},  -- dimming service<br/>&nbsp;&nbsp;&nbsp;&nbsp;},  -- serviceList<br/>&nbsp;&nbsp;},  -- customtable<br/>--<br/>-- go create a dimmable light and then customize it<br/>local myDevTable = devicefactory.customizedevice(devicefactory.createdevice("schemas.upnp.org", "DimmableLight", "1") , customtable)</pre>
 
 </div>
 
 
+
+<div>
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="../modules/upnp.classes.device.html#device:start">
+		upnp.classes.device:start
+	</a></li>
+	
+	<li><a href="../modules/upnp.classes.device.html#device:stop">
+		upnp.classes.device:stop
+	</a></li>
+	
+	<li><a href="../modules/upnp.devicefactory.html#devicefactory.createdevice">
+		devicefactory.createdevice
+	</a></li>
+	
+</ul>
+
+</div>
 
 
 </dd>
@@ -307,20 +422,20 @@ device table, but it will have been modified, might also throw an error
 
 
 
-<dt><a name="devicefactory.dropservice"></a><strong>devicefactory.dropservice</strong>&nbsp;(service, droptable)</dt>
+<dt><a name="devicefactory.customizeservice"></a><strong>devicefactory.customizeservice</strong>&nbsp;(service, customtable)</dt>
 <dd>
-Drops optional elements (statevariables and/or actions) from a service.
+Customizes a service by dropping optional elements (statevariables and/or actions) and adding the implementation functions/methods.
 
 
 <h3>Parameters:</h3>
 <ul>
 	
 	<li>
-	  <code><em>service</em></code>: the service table where elements need to be dropped from
+	  <code><em>service</em></code>: the service table to be customized (typically this is the table returned from <code>devicefactory.createservice()</code>).
 	</li>
 	
 	<li>
-	  <code><em>droptable</em></code>: a table containing the elements to drop by name, with value <code>false</code>
+	  <code><em>customtable</em></code>: a table containing the elements to customize by name, with value <code>false</code> to drop, or a table containing the <code>execute, beforeset, afterset</code> functions.
 	</li>
 	
 </ul>
@@ -343,11 +458,36 @@ service table, but it will have been modified, might also throw an error
 <div>
 
 <h3 class="inline-block">Example:</h3>
-<pre class="example">-- example droplist for a 'urn:schemas-upnp-org:service:Dimming:1' service<br/>local droplist = devicefactory.emptyservice()<br/>droplist.serviceStateTable.StepDelta = false<br/>droplist.actionList.StepUp = false<br/>droplist.actionList.StepDown = false</pre>
+<pre class="example">-- example customtable for a 'urn:schemas-upnp-org:service:Dimming:1' service<br/>local customtable = {<br/>&nbsp;&nbsp;&nbsp;&nbsp;serviceStateTable = {<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StepDelta = false,  -- remove this variable<br/>&nbsp;&nbsp;&nbsp;&nbsp;},<br/>&nbsp;&nbsp;&nbsp;&nbsp;actionList = {<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StepUp = false,     -- remove this action<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StepDown = {        -- implement the action behaviour<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;execute = function(self, params)<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print ("method being executed now!")<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;end,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br/>&nbsp;&nbsp;&nbsp;&nbsp;},<br/>}</pre>
 
 </div>
 
 
+
+<div>
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="../modules/upnp.devicefactory.html#devicefactory.createservice">
+		devicefactory.createservice
+	</a></li>
+	
+	<li><a href="../modules/upnp.classes.action.html#action:execute">
+		upnp.classes.action:execute
+	</a></li>
+	
+	<li><a href="../modules/upnp.classes.statevariable.html#statevariable:beforeset">
+		upnp.classes.statevariable:beforeset
+	</a></li>
+	
+	<li><a href="../modules/upnp.classes.statevariable.html#statevariable:afterset">
+		upnp.classes.statevariable:afterset
+	</a></li>
+	
+</ul>
+
+</div>
 
 
 </dd>
@@ -363,6 +503,14 @@ Creates an empty device table.
 
 
 
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+new table with two empty subtables; <code>serviceList</code> and <code>deviceList</code>.
+
+</div>
 
 
 
@@ -383,6 +531,14 @@ Creates an empty service table.
 
 
 
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+new table with two empty subtables; <code>actionList</code> and <code>serviceStateTable</code>.
+
+</div>
 
 
 
