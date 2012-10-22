@@ -269,7 +269,7 @@ end
 --   -- or full schema and no customtable
 -- devicefactory.builddevice("urn:schemas-upnp-org:device:BinaryLight:1")
 devicefactory.builddevice = function(domain, devicetype, version, customtable)
-  local devtable, xmllist, device, err, err2, success
+  local devtable, xmllist, device, err, err2, success, devicepath
   
   if type(devicetype) ~= "string" and customtable == nil then
     -- the optionals not provided, reshuffle arguments
@@ -279,7 +279,7 @@ devicefactory.builddevice = function(domain, devicetype, version, customtable)
   customtable = customtable or {}
   
   -- create device table for the standardized device
-  logger:debug("devicefactory.builddevice; creating device table %s, %s, %s", tostring(domain), tostring(devicetype), tostring(version))
+  logger:debug("devicefactory.builddevice; creating device table %s, %s, %s", tostring(domain), tostring(devicetype or ""), tostring(version or ""))
   success, devtable, err = pcall(devicefactory.createdevice, domain, servicetype, version)
   if not success then return nil, devtable end -- pcall; devtable holds error
   if devtable == nil then return nil, err end -- contained error (nil + errmsg)
@@ -298,7 +298,7 @@ devicefactory.builddevice = function(domain, devicetype, version, customtable)
   
   -- write webserver files
   logger:debug("devicefactory.builddevice; xmls created, now writing them to webroot folder")
-  success, err, err2 = xmlfactory.writetoweb(xmllist)
+  success, err, err2 = pcall(xmlfactory.writetoweb, xmllist)
   if not success then return nil, err end -- pcall; err holds error
   if err2 ~= nil then return nil, err2 end -- contained error (nil + errmsg)
   
@@ -308,12 +308,14 @@ devicefactory.builddevice = function(domain, devicetype, version, customtable)
     -- plist = object properties, indexed by lowercase (!!!) names
     -- classname = "device", "service", "statevariable", "action", "argument", "servicexml"
     -- parent is the parent object, or nil for a root device
+    logger:debug("devicefactory.builddevice; creator: class requested = %s", tostring(classname))
     if classname == "servicexml" then
       -- the device.parsefromxml() parser will automatically fallback to the SCPDURL 
       -- property listed in the device description if nothing is returned, next call 
       -- here if for actually creating the service object, and thats when we will 
-      -- customize it
-      return nil
+      -- customize it.
+      -- Only prepend path to device directory to make sure it gets found
+      return devicepath .. plist.scpdurl
     end
     
     local target = upnp.classes[classname](plist)
@@ -331,15 +333,25 @@ devicefactory.builddevice = function(domain, devicetype, version, customtable)
         end
         assert(source, "devicefactory.builddevice[creator]; unkown device: UDN = " .. tostring(plist.udn))
       end
+      logger:debug("devicefactory.builddevice; creator: created device with UDN = %s", tostring(plist.udn))
       -- implement/customize device methods
       target.start = source.start or target.start
       target.stop = source.stop or target.stop
     
     elseif classname == "service" then
-      -- has no custom methods, nothing to do here
+      for _, serv in pairs(creations[parent].serviceList) do
+        if serv.serviceId == plist.serviceid then
+          source = serv
+          break
+        end
+      end
+      assert(source, "devicefactory.builddevice[creator]; unkown service: serviceId = " .. tostring(plist.serviceid))
+      logger:debug("devicefactory.builddevice; creator: created service with serviceId = %s", tostring(plist.serviceid))
+      -- has no custom methods, nothing further to do here
     
     elseif classname == "argument" then
-      -- has no custom methods, nothing to do here
+      logger:debug("devicefactory.builddevice; creator: created argument named = %s", tostring(plist.name))
+      -- has no custom methods, nor any child-objects, nothing to do here
     
     elseif classname == "statevariable" then
       -- lookup variable in parent serviceStateTable
@@ -350,6 +362,7 @@ devicefactory.builddevice = function(domain, devicetype, version, customtable)
         end
       end
       assert(source, "devicefactory.builddevice[creator]; unkown statevariable: " .. tostring(plist.name))
+      logger:debug("devicefactory.builddevice; creator: created statevariable named = %s", tostring(plist.name))
       -- implement/customize statevariable methods
       target.beforeset = source.beforeset or target.beforeset
       target.afterset = source.afterset or target.afterset
@@ -363,15 +376,13 @@ devicefactory.builddevice = function(domain, devicetype, version, customtable)
         end
       end
       assert(source, "devicefactory.builddevice[creator]; unkown action: " .. tostring(plist.name))
+      logger:debug("devicefactory.builddevice; creator: created action named = %s", tostring(plist.name))
       -- implement/customize action methods
       target.execute = source.execute or target.execute
     
     else
       error("devicefactory.builddevice[creator]; unkown classname: " .. tostring(classname))
     end
-    
-    upnp.classes.service(plist)    
-    upnp.classes.device(plist) 
     
     -- store results and return created object
     creations[target] = source
@@ -380,6 +391,7 @@ devicefactory.builddevice = function(domain, devicetype, version, customtable)
   
   -- parse xml into an object structure representing the device
   logger:debug("devicefactory.builddevice; parsing xmls into device objects")
+  devicepath = xmllist[1]:gsub("device.xml", "")
   success, device, err = pcall(upnp.classes.device.parsefromxml, upnp.classes.device, xmllist[1], creator, nil)
   if not success then return nil, device end -- pcall; device holds error
   if device == nil then return nil, err end -- contained error (nil + errmsg)

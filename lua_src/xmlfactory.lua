@@ -10,6 +10,7 @@ local upnp = require("upnp")
 local lfs = require ("lfs")
 local logger = upnp.logger
 local xmlfactory = {}
+local pathseparator = _G.package.config:sub(1,1)
 
 -- Compiles and runs a module template. In case of error, it will be logged
 -- @param template the modulename of the template to use
@@ -81,7 +82,7 @@ end
 --
 -- local xml = upnp.xmlfactory.servicexml(service)
 xmlfactory.servicexml = function(service)
-  return runtemplate("upnp.templates.service", service)
+  return runtemplate("upnp.templates.service", {service = service})
 end
 
 ------------------------------------------------------
@@ -93,7 +94,7 @@ end
 -- @return xml string containing the device xml
 -- @return table with 2 parts; array part is a list of filenames for the xmls (element 1 is the device xml filename), the hash part will hold the actual xml documents, indexed by their filenames.
 xmlfactory.rootxml = function(rootdev)
-  local servicelist
+  local servicelist = {}
   local xml
   local rootpath
 
@@ -111,13 +112,10 @@ xmlfactory.rootxml = function(rootdev)
     end
     if not name then
       -- xml wasn't found, so its unique so far, create name and store
-      name = service.serviceId:gsub("%:","-")
-      local cnt = 1
-      while servicelist[rootpath .. name .. "-" .. tostring(cnt) .. ".xml"] do cnt = cnt + 1 end
-      name = rootpath .. name .. "-" .. tostring(cnt) .. ".xml"
-      servicelist[name] = xml
+      name = service.serviceId:gsub("%:","-") .. ".xml"
+      servicelist[rootpath .. name] = xml
     end
-    table.insert(servicelist, name)
+    table.insert(servicelist, rootpath .. name)
     return name
   end
 
@@ -156,7 +154,7 @@ xmlfactory.rootxml = function(rootdev)
 
   -- check all devices/services, traverse hierarchy, then create xml
   processDevice(rootdev)
-  xml = runtemplate("upnp.templates.rootdevice", rootdev)
+  xml = runtemplate("upnp.templates.rootdevice", { device = rootdev } )
 
   -- store as nr 1 in list
   rootpath = rootpath .. "device.xml"  -- root dev is always called 'device.xml'
@@ -174,29 +172,33 @@ end
 xmlfactory.writetoweb = function(filelist)
   logger:debug("xmlfactory.writetoweb: writing filelist")
   -- grab path from device xml name
-  local path = filelist[1]:find("^(.-)%/device%.xml")
+  local _, _, path = filelist[1]:find("^(.-)[%/%\\]device%.xml$")
   -- append it to webroot
+  local webroot
   if upnp.webroot:sub(-1,-1) == "\\" or upnp.webroot:sub(-1,-1) == "/" then
-    path = upnp.webroot .. path
+    webroot = upnp.webroot
   else
-    path = upnp.webroot .. "/" .. path
+    webroot = upnp.webroot .. pathseparator
   end
   -- normalize all slashes to platform default
-  path = path:gsub("%/", package.config:sub(1,1)):gsub("%\\", package.config:sub(1,1))
+  webroot = webroot:gsub("%/", pathseparator):gsub("%\\", pathseparator)
+  logger:info("xmlfactory.writetoweb: writing device xmls to '%s'", webroot .. path)
   -- make directory
-  local result, err = lfs.mkdir(path)
+  local result, err = lfs.mkdir(webroot .. path)
   if not result then
     -- warn only, it might already exist
-    logger:warn("xmlfactory.writetoweb: failed to create device directory '%s' with error; %s", path, tostring(err))
+    logger:warn("xmlfactory.writetoweb: failed to create device directory '%s' with error; %s", webroot .. path, tostring(err))
   end
   -- append final slash to path
-  path = path .. package.config:sub(1,1)
+  --path = path .. pathseparator
   -- write all files
   for _, filename in ipairs(filelist) do
-    logger:info("xmlfactory.writetoweb: now writing '%s' to the webroot path.", filename)
-    local file, err = io.open(path .. filename,"w")
+    local fullname = webroot .. filename
+    fullname = fullname:gsub("%/", pathseparator):gsub("%\\", pathseparator)
+    logger:info("xmlfactory.writetoweb: now writing '%s'", fullname)
+    local file, err = io.open(fullname,"w")
     if not file then
-      logger:error("xmlfactory.writetoweb: failed to write file '%s' to the webroot path. Error: %s", filename, tostring(err))
+      logger:error("xmlfactory.writetoweb: failed to write file '%s'. Error: %s", fullname, tostring(err))
     else
       file:write(filelist[filename])
       file:close()

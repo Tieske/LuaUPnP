@@ -23,10 +23,10 @@
   <% if #(device.serviceList or {}) > 0 then %><serviceList>
     <% for i, service in ipairs(device.serviceList) do %><service>
       <serviceType>urn:schemas-upnp-org:service:SwitchPower:1</serviceType>
-      <serviceId><% service.serviceId %></serviceId>
-      <SCPDURL><% service.SCPDURL %></SCPDURL>
-      <controlURL><% service.controlURL %></controlURL>
-      <eventSubURL><% (service.eventSubURL or "") %></eventSubURL>
+      <serviceId><%= service.serviceId %></serviceId>
+      <SCPDURL><%= service.SCPDURL %></SCPDURL>
+      <controlURL><%= service.controlURL %></controlURL>
+      <eventSubURL><%= (service.eventSubURL or "") %></eventSubURL>
     </service><% end %>
     <!-- Declarations for other services added by UPnP vendor (if any) go here -->
   </serviceList><% end %>

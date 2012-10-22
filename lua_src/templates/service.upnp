@@ -9,7 +9,7 @@
       <%=lp.includemodule("upnp.templates.action", {action = action}) %>
     <% end %>
 	</actionList><% end %>
-	<serviceStateTable> <% -- at least 1 statevar is required for a service! %>
+	<serviceStateTable> <% --[[ at least 1 statevar is required for a service! ]] %>
     <% for i, statevar in ipairs(service.serviceStateTable) do %>
       <%=lp.includemodule("upnp.templates.statevariable", {statevariable = statevar}) %>
     <% end %>

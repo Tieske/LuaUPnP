@@ -27,9 +27,10 @@ local extension = ".upnp"   -- extension used for template search in the module 
 local pathseparator = _G.package.config:sub(1,1)
 
 ----------------------------------------------------------------------------
--- function to do output
-local outfunc = "return"
-
+-- function to do output, initializer and finalizer
+local outfunc = "__lp__output"
+local blockinit = "local __lp__result = {}\n local __lp__output = function(data) table.insert(__lp__result, data) end\n"
+local blockfinal = "return table.concat(__lp__result, '')"
 --
 -- Builds a piece of Lua code which outputs the (part of the) given string.
 -- @param s String.
@@ -56,6 +57,7 @@ end
 function lp.translate (s)
 	s = gsub(s, "<%%(.-)%%>", "<?lua %1 ?>")
 	local res = {}
+  table.insert(res, blockinit)
 	local start = 1   -- start of untranslated part in `s'
 	while true do
 		local ip, fp, target, exp, code = find(s, "<%?(%w*)[ \t]*(=?)(.-)%?>", start)
@@ -74,6 +76,7 @@ function lp.translate (s)
 		start = fp + 1
 	end
 	table.insert(res, out(s, start))
+  table.insert(res, blockfinal)
 	return table.concat(res)
 end
 
@@ -152,7 +155,7 @@ function lp.includefile (filename, env)
 	env = env or {}
 	env.table = table
 	env.io = io
-	env.lp = M
+	env.lp = lp
   env.pairs = pairs
 	env.ipairs = ipairs
 	env.tonumber = tonumber
