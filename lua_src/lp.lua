@@ -23,6 +23,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 local find, format, gsub, strsub = string.find, string.format, string.gsub, string.sub
 
 local lp = {}
+local extension = ".upnp"   -- extension used for template search in the module path
+local pathseparator = _G.package.config:sub(1,1)
 
 ----------------------------------------------------------------------------
 -- function to do output
@@ -91,6 +93,8 @@ end
 -- @return String with the complete path of the file found
 --	or nil in case the file is not found.
 local function search (path, name)
+  name = name:gsub("%.", pathseparator)
+  local lst = "Loading template '" .. name .."'" 
   for c in string.gfind(path, "[^;]+") do
     c = gsub(c, "%?", name)
     local f = io.open(c)
@@ -98,8 +102,9 @@ local function search (path, name)
       f:close()
       return c
     end
+    lst = lst .. "\n   " .. c .. " - failed"
   end
-  return nil    -- file not found
+  return nil, lst    -- file not found
 end
 
 ----------------------------------------------------------------------------
@@ -115,8 +120,9 @@ local cache = {}
 -- @return Function with the resulting translation.
 
 function lp.compile (str, chunkname)
-	local f, err = loadstring (lp.translate (str), chunkname)
-	if not f then error (err, 3) end
+  local code = lp.translate (str)
+	local f, err = loadstring (code, chunkname)
+	if not f then error (err .. "\n CODE \n======\n" .. code, 3) end
 	return f
 end
 
@@ -168,9 +174,9 @@ end
 -- throw an error
 function lp.includemodule(template, env)
 	-- search using package.path (modified to search .upnp instead of .lua
-	local search_path = string.gsub(package.path, "%.lua", "%.upnp")
-	local templatepath = search(search_path, template)
-	assert(templatepath, string.format("template `%s' not found", template))
+	local search_path = string.gsub(package.path, "%.lua", extension)
+	local templatepath, err = search(search_path, template)
+	assert(templatepath, err)
 
 	return lp.includefile(templatepath, env)
 end

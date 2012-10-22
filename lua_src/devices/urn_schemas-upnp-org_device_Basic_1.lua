@@ -1,8 +1,9 @@
+local logger = upnp.logger
 
-local export = {}
-
-export.newdevice = function()
+local newdevice = function()
+  logger:info("Creating a new 'urn:schemas-upnp-org:device:Basic:1' device")
   return {
+    UDN = "uuid:" .. upnp.lib.util.CreateUUID(),
 		deviceType = "urn:schemas-upnp-org:device:Basic:1",
 		friendlyName = "short user-friendly title",
 		manufacturer = "manufacturer name",
@@ -24,4 +25,4 @@ export.newdevice = function()
   }
 end
 
-return export
+return newdevice

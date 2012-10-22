@@ -97,13 +97,6 @@ xmlfactory.rootxml = function(rootdev)
   local xml
   local rootpath
 
-  -- Creates and logs a new uuid
-  local createUUID = function()
-    local uuid = "uuid:" .. upnp.lib.util.CreateUUID()
-    logger:info("created new id; %s", uuid)
-    return uuid
-  end
-
   -- add service xml to servicelist, undoubles if necessary
   -- @param service table containg the service
   -- @param xml string with xml description of service
@@ -149,7 +142,7 @@ xmlfactory.rootxml = function(rootdev)
   -- traverse all sub devices
   -- creates UUID if not present
   local function processDevice(device)
-    device.UDN = device.UDN or createUUID()
+    device.UDN = device.UDN or upnp.lib.util.CreateUUID()
     if device.serviceList then processServices(device.serviceList) end
     if device.deviceList then
       -- recurse sub devices
@@ -158,11 +151,11 @@ xmlfactory.rootxml = function(rootdev)
   end
 
   -- get rootUDN, create if necessary
-  rootdev.UDN = rootdev.UDN or createUUID()
+  rootdev.UDN = rootdev.UDN or upnp.lib.util.CreateUUID()
   rootpath = rootdev.UDN:gsub("%:","-") .. "/"
 
   -- check all devices/services, traverse hierarchy, then create xml
-  processDevice(rootdev.device)
+  processDevice(rootdev)
   xml = runtemplate("upnp.templates.rootdevice", rootdev)
 
   -- store as nr 1 in list
@@ -200,6 +193,7 @@ xmlfactory.writetoweb = function(filelist)
   path = path .. package.config:sub(1,1)
   -- write all files
   for _, filename in ipairs(filelist) do
+    logger:info("xmlfactory.writetoweb: now writing '%s' to the webroot path.", filename)
     local file, err = io.open(path .. filename,"w")
     if not file then
       logger:error("xmlfactory.writetoweb: failed to write file '%s' to the webroot path. Error: %s", filename, tostring(err))

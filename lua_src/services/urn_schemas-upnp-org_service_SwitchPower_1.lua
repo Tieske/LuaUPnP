@@ -9,9 +9,7 @@
 -- @class module
 -- @name urn_schemas-upnp-org_SwitchPower_1
 
-local export = {}
-
-export.newservice = function()
+local newservice = function()
   return {
     serviceType = "urn:schemas-upnp-org:service:SwitchPower:1",
     actionList = {
@@ -67,4 +65,4 @@ export.newservice = function()
   }
 end
 
-return export
+return newservice

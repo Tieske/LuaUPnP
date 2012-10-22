@@ -26,7 +26,7 @@ local typecheck = function(domain, elementtype, typename, version)
     _, _, sdom, et, typename, version = domain:find("^urn%:(.-)%:(.-)%:(.-)%:(.-)$")
     if et ~= elementtype then
       local err = string.format("typecheck failed; '%s' is of type '%s', expected type '%s'", tostring(domain), tostring(et), tostring(elementtype))
-      logging:error("devicefactory.typecheck: %s", err)
+      logger:error("devicefactory.typecheck: %s", err)
       return nil, err
     end
     domain = sdom
@@ -279,25 +279,29 @@ devicefactory.builddevice = function(domain, devicetype, version, customtable)
   customtable = customtable or {}
   
   -- create device table for the standardized device
+  logger:debug("devicefactory.builddevice; creating device table %s, %s, %s", tostring(domain), tostring(devicetype), tostring(version))
   success, devtable, err = pcall(devicefactory.createdevice, domain, servicetype, version)
   if not success then return nil, devtable end -- pcall; devtable holds error
-  if dev == nil then return nil, err end -- contained error (nil + errmsg)
+  if devtable == nil then return nil, err end -- contained error (nil + errmsg)
   
   -- customize the standard device
+  logger:debug("devicefactory.builddevice; device table created, now start customizing")
   success, devtable, err = pcall(devicefactory.customizedevice, devtable, customtable)
   if not success then return nil, devtable end -- pcall; devtable holds error
   if devtable == nil then return nil, err end -- contained error (nil + errmsg)
 
   -- generate xml list
+  logger:debug("devicefactory.builddevice; device table customized, now start generating xmls")
   success, xmllist, err = pcall(xmlfactory.rootxml, devtable)
   if not success then return nil, xmllist end -- pcall; xmllist holds error
   if xmllist == nil then return nil, err end -- contained error (nil + errmsg)
-    
+  
   -- write webserver files
+  logger:debug("devicefactory.builddevice; xmls created, now writing them to webroot folder")
   success, err, err2 = xmlfactory.writetoweb(xmllist)
   if not success then return nil, err end -- pcall; err holds error
   if err2 ~= nil then return nil, err2 end -- contained error (nil + errmsg)
-
+  
   -- creator function
   local creations = {} -- created objects, index by themselves, value is sub-table of devtable
   local creator = function(plist, classname, parent)
@@ -375,11 +379,13 @@ devicefactory.builddevice = function(domain, devicetype, version, customtable)
   end
   
   -- parse xml into an object structure representing the device
+  logger:debug("devicefactory.builddevice; parsing xmls into device objects")
   success, device, err = pcall(upnp.classes.device.parsefromxml, upnp.classes.device, xmllist[1], creator, nil)
   if not success then return nil, device end -- pcall; device holds error
   if device == nil then return nil, err end -- contained error (nil + errmsg)
   
   -- set xml location in device (required by upnp.startdevice()) and return the device
+  logger:debug("devicefactory.builddevice; device created")
   device.devicexmlurl = xmllist[1]
   return device
 end

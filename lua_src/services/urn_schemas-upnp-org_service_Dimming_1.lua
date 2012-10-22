@@ -1,7 +1,5 @@
 
-local export = {}
-
-export.newservice = function()
+local newservice = function()
   return {
     serviceType = "urn:schemas-upnp-org:service:Dimming:1",
     actionList = {
@@ -215,4 +213,4 @@ export.newservice = function()
   }
 end
 
-return export
+return newservice
