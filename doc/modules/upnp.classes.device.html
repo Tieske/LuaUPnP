@@ -3,7 +3,7 @@
    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"> 
 <head>
-    <title>upnp.device: Module Index</title>
+    <title>upnp.classes.device: Module Index</title>
     <link rel="stylesheet" href="../luadoc.css" type="text/css" />
     <!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
 </head>
@@ -40,15 +40,27 @@
 	</li>
 
 	<li>
-		<a href="../modules/upnp.action.html">upnp.action</a>
+		<a href="../modules/upnp.classes.action.html">upnp.classes.action</a>
 	</li>
 
 	<li>
-		<a href="../modules/upnp.argument.html">upnp.argument</a>
+		<a href="../modules/upnp.classes.argument.html">upnp.classes.argument</a>
 	</li>
 
-	<li><strong>upnp.device</strong></li>
+	<li><strong>upnp.classes.device</strong></li>
 	
+	<li>
+		<a href="../modules/upnp.classes.service.html">upnp.classes.service</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.statevariable.html">upnp.classes.statevariable</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.upnpbase.html">upnp.classes.upnpbase</a>
+	</li>
+
 	<li>
 		<a href="../modules/upnp.devicefactory.html">upnp.devicefactory</a>
 	</li>
@@ -62,19 +74,11 @@
 	</li>
 
 	<li>
-		<a href="../modules/upnp.service.html">upnp.service</a>
-	</li>
-
-	<li>
-		<a href="../modules/upnp.statevariable.html">upnp.statevariable</a>
-	</li>
-
-	<li>
-		<a href="../modules/upnp.upnpbase.html">upnp.upnpbase</a>
-	</li>
-
-	<li>
 		<a href="../modules/upnp.xmlfactory.html">upnp.xmlfactory</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_SwitchPower_1.html">urn_schemas-upnp-org_SwitchPower_1</a>
 	</li>
 
 </ul>
@@ -92,7 +96,7 @@
 
 <div id="content">
 
-<h1>Module "<code>upnp.device</code>"</h1>
+<h1>Module "<code>upnp.classes.device</code>"</h1>
 
 <p>The base object for UPnP devices.</p>
 
@@ -197,6 +201,10 @@
 	  <code><em>servicelist</em></code>: list of services, ordered by their serviceid
 	</li>
 	
+	<li>
+	  <code><em>devicexmlurl</em></code>: the url to the device XML (relative to the <codce>upnp.webroot</code> directory), this only applies to root-devices
+	</li>
+	
 </ul>
 
 
@@ -234,7 +242,7 @@ Description of the "creator" callback function as it has to be provided to <code
 	</li>
 	
 	<li>
-	  <code><em>parent</em></code>: The parent object to which the requested object will be added. The parent property on the created object will be set afterwards, no need to set it here.
+	  <code><em>parent</em></code>: The parent object to which the requested object will be added. The parent property on the created object will be set afterwards, no need to set it here (<code>nil</code> for a root-device).
 	</li>
 	
 </ul>
@@ -412,7 +420,7 @@ device object or <code>nil + error message</code>
 <h3>See also:</h3>
 <ul>
 	
-	<li><a href="../modules/upnp.device.html#creator">
+	<li><a href="../modules/upnp.classes.device.html#creator">
 		creator
 	</a></li>
 	

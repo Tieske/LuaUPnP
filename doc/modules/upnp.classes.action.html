@@ -3,7 +3,7 @@
    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"> 
 <head>
-    <title>upnp.action: Module Index</title>
+    <title>upnp.classes.action: Module Index</title>
     <link rel="stylesheet" href="../luadoc.css" type="text/css" />
     <!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
 </head>
@@ -39,14 +39,26 @@
 		<a href="../modules/upnp.html">upnp</a>
 	</li>
 
-	<li><strong>upnp.action</strong></li>
+	<li><strong>upnp.classes.action</strong></li>
 	
 	<li>
-		<a href="../modules/upnp.argument.html">upnp.argument</a>
+		<a href="../modules/upnp.classes.argument.html">upnp.classes.argument</a>
 	</li>
 
 	<li>
-		<a href="../modules/upnp.device.html">upnp.device</a>
+		<a href="../modules/upnp.classes.device.html">upnp.classes.device</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.service.html">upnp.classes.service</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.statevariable.html">upnp.classes.statevariable</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.upnpbase.html">upnp.classes.upnpbase</a>
 	</li>
 
 	<li>
@@ -62,19 +74,11 @@
 	</li>
 
 	<li>
-		<a href="../modules/upnp.service.html">upnp.service</a>
-	</li>
-
-	<li>
-		<a href="../modules/upnp.statevariable.html">upnp.statevariable</a>
-	</li>
-
-	<li>
-		<a href="../modules/upnp.upnpbase.html">upnp.upnpbase</a>
-	</li>
-
-	<li>
 		<a href="../modules/upnp.xmlfactory.html">upnp.xmlfactory</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_SwitchPower_1.html">urn_schemas-upnp-org_SwitchPower_1</a>
 	</li>
 
 </ul>
@@ -92,7 +96,7 @@
 
 <div id="content">
 
-<h1>Module "<code>upnp.action</code>"</h1>
+<h1>Module "<code>upnp.classes.action</code>"</h1>
 
 <p>The base object for UPnP actions.</p>
 
@@ -199,7 +203,7 @@
 
 <dt><a name="action:_execute"></a><strong>action:_execute</strong>&nbsp;(params)</dt>
 <dd>
-Executes the action while checking inputs and outputs. Parameter values may be in either UPnP or Lua format. The actual implementation is in <code>action:execute()</code> which will be called by this method. <br/>Actual execution order; <br/>1) <code>action:_execute()</code> verifies correctness of all arguments provided and converts them to Lua equivalents <br/>2) <code>action:execute()</code> gets called to perform actual device behaviour <br/>3) <code>action:_execute()</code> verifies the return values and converts them to UPnP formats <br/>So to implement device behaviour, override the <code>action:execute()</code> method, to execute the action call <code>action:_execute()</code>.
+Executes the action while checking inputs and outputs. Parameter values may be in either UPnP or Lua format. The actual implementation is in <code>action:execute()</code> which will be called by this method. <br/>Actual execution order; <br/>1) <code>action:_execute()</code> verifies correctness of all arguments provided and converts them to Lua equivalents <br/>2) <code>action:execute()</code> gets called to perform actual device behaviour <br/>3) <code>action:_execute()</code> verifies the return values and converts them to UPnP formats <br/>So to implement device behaviour, override the <code>action:execute()</code> method, to execute the action call <code>action:_execute()</code> or even better call <a href="upnp.service.html#service:executeaction"><code>service:executeaction()</code></a> as that will also return the proper UPnP error if the action doesn't exist.
 
 
 <h3>Parameters:</h3>
@@ -233,11 +237,11 @@ Executes the action while checking inputs and outputs. Parameter values may be i
 <h3>See also:</h3>
 <ul>
 	
-	<li><a href="../modules/upnp.action.html#action:execute">
+	<li><a href="../modules/upnp.classes.action.html#action:execute">
 		action:execute
 	</a></li>
 	
-	<li><a href="../modules/upnp.service.html#service:executeaction">
+	<li><a href="../modules/upnp.classes.service.html#service:executeaction">
 		service:executeaction
 	</a></li>
 	
@@ -316,11 +320,11 @@ table with named return values (each indexed by its name). The returned values c
 <h3>See also:</h3>
 <ul>
 	
-	<li><a href="../modules/upnp.action.html#action:_execute">
+	<li><a href="../modules/upnp.classes.action.html#action:_execute">
 		action:_execute
 	</a></li>
 	
-	<li><a href="../modules/upnp.service.html#service:executeaction">
+	<li><a href="../modules/upnp.classes.service.html#service:executeaction">
 		service:executeaction
 	</a></li>
 	

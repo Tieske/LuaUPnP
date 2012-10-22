@@ -42,15 +42,27 @@
 	</li>
 
 	<li>
-		<a href="modules/upnp.action.html">upnp.action</a>
+		<a href="modules/upnp.classes.action.html">upnp.classes.action</a>
 	</li>
 
 	<li>
-		<a href="modules/upnp.argument.html">upnp.argument</a>
+		<a href="modules/upnp.classes.argument.html">upnp.classes.argument</a>
 	</li>
 
 	<li>
-		<a href="modules/upnp.device.html">upnp.device</a>
+		<a href="modules/upnp.classes.device.html">upnp.classes.device</a>
+	</li>
+
+	<li>
+		<a href="modules/upnp.classes.service.html">upnp.classes.service</a>
+	</li>
+
+	<li>
+		<a href="modules/upnp.classes.statevariable.html">upnp.classes.statevariable</a>
+	</li>
+
+	<li>
+		<a href="modules/upnp.classes.upnpbase.html">upnp.classes.upnpbase</a>
 	</li>
 
 	<li>
@@ -66,19 +78,11 @@
 	</li>
 
 	<li>
-		<a href="modules/upnp.service.html">upnp.service</a>
-	</li>
-
-	<li>
-		<a href="modules/upnp.statevariable.html">upnp.statevariable</a>
-	</li>
-
-	<li>
-		<a href="modules/upnp.upnpbase.html">upnp.upnpbase</a>
-	</li>
-
-	<li>
 		<a href="modules/upnp.xmlfactory.html">upnp.xmlfactory</a>
+	</li>
+
+	<li>
+		<a href="modules/urn_schemas-upnp-org_SwitchPower_1.html">urn_schemas-upnp-org_SwitchPower_1</a>
 	</li>
 
 </ul>
@@ -98,7 +102,7 @@
 
 
 <div id="readme">
-<br/><h1>LuaUPnP</h1><br/><br/><p>A binding of the pupnp library for Lua 5.1.</p><br/><br/><p>its is a work in progress and nowhere near complete yet.</p><br/><br/><h1>Documentation</h1><br/><p>LuaDoc generated documentation is available here; http://tieske.github.com/LuaUPnP</p><br/><br/><h1>Copyright &amp; license</h1><br/><p>Copyright 2012 Thijs Schreijer (http://www.thijsschreijer.nl), licensed under GPLv3, see http://www.gnu.org/licenses/gpl-3.0.html</p><br/><br/>
+<br/><h1>LuaUPnP</h1><br/><br/><p>A binding of the pupnp library for Lua 5.1.</p><br/><br/><p>its is a work in progress and nowhere near complete yet.</p><br/><br/><h1>Documentation</h1><br/><p>LuaDoc <a href="http://tieske.github.com/LuaUPnP">generated documentation</a> is available. </p><br/><br/><h1>Copyright &amp; license</h1><br/><p>Copyright 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>.</p><br/><br/><h1>Contributions</h1><br/><p>Please read the <a href="https://github.com/Tieske/LuaUPnP/blob/master/CONTRIBUTING.md">contributing guidelines</a> first</p><br/>
 </div>
 
 
@@ -113,23 +117,38 @@
     </tr>
 
     <tr>
-        <td class="name"><a href="modules/upnp.action.html">upnp.action</a></td>
+        <td class="name"><a href="modules/upnp.classes.action.html">upnp.classes.action</a></td>
         <td class="summary">The base object for UPnP actions.</td>
     </tr>
 
     <tr>
-        <td class="name"><a href="modules/upnp.argument.html">upnp.argument</a></td>
+        <td class="name"><a href="modules/upnp.classes.argument.html">upnp.classes.argument</a></td>
         <td class="summary">The base object for UPnP action arguments.</td>
     </tr>
 
     <tr>
-        <td class="name"><a href="modules/upnp.device.html">upnp.device</a></td>
+        <td class="name"><a href="modules/upnp.classes.device.html">upnp.classes.device</a></td>
         <td class="summary">The base object for UPnP devices.</td>
     </tr>
 
     <tr>
+        <td class="name"><a href="modules/upnp.classes.service.html">upnp.classes.service</a></td>
+        <td class="summary">The base object for UPnP services.</td>
+    </tr>
+
+    <tr>
+        <td class="name"><a href="modules/upnp.classes.statevariable.html">upnp.classes.statevariable</a></td>
+        <td class="summary">The base object for UPnP statevariable.</td>
+    </tr>
+
+    <tr>
+        <td class="name"><a href="modules/upnp.classes.upnpbase.html">upnp.classes.upnpbase</a></td>
+        <td class="summary">The base object for UPnP objects.</td>
+    </tr>
+
+    <tr>
         <td class="name"><a href="modules/upnp.devicefactory.html">upnp.devicefactory</a></td>
-        <td class="summary">device factory.</td>
+        <td class="summary">Device factory for generating standardized services and devices (xml's + implementation code).</td>
     </tr>
 
     <tr>
@@ -143,23 +162,13 @@
     </tr>
 
     <tr>
-        <td class="name"><a href="modules/upnp.service.html">upnp.service</a></td>
-        <td class="summary">The base object for UPnP services.</td>
-    </tr>
-
-    <tr>
-        <td class="name"><a href="modules/upnp.statevariable.html">upnp.statevariable</a></td>
-        <td class="summary">The base object for UPnP statevariable.</td>
-    </tr>
-
-    <tr>
-        <td class="name"><a href="modules/upnp.upnpbase.html">upnp.upnpbase</a></td>
-        <td class="summary">The base object for UPnP objects.</td>
-    </tr>
-
-    <tr>
         <td class="name"><a href="modules/upnp.xmlfactory.html">upnp.xmlfactory</a></td>
-        <td class="summary">xml factory.</td>
+        <td class="summary">XML factory for generating device and service XML's which can be written to the webserver.</td>
+    </tr>
+
+    <tr>
+        <td class="name"><a href="modules/urn_schemas-upnp-org_SwitchPower_1.html">urn_schemas-upnp-org_SwitchPower_1</a></td>
+        <td class="summary">Standard service; urn:schemas-upnp-org:SwitchPower:1.</td>
     </tr>
 
 </table>
