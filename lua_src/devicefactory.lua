@@ -115,14 +115,19 @@ end
 -- @see upnp.classes.statevariable:beforeset
 -- @see upnp.classes.statevariable:afterset
 -- @example# -- example customtable for a 'urn:schemas-upnp-org:service:Dimming:1' service
--- local customtable = devicefactory.emptyservice()
--- -- remove a variable and an action
--- customtable.serviceStateTable.StepDelta = false
--- customtable.actionList.StepUp = false
--- -- implement the 'execute' method for an action
--- customtable.actionList.StepDown = { execute = function(self) 
---        print ("method being executed now!")
---      end } 
+-- local customtable = {
+--     serviceStateTable = {
+--         StepDelta = false,  -- remove this variable
+--     },
+--     actionList = {
+--         StepUp = false,     -- remove this action
+--         StepDown = {        -- implement the action behaviour
+--           execute = function(self, params) 
+--             print ("method being executed now!")
+--           end,
+--         },
+--     },
+-- }
 devicefactory.customizeservice = function(service, customtable)
   if customtable == nil then return service end
   if customtable.serviceStateTable and next(customtable.serviceStateTable) then
@@ -174,28 +179,35 @@ end
 -- or <code>deviceType</code> (for devices), with value <code>false</code>.
 -- @see devicefactory.createdevice
 -- @example# -- example customtable for a 'urn:schemas-upnp-org:device:DimmableLight:1' device
--- local customtable = devicefactory.emptydevice()
--- -- customize device level first
--- customtable.friendlyName = "This is my new UPnP device"
--- customtable.start = function(self)
+-- local customtable = {
+--     -- customize device level first
+--     friendlyName = "This is my new UPnP device",
+--     start = function(self)   -- implement startup behaviour
 --       self:superclass().start(self)
 --       print("myDevice is now starting...")
---     end) 
--- customtable.stop = function(self)
+--     end,
+--     stop = function(self)    -- implement device shutdown behaviour
 --       print("myDevice is now stopped")
 --       self:superclass().stop(self)
---     end) 
+--     end,
+--     -- customize services next
+--     serviceList = {
+--       ["urn:upnp-org:serviceId:Dimming:1"] = {
+--         serviceStateTable = {
+--           StepDelta = false,
+--         },
+--         actionList = {
+--           StepUp = false,
+--           StepDown = {
+--             execute = function(self, params) 
+--               print ("method being executed now!")
+--             end,
+--           },
+--         },  -- actionList
+--       },  -- dimming service
+--     },  -- serviceList
+--   },  -- customtable
 --
--- -- prepare a service to be customized
--- customtable.serviceList["urn:upnp-org:serviceId:Dimming:1"] = devicefactory.emptyservice()
--- -- remove a variable and an action
--- customtable.serviceList["urn:upnp-org:serviceId:Dimming:1"].serviceStateTable.StepDelta = false
--- customtable.serviceList["urn:upnp-org:serviceId:Dimming:1"].actionList.StepUp = false
--- -- implement the 'execute' method for an action
--- customtable.serviceList["urn:upnp-org:serviceId:Dimming:1"].actionList.StepDown = { execute = function(self) 
---        print ("method being executed now!")
---     end } 
--- 
 -- -- go create a dimmable light and then customize it
 -- local myDevTable = devicefactory.customizedevice(devicefactory.createdevice("schemas.upnp.org", "DimmableLight", "1") , customtable)
 devicefactory.customizedevice = function(device, customtable)
@@ -235,10 +247,11 @@ end
 -- This method takes a number of steps to create a fully functional device;</p>
 -- <ol>
 -- <li>Creates a device table for a standard device (<code>devicefactory.createdevice()</code>)</li>
--- <li>Drops optionals as set in the <code>customtable</code> parameter (<code>devicefactory.customizedevice()</code>)</li>
+-- <li>Drops optionals as set in the <code>customtable</code> parameter (<code>devicefactory.customizedevice()</code>)
+-- and adds the implementations of device/variable/action methods from the <code>customtable</code> to the device table</li>
 -- <li>Creates the XML's for the device and its services (<code>xmlfactory.rootxml()</code>)</li>
 -- <li>Writes the XML's to the webroot directory, so they are accessible (<code>xmlfactory.writetoweb()</code>)</li>
--- <li>Parses the XML's into a root-device object structure, whilst adding the custom implementations as set in the <code>customtable</code> parameter (<code>upnp.classes.device:parsefromxml()</code>)</li>
+-- <li>Parses the XML's into a root-device object structure, whilst adding the custom implementations as set in the devicetable (<code>upnp.classes.device:parsefromxml()</code>)</li>
 -- <li>sets the <code>devicexmlurl</code> on the device and returns the device object</li>
 -- <ol><p>
 -- @see devicefactory.createdevice
@@ -286,8 +299,79 @@ devicefactory.builddevice = function(domain, devicetype, version, customtable)
   if err2 ~= nil then return nil, err2 end -- contained error (nil + errmsg)
 
   -- creator function
+  local creations = {} -- created objects, index by themselves, value is sub-table of devtable
   local creator = function(plist, classname, parent)
-    to be done
+    -- plist = object properties, indexed by lowercase (!!!) names
+    -- classname = "device", "service", "statevariable", "action", "argument", "servicexml"
+    -- parent is the parent object, or nil for a root device
+    if classname == "servicexml" then
+      -- the device.parsefromxml() parser will automatically fallback to the SCPDURL 
+      -- property listed in the device description if nothing is returned, next call 
+      -- here if for actually creating the service object, and thats when we will 
+      -- customize it
+      return nil
+    end
+    
+    local target = upnp.classes[classname](plist)
+    local source
+    if classname == "device" then
+      if parent == nil then
+        source = devtable  -- root device
+      else
+        -- lookup device in parent deviceList
+        for _, dev in pairs(creations[parent].deviceList) do
+          if dev.UDN and dev.UDN == plist.udn then
+            source = dev
+            break
+          end
+        end
+        assert(source, "devicefactory.builddevice[creator]; unkown device: UDN = " .. tostring(plist.udn))
+      end
+      -- implement/customize device methods
+      target.start = source.start or target.start
+      target.stop = source.stop or target.stop
+    
+    elseif classname == "service" then
+      -- has no custom methods, nothing to do here
+    
+    elseif classname == "argument" then
+      -- has no custom methods, nothing to do here
+    
+    elseif classname == "statevariable" then
+      -- lookup variable in parent serviceStateTable
+      for _, var in pairs(creations[parent].serviceStateTable) do
+        if var.name and var.name == plist.name then
+          source = var
+          break
+        end
+      end
+      assert(source, "devicefactory.builddevice[creator]; unkown statevariable: " .. tostring(plist.name))
+      -- implement/customize statevariable methods
+      target.beforeset = source.beforeset or target.beforeset
+      target.afterset = source.afterset or target.afterset
+      
+    elseif classname == "action" then
+      -- lookup action in parent actionList
+      for _, act in pairs(creations[parent].actionList) do
+        if act.name and act.name == plist.name then
+          source = act
+          break
+        end
+      end
+      assert(source, "devicefactory.builddevice[creator]; unkown action: " .. tostring(plist.name))
+      -- implement/customize action methods
+      target.execute = source.execute or target.execute
+    
+    else
+      error("devicefactory.builddevice[creator]; unkown classname: " .. tostring(classname))
+    end
+    
+    upnp.classes.service(plist)    
+    upnp.classes.device(plist) 
+    
+    -- store results and return created object
+    creations[target] = source
+    return target
   end
   
   -- parse xml into an object structure representing the device

@@ -26,6 +26,8 @@ local classname = "device"
 -- @field parent owning device, or <code>nil</code> if it is a root device
 -- @field devicelist list of sub-devices, ordered by their UDN
 -- @field servicelist list of services, ordered by their serviceid
+-- @field devicexmlurl the url to the device XML (relative to the <codce>upnp.webroot</code> directory), this only applies
+-- to root-devices
 local device = super:subclass()
 
 -----------------------------------------------------------------------------------------
@@ -56,7 +58,7 @@ local creator -- trick LuaDoc to generate the documentation for this one
 -- @param classname the type of object (or descendant of that type) to be created, this will be any of the
 -- following; <code>"device", "service", "statevariable", "action", "argument",</code> or <code>"servicexml"</code>.
 -- @param parent The parent object to which the requested object will be added. The parent property on the
--- created object will be set afterwards, no need to set it here.
+-- created object will be set afterwards, no need to set it here (<code>nil</code> for a root-device).
 -- @return object type as requested, to be created by calling <code>objectbaseclass:new(plist)</code>, which
 -- will instantiate a new class and set the properties from plist accordingly. EXCEPTION: if class <code>servicexml</code>
 -- is requested, a string with the service xml should be returned, the string should be parseable by the
@@ -186,7 +188,7 @@ function device:parsefromxml(xmldoc, creator, parent)
                     end
                     ielement = ielement:getNextSibling()
                 end
-                -- basics from the device XML have been collected, now get the service XML
+                -- service basics from the device XML have been collected, now get the service XML
                 logger:debug("device:parsefromxml(), collecting service-xml through 'creator'")
                 local sdoc = creator(plist, "servicexml", dev)
                 if not sdoc then
