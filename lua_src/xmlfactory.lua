@@ -133,7 +133,10 @@ xmlfactory.rootxml = function(rootdev)
       end
       -- generate xml and add it to the files list
       local sxml = xmlfactory.servicexml(service)
+      -- set control URLs to go in device xml
       service.SCPDURL = storeservice(service, sxml)
+      service.controlURL = "upnp/control/" .. service.SCPDURL:gsub("%.xml","")
+      service.eventSubURL = "upnp/event/" .. service.SCPDURL:gsub("%.xml","")
     end
   end
 
