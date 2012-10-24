@@ -42,7 +42,7 @@ function service:initialize()
     --self.serviceid = nil                -- service id
     self.parent = nil                   -- owning UPnP device of this service
     self.actionlist = {}               -- table with actions, indexed by name
-    self.statetable = {}               -- table with statevariables, indexed by name
+    self.servicestatetable = {}               -- table with statevariables, indexed by name
     classname = classname          -- set object classname
 
     logger:debug("Initializing class '%s' completed", classname)
@@ -184,8 +184,8 @@ function service:addstatevariable(statevar)
     -- register original name, switch to lowercase
     statevar._name, statevar.name = statevar.name, string.lower(statevar.name)
 
-    self.statetable = self.statetable or {}
-    self.statetable[statevar.name] = statevar
+    self.servicestatetable = self.servicestatetable or {}
+    self.servicestatetable[statevar.name] = statevar
     -- update statevariable
     statevar.parent = self
 end
@@ -235,7 +235,7 @@ end
 function service:getupnpvalues()
     local names = {}
     local values = {}
-    for _, v in pairs(self.statetable) do
+    for _, v in pairs(self.servicestatetable) do
         if v.sendevents then    -- only if evented
             table.insert(names, v._name)    -- use original casing for name here
             table.insert(values, v:getupnp())
@@ -249,7 +249,7 @@ end
 -- Override in subclasses to clear tree-structure.
 function service:clearlazyness()
     super.clearlazyness(self)
-    for _, statevar in pairs(self.statetable or {}) do
+    for _, statevar in pairs(self.servicestatetable or {}) do
         statevar:clearlazyness()
     end
     for _, act in pairs(self.actionlist or {}) do

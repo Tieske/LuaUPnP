@@ -133,25 +133,40 @@ devicefactory.customizeservice = function(service, customtable)
   if customtable.serviceStateTable and next(customtable.serviceStateTable) then
     for i,v in ipairs(service.serviceStateTable or {}) do
       local variable = customtable.serviceStateTable[v.name]
-      if variable == false then 
+      if variable == nil then
+        logger:debug("devicefactory.customizeservice: statevariable '%s' not found in customtable", tostring(v.name))
+      elseif variable == false then 
         -- drop optional variable
         table.remove(service.serviceStateTable, i)
+        logger:debug("devicefactory.customizeservice: dropping statevariable '%s'", tostring(v.name))
       elseif type(variable) == "table" then
         -- add methods
-        v.beforeset = variable.beforeset or v.beforeset
-        v.afterset = variable.afterset or v.afterset
+        if variable.beforeset then
+          logger:debug("devicefactory.customizeservice: adding statevariable '%s:beforeset' implementation", v.name)
+          v.beforeset = variable.beforeset or v.beforeset
+        end
+        if variable.afterset then
+          logger:debug("devicefactory.customizeservice: adding statevariable '%s:afterset' implementation", v.name)
+          v.afterset = variable.afterset or v.afterset
+        end
       end
     end
   end
   if customtable.actionList and next(customtable.actionList) then
     for i,v in ipairs(service.actionList or {}) do
       local action = customtable.actionList[v.name]
-      if action == false then 
+      if action == nil then
+        logger:debug("devicefactory.customizeservice: action '%s' not found in customtable", tostring(v.name))
+      elseif action == false then 
         -- drop optional action
         table.remove(service.actionList, i)
-      elseif type(variable) == "table" then
+        logger:debug("devicefactory.customizeservice: dropping action '%s'", tostring(v.name))
+      elseif type(action) == "table" then
         -- add method
-        v.execute = variable.execute or v.execute
+        if action.execute then
+          logger:debug("devicefactory.customizeservice: adding action '%s:execute' implementation", v.name)
+          v.execute = action.execute or v.execute
+        end
       end
     end
   end
@@ -215,27 +230,46 @@ devicefactory.customizedevice = function(device, customtable)
   for k,v in pairs(device) do
     if customtable[k] == false then
       device[k] = nil
+      logger:debug("devicefactory.customizedevice: dropping device property '%s'", tostring(k))
     elseif (type(v) == "string" or type(v) == "nil") and type(customtable[k]) == "string"  then
       device[k] = customtable[k]
+      logger:debug("devicefactory.customizedevice: setting '%s' to '%s'", tostring(k), tostring(device[k]))
     end
   end
-  if type(customtable.start) == "function" then device.start = customtable.start end
-  if type(customtable.stop) == "function" then device.stop = customtable.stop end
+  if type(customtable.start) == "function" then 
+    device.start = customtable.start
+    logger:debug("devicefactory.customizedevice: adding 'start' implementation")
+  end
+  if type(customtable.stop) == "function" then 
+    device.stop = customtable.stop
+    logger:debug("devicefactory.customizedevice: adding 'stop' implementation")
+  end
   if customtable.serviceList and next(customtable.serviceList) then
     for i,v in ipairs(device.serviceList or {}) do
-      if customtable.serviceList[v.serviceId] == false then 
+      local service = customtable.serviceList[v.serviceId]
+      if service == nil then
+        logger:debug("devicefactory.customizedevice: service '%s' not found in customtable", tostring(v.serviceId))
+for k,v in pairs(customtable.serviceList) do print(k,v) end        
+      elseif service == false then 
         table.remove(device.serviceList, i)
+        logger:debug("devicefactory.customizedevice: dropping service '%s'", tostring(v.serviceId))
       else
-        devicefactory.customizeservice(v, customtable.serviceList[v.serviceId])
+        logger:debug("devicefactory.customizedevice: customizing service '%s'", tostring(v.serviceId))
+        devicefactory.customizeservice(v, service)
       end
     end
   end
   if customtable.deviceList and next(customtable.deviceList) then
     for i,v in ipairs(device.deviceList or {}) do
-      if customtable.deviceList[v.deviceType] == false then 
+      local subdev = customtable.deviceList[v.deviceType]
+      if subdev == nil then
+        logger:debug("devicefactory.customizedevice: subdevice '%s' not found in customtable", tostring(v.deviceType))
+      elseif subdev == false then 
         table.remove(device.deviceList, i)
+        logger:debug("devicefactory.customizedevice: dropping subdevice '%s'", tostring(v.deviceType))
       else
-        devicefactory.customizedevice(v, customtable.deviceList[v.deviceType])
+        logger:debug("devicefactory.customizedevice: customizing subdevice '%s'", tostring(v.deviceType))
+        devicefactory.customizedevice(v, subdev)
       end
     end
   end

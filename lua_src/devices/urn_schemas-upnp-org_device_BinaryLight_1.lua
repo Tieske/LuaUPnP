@@ -8,7 +8,7 @@ local newdevice = function()
   logger:info("Switching 'Basic' to '"..dev.deviceType.."' device")
   
   local serv = switch()
-  serv.serviceId = "urn:upnp-org:device:SwitchPower:1"
+  serv.serviceId = "urn:upnp-org:service:SwitchPower:1"
   logger:info("adding '"..serv.serviceId.."' service")
   table.insert(dev.serviceList, serv)
   return dev

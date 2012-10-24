@@ -21,7 +21,7 @@ local newservice = function()
           },
         },
         execute = function(self, params)
-          local val, errstr, errnr = self.parent.statetable.target:set(params.newtargetvalue)
+          local val, errstr, errnr = self.parent.servicestatetable.target:set(params.newtargetvalue)
           if not val then
               return nil, errstr, errnr       -- report error
           end

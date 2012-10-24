@@ -83,11 +83,11 @@ function argument:parsefromxml(xmldoc, creator, parent, service)
     if plist.relatedstatevariable then
         plist.relatedstatevariable = string.lower(plist.relatedstatevariable)
     end
-    if not plist.relatedstatevariable or not service.statetable[plist.relatedstatevariable] then
+    if not plist.relatedstatevariable or not service.servicestatetable[plist.relatedstatevariable] then
         return nil, "Error cannot attach statevariable to parsed argument, statevariable not found; " .. tostring(plist.relatedstatevariable)
     end
     -- attach statevariable
-    plist.statevariable = service.statetable[plist.relatedstatevariable]
+    plist.statevariable = service.servicestatetable[plist.relatedstatevariable]
     plist.relatedstatevariable = nil
     -- go create the object
     local arg = (creator(plist, "argument", parent) or upnp.classes.argument(plist))
