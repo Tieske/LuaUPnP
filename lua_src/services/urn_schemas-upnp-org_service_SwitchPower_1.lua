@@ -20,12 +20,7 @@ local newservice = function()
             direction = "in",
           },
         },
-        execute = function(self, params)
-          local val, errstr, errnr = self.parent.servicestatetable.target:set(params.newtargetvalue)
-          if not val then
-              return nil, errstr, errnr       -- report error
-          end
-        end,
+        execute = upnp.classes.action.genericsetter,
       },
       { name = "GetTarget",
         argumentList = {
@@ -34,9 +29,7 @@ local newservice = function()
             direction = "out",
           },
         },
-        execute = function(self, params)
-          return { rettargetvalue = self.parent.statetable.target:get() }
-        end,
+        execute = upnp.classes.action.genericgetter,
       },
       { name = "GetStatus",
         argumentList = {
@@ -45,9 +38,7 @@ local newservice = function()
             direction = "out",
           },
         },
-        execute = function(self, params)
-          return { resultstatus = self.parent.statetable.status:get() }
-        end,
+        execute = upnp.classes.action.genericgetter,
       },
     },
     serviceStateTable = {

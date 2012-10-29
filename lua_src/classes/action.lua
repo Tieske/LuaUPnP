@@ -226,7 +226,7 @@ end
 -- @see action:execute
 -- @see service:executeaction
 function action:_execute(params)
-    logger:info("Entering action:_execute() for action '%s'", tostring(self._name))
+    logger:debug("Entering action:_execute() for action '%s'", tostring(self._name))
     local names, values, success
     local result, err, errnr = checkparams(self, params)
     if not result then
@@ -254,6 +254,7 @@ function action:_execute(params)
     end
     -- transform result in 2 lists, names and values
     -- proper order, and UPnP typed values
+    result = result or {}
     names = {}
     values = {}
     local i = 1
@@ -282,6 +283,49 @@ function action:clearlazyness()
     for _, arg in pairs(self.argumentlist or {}) do
         arg:clearlazyness()
     end
+end
+
+-----------------------------------------------------------------------------------------
+-- Generic function for standard actions 'getVariableName'. This method is capable of returning
+-- multiple parameters, it will simply report all 'out' arguments of the action based on the 
+-- related statevariables current value.
+-- Do not call this directly, but on these common type of action set this function as the execute method, see example below.
+-- @params list of parameters (not used)
+-- @return table with named return arguments (see <code>action:execute()</code>)
+-- @example# -- usage for generic getter, assign to execute method
+-- myAction.execute = upnp.classes.action.genericgetter
+function action:genericgetter(params)
+    local result = {}
+    for _, arg in ipairs(self.argumentlist or {}) do
+        if arg.direction == "out" then
+            result[arg.name] = arg.statevariable:get()
+        end
+    end
+    return result
+end
+
+-----------------------------------------------------------------------------------------
+-- Generic function for standard actions 'setVariableName'. This method is capable of aetting
+-- multiple statevariable values, it will simply store all values of the parameters in the 
+-- related statevariables.
+-- Do not call this directly, but on these common type of action set this function as the execute method, see example below.
+-- @params list of parameters
+-- @return 1 on success, or <code>nil</code> on error
+-- @return <code>errorstring</code> on error
+-- @return <code>errornr</code> on error
+-- @example# -- usage for generic getter, assign to execute method
+-- myAction.execute = upnp.classes.action.genericgetter
+function action:genericsetter(params)
+    for pname, pvalue in pairs(params) do
+        local param = self.argumentlist[pname]
+        if pname then
+            local res, errstr, errnr = param.statevariable:set(pvalue)
+            if res == nil then
+                return res, errstr, errnr
+            end
+        end
+    end
+    return 1
 end
 
 return action
