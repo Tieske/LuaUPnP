@@ -289,11 +289,15 @@ end
 -- Generic function for standard actions 'getVariableName'. This method is capable of returning
 -- multiple parameters, it will simply report all 'out' arguments of the action based on the 
 -- related statevariables current value.
--- Do not call this directly, but on these common type of action set this function as the execute method, see example below.
--- @params list of parameters (not used)
--- @return table with named return arguments (see <code>action:execute()</code>)
+-- Do not call this directly, but on these common type of action set this function as the 
+-- execute method, see example below. For another example see the 
+-- <a href="urn_schemas-upnp-org_service_SwitchPower_1.html">SwitchPower service implementation</a>.
+-- @param params list of parameters (not used, but is standard in <code>execute()</code> method signature)
+-- @return table with named return arguments (see <code>action:execute()</code> for format)
 -- @example# -- usage for generic getter, assign to execute method
 -- myAction.execute = upnp.classes.action.genericgetter
+-- @see SwitchPower urn_schemas-upnp-org_service_SwitchPower_1.html
+-- @see action:execute
 function action:genericgetter(params)
     local result = {}
     for _, arg in ipairs(self.argumentlist or {}) do
@@ -308,13 +312,17 @@ end
 -- Generic function for standard actions 'setVariableName'. This method is capable of aetting
 -- multiple statevariable values, it will simply store all values of the parameters in the 
 -- related statevariables.
--- Do not call this directly, but on these common type of action set this function as the execute method, see example below.
--- @params list of parameters
--- @return 1 on success, or <code>nil</code> on error
+-- Do not call this directly, but on these common type of action set this function as the 
+-- execute method, see example below. For another example see the 
+-- <a href="urn_schemas-upnp-org_service_SwitchPower_1.html">SwitchPower service implementation</a>.
+-- @param params list of parameters
+-- @return <code>1</code> on success, or <code>nil</code> on error
 -- @return <code>errorstring</code> on error
 -- @return <code>errornr</code> on error
 -- @example# -- usage for generic getter, assign to execute method
 -- myAction.execute = upnp.classes.action.genericgetter
+-- @see SwitchPower urn_schemas-upnp-org_service_SwitchPower_1.html
+-- @see action:execute
 function action:genericsetter(params)
     for pname, pvalue in pairs(params) do
         local param = self.argumentlist[pname]

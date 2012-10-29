@@ -7,7 +7,7 @@
 -- </ul>
 -- <p>
 -- @class module
--- @name urn_schemas-upnp-org_SwitchPower_1
+-- @name urn_schemas-upnp-org_service_SwitchPower_1
 
 local newservice = function()
   return {
