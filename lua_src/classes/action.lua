@@ -117,6 +117,31 @@ function action:parsefromxml(xmldoc, creator, parent)
         end
     end
 
+    -- check for generic getter/setter functionality
+    if act.argumentcount > 0 then
+      local same = true
+      for _, arg in ipairs(act.argumentlist) do
+        if arg.direction ~= act.argumentlist[1].direction or arg.name:sub(1,11):lower() == "a_arg_type_" then
+          same = false
+          break
+        end
+      end
+      if same then
+        if (act.argumentlist[1].direction == "in"  and act.name:sub(1,3):lower() == "set") or 
+           (act.argumentlist[1].direction == "out" and act.name:sub(1,3):lower() == "get") then
+          -- all arguments have the same direction, and methodname starts with 'get' or 'set'
+          -- so use generic setter/getter
+          if act.name:sub(1,3):lower() == "set" then
+            act.execute = self.genericsetter
+            logger:info("statevariable:parsefromxml(): setting 'genericsetter' as execute() method for action '%s'", tostring(act.name))
+          else
+            act.execute = self.genericgetter
+            logger:info("statevariable:parsefromxml(): setting 'genericgetter' as execute() method for action '%s'", tostring(act.name))
+          end
+        end
+      end
+    end
+    
     logger:debug("Leaving statevariable:parsefromxml()...")
     return act  -- the parsing service will add it to the parent service
 end
@@ -193,7 +218,9 @@ end
 -- Executes the action.
 -- Override in descendant classes to implement the actual device behaviour. <br/><strong>NOTE 1</strong>: if not
 -- overridden, the default result will be an error; <code>602, Optional Action Not Implemented</code> (hence;
--- from the descedant overridden method, DO NOT call the ancestor method, as it will only return the error)
+-- from the descedant overridden method, DO NOT call the ancestor method, as it will only return the error), 
+-- alternatively, if parsed from an xml file the <code>genericgetter()/genericsetter()</code> may be set as the 
+-- <code>execute()</code> method.
 -- <br/><strong>NOTE 2</strong>: this method is wrapped by <code>action:_execute()</code> from which it will be
 -- called. So never call this method directly, if you need to execute, call <code>_execute()</code>. If called
 -- externally, it is best to call <a href="upnp.service.html#service:executeaction"><code>service:executeaction()</code></a>
@@ -206,6 +233,8 @@ end
 -- the 6xx error codes in the UPnP 1.0 architecture document, section 3.2.2)
 -- @see action:_execute
 -- @see service:executeaction
+-- @see action:genericgetter
+-- @see action:genericsetter
 function action:execute(params)
     logger:warning("Action '%s' has not been implemented!", tostring(self._name))
     return nil, "Optional Action Not Implemented; " .. tostring(self._name), 602
@@ -289,14 +318,18 @@ end
 -- Generic function for standard actions 'getVariableName'. This method is capable of returning
 -- multiple parameters, it will simply report all 'out' arguments of the action based on the 
 -- related statevariables current value.
--- Do not call this directly, but on these common type of action set this function as the 
--- execute method, see example below. For another example see the 
--- <a href="urn_schemas-upnp-org_service_SwitchPower_1.html">SwitchPower service implementation</a>.
+-- <br><strong>NOTE:</strong> when an action is parsed from an xml, and the following conditions
+-- are met;</p><ul>
+-- <li>action name starts with <code>'get'</code> (case independent)</li>
+-- <li>the action has 1 or more arguments</li>
+-- <li>all arguments are direction <code>'out'</code></li>
+-- <li>none of the arguments has a related statevariable which name starts with <code>'A_ARG_TYPE_'</code> (case independent)</li>
+-- </ul><p> then the <code>genericgetter</code> will automatically be set as the <code>execute()</code>
+-- method for the action.
 -- @param params list of parameters (not used, but is standard in <code>execute()</code> method signature)
 -- @return table with named return arguments (see <code>action:execute()</code> for format)
 -- @example# -- usage for generic getter, assign to execute method
 -- myAction.execute = upnp.classes.action.genericgetter
--- @see SwitchPower urn_schemas-upnp-org_service_SwitchPower_1.html
 -- @see action:execute
 function action:genericgetter(params)
     local result = {}
@@ -312,16 +345,20 @@ end
 -- Generic function for standard actions 'setVariableName'. This method is capable of aetting
 -- multiple statevariable values, it will simply store all values of the parameters in the 
 -- related statevariables.
--- Do not call this directly, but on these common type of action set this function as the 
--- execute method, see example below. For another example see the 
--- <a href="urn_schemas-upnp-org_service_SwitchPower_1.html">SwitchPower service implementation</a>.
+-- <br><strong>NOTE:</strong> when an action is parsed from an xml, and the following conditions
+-- are met;</p><ul>
+-- <li>action name starts with <code>'set'</code> (case independent)</li>
+-- <li>the action has 1 or more arguments</li>
+-- <li>all arguments are direction <code>'in'</code></li>
+-- <li>none of the arguments has a related statevariable which name starts with <code>'A_ARG_TYPE_'</code> (case independent)</li>
+-- </ul><p> then the <code>genericsetter</code> will automatically be set as the <code>execute()</code>
+-- method for the action.
 -- @param params list of parameters
 -- @return <code>1</code> on success, or <code>nil</code> on error
 -- @return <code>errorstring</code> on error
 -- @return <code>errornr</code> on error
 -- @example# -- usage for generic getter, assign to execute method
 -- myAction.execute = upnp.classes.action.genericgetter
--- @see SwitchPower urn_schemas-upnp-org_service_SwitchPower_1.html
 -- @see action:execute
 function action:genericsetter(params)
     for pname, pvalue in pairs(params) do

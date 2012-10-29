@@ -12,6 +12,10 @@
 local newservice = function()
   return {
     serviceType = "urn:schemas-upnp-org:service:SwitchPower:1",
+    
+    -------------------------------------------------------------
+    --  ACTION LIST IMPLEMENTATION
+    -------------------------------------------------------------
     actionList = {
       { name = "SetTarget",
         argumentList = {
@@ -20,7 +24,6 @@ local newservice = function()
             direction = "in",
           },
         },
-        execute = upnp.classes.action.genericsetter,
       },
       { name = "GetTarget",
         argumentList = {
@@ -29,7 +32,6 @@ local newservice = function()
             direction = "out",
           },
         },
-        execute = upnp.classes.action.genericgetter,
       },
       { name = "GetStatus",
         argumentList = {
@@ -38,9 +40,11 @@ local newservice = function()
             direction = "out",
           },
         },
-        execute = upnp.classes.action.genericgetter,
       },
     },
+    -------------------------------------------------------------
+    --  STATEVARIABLE IMPLEMENTATION
+    -------------------------------------------------------------
     serviceStateTable = {
       { name = "Target",
         sendEvents = false,
