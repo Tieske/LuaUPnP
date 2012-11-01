@@ -244,6 +244,48 @@ function service:getupnpvalues()
     return names, values
 end
 
+-----------------------------------------------------------------------------------------
+-- Handler called before the new value is set to an owned statevariable.
+-- The new value will have been checked and converted before this handler is called.
+-- Override in descendant classes to implement device behaviour (when overriding, do not forget
+-- to call the ancestor method to make this 'event' bubble up to the device level).
+-- While the <code>afterset()</code> will only
+-- be called when the value being set is actually different from the current value, the <code>beforeset()</code>
+-- will always be run. Hence, <code>beforeset()</code> has the opportunity to change the value being set.
+-- <br>Call order; <code>statevariable:beforeset() -&gt; service:beforeset() -&gt; device:beforeset()</code>
+-- @param statevariable the statevariable (table/object) whose value is being changed
+-- @param newval the new value to be set
+-- @return newval to be set (Lua type) or <code>nil, error message, error number</code> upon failure
+-- @see statevariable:beforeset
+-- @see service:afterset
+function service:beforeset(statevariable, newval)
+  if self.parent and self.parent.beforeset then
+    return self.parent:beforeset(self, statevariable, newval)
+  else
+    return newval
+  end
+end
+
+-----------------------------------------------------------------------------------------
+-- Handler called after the new value has been set to an owned statevariable.
+-- <br/><strong>NOTE:</strong> this will only be called when the value
+-- has actually changed, so setting the current value again will not trigger it!
+-- Override in descendant classes to implement device behaviour (when overriding, do not forget
+-- to call the ancestor method to make this 'event' bubble up to the device level)
+-- <br>Call order; <code>statevariable:afterset() -&gt; service:afterset() -&gt; device:afterset()</code>
+-- @param statevariable the statevariable (table/object) whose value is being changed
+-- @param oldval the previous value of the statevariable
+-- @see statevariable:beforeset
+-- @see service:beforeset
+function service:afterset(statevariable, oldval)
+  if self.parent and self.parent.afterset then
+    return self.parent:afterset(self, statevariable, oldval)
+  else
+    return
+  end
+end
+
+
 -- Clears all the lazy-elements set. Applies to <code>getaction(), getservice(), getdevice(),
 -- getroot(), gethandle()</code> methods.
 -- Override in subclasses to clear tree-structure.

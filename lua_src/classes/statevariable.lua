@@ -383,23 +383,48 @@ end
 -----------------------------------------------------------------------------------------
 -- Handler called before the new value is set. The new value will have been checked and converted
 -- before this handler is called.
--- Override in descendant classes to implement device behaviour. While the <code>afterset()</code> will only
+-- Override in descendant classes to implement device behaviour (when overriding, do not forget
+-- to call the ancestor method to make this 'event' bubble up to the device level). While the <code>afterset()</code> will only
 -- be called when the value being set is actually different from the current value, the <code>beforeset()</code>
 -- will always be run. Hence, <code>beforeset()</code> has the opportunity to change the value being set.
+-- <br>Call order; <code>statevariable:beforeset() -&gt; service:beforeset() -&gt; device:beforeset()</code>
 -- @param newval the new value to be set
 -- @return newval to be set (Lua type) or <code>nil, error message, error number</code> upon failure
 -- @see statevariable:afterset
+-- @example# -- example 1) using a descendant class (inheritance)
+-- function mydescendant:beforeset(newval)
+--   print("New value being set:",newval)
+--   -- call ancestor method through the superclass() method
+--   return self:superclass().beforeset(self, newval)  -- NOTE: do not use colon syntax!
+-- end
+-- @example# -- example 2) use when replacing a method (use from <code>devicefactory</code>)
+-- beforeset = function(self, newval)
+--   print("New value being set:",newval)
+--   -- assuming the ancestor is the base statevariable class, call it directly on that class
+--   return upnp.classes.statevariable.beforeset(self, newval)   -- NOTE: do not use colon syntax!
+-- end  
 function statevariable:beforeset(newval)
+  if self.parent and self.parent.beforeset then
+    return self.parent:beforeset(self, newval)
+  else
     return newval
+  end
 end
 
 -----------------------------------------------------------------------------------------
 -- Handler called after the new value has been set. <br/><strong>NOTE:</strong> this will only be called when the value
 -- has actually changed, so setting the current value again will not trigger it!
--- Override in descendant classes to implement device behaviour.
+-- Override in descendant classes to implement device behaviour (when overriding, do not forget
+-- to call the ancestor method to make this 'event' bubble up to the device level).
+-- <br>Call order; <code>statevariable:afterset() -&gt; service:afterset() -&gt; device:afterset()</code>
 -- @param oldval the previous value of the statevariable
 -- @see statevariable:beforeset
 function statevariable:afterset(oldval)
+  if self.parent and self.parent.afterset then
+    return self.parent:afterset(self, oldval)
+  else
+    return
+  end
 end
 
 -----------------------------------------------------------------------------------------

@@ -315,6 +315,37 @@ function device:adddevice(device)
 end
 
 -----------------------------------------------------------------------------------------
+-- Handler called before the new value is set to an owned statevariable (through a service).
+-- The new value will have been checked and converted before this handler is called.
+-- Override in descendant classes to implement device behaviour. While the <code>afterset()</code> will only
+-- be called when the value being set is actually different from the current value, the <code>beforeset()</code>
+-- will always be run. Hence, <code>beforeset()</code> has the opportunity to change the value being set.
+-- <br>Call order; <code>statevariable:beforeset() -&gt; service:beforeset() -&gt; device:beforeset()</code>
+-- @param service the service (table/object) the statevariable is located in
+-- @param statevariable the statevariable (table/object) whose value is being changed
+-- @param newval the new value to be set
+-- @return newval to be set (Lua type) or <code>nil, error message, error number</code> upon failure
+-- @see statevariable:beforeset
+-- @see device:afterset
+function device:beforeset(service, statevariable, newval)
+  return newval
+end
+
+-----------------------------------------------------------------------------------------
+-- Handler called after the new value has been set to an owned statevariable (through a service).
+-- <br/><strong>NOTE:</strong> this will only be called when the value
+-- has actually changed, so setting the current value again will not trigger it!
+-- Override in descendant classes to implement device behaviour.
+-- <br>Call order; <code>statevariable:afterset() -&gt; service:afterset() -&gt; device:afterset()</code>
+-- @param service the service (table/object) the statevariable is located in
+-- @param statevariable the statevariable (table/object) whose value is being changed
+-- @param oldval the previous value of the statevariable
+-- @see statevariable:beforeset
+-- @see device:beforeset
+function device:afterset(service, statevariable, oldval)
+end
+
+-----------------------------------------------------------------------------------------
 -- Startup handler. Called by <code>upnpbase</code> ancestor object for the event <code>upnp.events.UPnPstarted</code> (event
 -- through the Copas Timer eventer mechanism)
 -- When called it will call the <code>start()</code> method on all sub-devices. Override
