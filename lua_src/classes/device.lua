@@ -357,16 +357,18 @@ end
 -- @see action:checkparams
 -- @see action:checkresults
 function device:executeaction(serviceid, actionname, params)
+  logger:debug("device:executeaction(), entering...")
   -- find service
   local service
   if type(serviceid) == "table" then
     service = serviceid
   else
-    service = self.servicelist[string.lower(tostring(serviceid))]
+    service = self.servicelist[tostring(serviceid)]
     if not service then
       return nil, "Action Failed; no service '" .. tostring(serviceid) .. "'", 501
     end
   end
+  logger:debug("device:executeaction(), service was found...")
   -- find action
   local action
   if type(actionname) == "table" then
@@ -377,28 +379,31 @@ function device:executeaction(serviceid, actionname, params)
       return nil, "Invalid Action; no action by name '" .. actionname .. "'", 401
     end
   end
+  logger:debug("device:executeaction(), action was found...")
   -- check params
   local checked, errmsg, errnr
   checked, errmsg, errnr = action:checkparams(params or {})
   if not checked then
     return nil, errmsg, errnr
   end
+  logger:debug("device:executeaction(), parameters checked and passed...")
   -- execute action
   local success, results
-  success, results, errmsg, errnr = pcall(service.execute, service, action, params)
+  success, results, errmsg, errnr = pcall(service.executeaction, service, action, checked)
   if not success then
       -- pcall error...
-      logger:error("action:execute() failed (pcall); %s", tostring(results))
+      logger:error("service:executeaction() failed (pcall); %s", tostring(results))
       errnr = 501
       errmsg = "Action Failed. Internal error; " .. tostring(results)
       return nil, errmsg, errnr
   end
   if not results and (errmsg ~= nil or errnr ~= nil) then
       -- execution failed
-      logger:error("action:execute() failed (returned error); %s %s", tostring(errnr), tostring(errmsg))
+      logger:error("service:executeaction() failed (returned error); %s %s", tostring(errnr), tostring(errmsg))
       return nil, errmsg, errnr
   end
   -- return updated checked and formatted results (or nil + error info)
+  logger:debug("device:executeaction(), checking results and exiting")
   return action:checkresults(results)
 end
 

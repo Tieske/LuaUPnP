@@ -174,9 +174,8 @@ end
 
 -----------------------------------------------------------------------------------------
 -- Checks parameters, completeness and conversion to Lua values/types.
--- <br><strong>NOTE:</strong> the same table is returned, so the original table will be modified
--- when the values have been converted to their Lua type counterparts.
--- @param params table with parameters provided (key value list, where key is the parameter name)
+-- <br><strong>NOTE:</strong> a copy of the table is returned, so the original table will not be modified.
+-- @param params table with parameters provided (key value list, where key is the parameter name, value is the Lua typed value)
 -- @return params table, or <code>nil + errormsg + errornumber</code> in case of an error
 function action:checkparams(params)
     -- convert parameters to lowercase for matching
@@ -245,7 +244,7 @@ function action:checkresults(result)
         end
     end
 
-    logger:debug("Leaving action:checkresults()")
+    logger:debug("Leaving action:checkresults(), success")
     return names, values
 end
 
@@ -299,12 +298,17 @@ end
 -- myAction.execute = upnp.classes.action.genericgetter
 -- @see action:execute
 function action:genericgetter(params)
+    logger:debug("Entering action:genericgetter() for action '%s'", tostring(self._name))
     local result = {}
+    local count = 0
     for _, arg in ipairs(self.argumentlist or {}) do
         if arg.direction == "out" then
             result[arg.name] = arg.statevariable:get()
+            logger:debug("       adding argument '%s' with value '%s'", tostring(self._name), result[arg.name])
+            count = count + 1
         end
     end
+    logger:debug("Leaving action:genericgetter() for action '%s', number of return args: %s", tostring(self._name), tostring(count))
     return result
 end
 
@@ -328,15 +332,20 @@ end
 -- myAction.execute = upnp.classes.action.genericgetter
 -- @see action:execute
 function action:genericsetter(params)
+    logger:debug("action:genericsetter() entering... for action '%s'", tostring(self._name))
+    local count = 0
     for pname, pvalue in pairs(params) do
         local param = self.argumentlist[pname]
-        if pname then
+        if param then
+            logger:debug("action:genericsetter(): setting variable '%s' to value '%s'", tostring(param.statevariable._name), tostring(pvalue))
+            count = count + 1
             local res, errstr, errnr = param.statevariable:set(pvalue)
             if res == nil then
                 return res, errstr, errnr
             end
         end
     end
+    logger:debug("action:genericsetter() leaving... for action '%s', number of args set: %s", tostring(self._name), tostring(count))
     return 1
 end
 

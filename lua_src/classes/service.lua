@@ -218,6 +218,7 @@ end
 -- @see device:executeaction
 -- @see action:execute
 function service:executeaction(actionname, params)
+  logger:debug("service:executeaction(), entering...")
   -- find action
   local action
   if type(actionname) == "table" then
@@ -229,6 +230,7 @@ function service:executeaction(actionname, params)
     end
   end
   -- execute it
+  logger:debug("service:executeaction(), action found, executing and exiting")
   return action:execute(params)
 end
 

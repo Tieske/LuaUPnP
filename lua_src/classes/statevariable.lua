@@ -454,6 +454,7 @@ function statevariable:set(value, noevent)
             -- always create a new date table/object to prevent unintended changes
             newval = newval:copy()
         end
+        logger:debug("statevariable:set() setting variable '%s' to '%s'", self._name, tostring(newval))
         self._value = newval              -- set new value, fire event
         if self.sendevents and not noevent then
             local handle = self:gethandle()
@@ -463,6 +464,8 @@ function statevariable:set(value, noevent)
         end
         -- call the after handler
         self:afterset(oldval)
+    else
+        logger:debug("statevariable:set() not setting variable '%s' to '%s' because it already has the same value", self._name, tostring(newval))
     end
     return newval
 end
