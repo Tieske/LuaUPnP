@@ -364,7 +364,7 @@ function device:executeaction(serviceid, actionname, params)
   else
     service = self.servicelist[string.lower(tostring(serviceid))]
     if not service then
-      return nil, "Invalid Action; no service '" .. tostring(serviceid) .. "'", 401
+      return nil, "Action Failed; no service '" .. tostring(serviceid) .. "'", 501
     end
   end
   -- find action

@@ -230,16 +230,14 @@ EventTypeHandlers = {
             logger:debug(values)
             return 1
         elseif event.Event == "UPNP_CONTROL_ACTION_REQUEST" then
-            -- lookup device and service
+            local errstr, errnr, names, values
             local device = upnp.devices[event.UDN or ""]
-            local service = (device.servicelist or {})[event.ServiceID]
-            local errstr, errnr, names, values = nil, nil, nil, nil
-            if not service then
-                errstr = "Action Failed; unknown ServiceId"
+            if not device then
+                errstr = string.format("Action Failed; unknown device; '%s'", tostring(event.UDN))
                 errnr = 501
             else
                 -- execute it
-                names, values, errnr = service:executeaction(event.ActionName, event.Params)
+                names, values, errnr = device:executeaction(event.ServiceID, event.ActionName, event.Params)
                 if not names then
                     -- failed, switch variables
                     errstr = values
