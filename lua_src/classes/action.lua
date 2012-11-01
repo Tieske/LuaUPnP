@@ -257,6 +257,8 @@ end
 function action:_execute(params)
     logger:debug("Entering action:_execute() for action '%s'", tostring(self._name))
     local names, values, success
+    
+    -- 1) check and convert parameters provided
     local result, err, errnr = checkparams(self, params)
     if not result then
         -- parameter check failed
@@ -267,6 +269,7 @@ function action:_execute(params)
         params = result     -- update local params table
     end
 
+    -- 2) execute the action
     success, result, err, errnr = pcall(self.execute, self, params)
     if not success then
         -- pcall error...
@@ -281,6 +284,8 @@ function action:_execute(params)
         logger:error("action:execute() failed (returned error); %s", tostring(err))
         return nil, err, errnr
     end
+    
+    -- 3) create the results to return
     -- transform result in 2 lists, names and values
     -- proper order, and UPnP typed values
     result = result or {}

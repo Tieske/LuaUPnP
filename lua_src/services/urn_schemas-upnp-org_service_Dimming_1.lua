@@ -2,6 +2,10 @@
 local newservice = function()
   return {
     serviceType = "urn:schemas-upnp-org:service:Dimming:1",
+    
+    -------------------------------------------------------------
+    --  ACTION LIST IMPLEMENTATION
+    -------------------------------------------------------------
     actionList = {
       { name = "SetLoadLevelTarget",
 			  argumentList = {
@@ -57,11 +61,31 @@ local newservice = function()
           },
         },
       },
-      { name = "StepUp" },
-      { name = "StepDown" },
-      { name = "StartRampUp" },
-      { name = "StartRampDown" },
-      { name = "StopRamp" },
+      { name = "StepUp", 
+        execute = function(self, params)
+-- to be implemented          
+        end,
+      },
+      { name = "StepDown", 
+        execute = function(self, params)
+-- to be implemented          
+        end,
+      },
+      { name = "StartRampUp", 
+        execute = function(self, params)
+-- to be implemented          
+        end,
+      },
+      { name = "StartRampDown", 
+        execute = function(self, params)
+-- to be implemented          
+        end,
+      },
+      { name = "StopRamp", 
+        execute = function(self, params)
+-- to be implemented          
+        end,
+      },
       { name = "StartRampToLevel",
         argumentList = {
           { name = "newLoadLevelTarget",
@@ -73,6 +97,9 @@ local newservice = function()
             relatedStateVariable = "RampTime",
           },
         },
+        execute = function(self, params)
+-- to be implemented          
+        end,
       },
       { name = "SetStepDelta",
         argumentList = {
@@ -101,15 +128,23 @@ local newservice = function()
       },
       { name = "GetRampRate",
         argumentList = {
-          { name = "retRampRatename",
+          { name = "retRampRate",
             direction = "out",
             retval = true,
             relatedStateVariable = "RampRate",
           },
         },
       },
-      { name = "PauseRamp" },
-      { name = "ResumeRamp" },
+      { name = "PauseRamp", 
+        execute = function(self, params)
+-- to be implemented          
+        end,
+      },
+      { name = "ResumeRamp",
+        execute = function(self, params)
+-- to be implemented          
+        end,
+      },
       { name = "GetIsRamping",
         argumentList = {
           { name = "retIsRamping",
@@ -138,6 +173,10 @@ local newservice = function()
         },
       },
     },
+    
+    -------------------------------------------------------------
+    --  STATEVARIABLE IMPLEMENTATION
+    -------------------------------------------------------------
     serviceStateTable = {
       { name = "LoadLevelTarget",
         sendEvents = false,
@@ -147,6 +186,9 @@ local newservice = function()
           minimum = "0",
           maximum = "100",
         },
+        afterset = function(self, oldval)
+-- to be implemented          
+        end,
       },
       { name = "LoadLevelStatus",
         sendEvents = true,
@@ -175,7 +217,7 @@ local newservice = function()
       { name = "StepDelta",
         sendEvents = true,
         dataType = "ui1",
-        defaultValue = " Manufacturer defined default value ",
+        defaultValue = "20",
         allowedValueRange = {
           minimum = "1",
           maximum = "100",
