@@ -102,16 +102,35 @@ function upnpbase:initialize()
     --logger:debug("Initializing class '%s' completed", classname)
 end
 
+
 -----------------------------------------------------------------------------------------
--- Gets the owning action. Only applicable for arguments.
-function upnpbase:getaction()
+-- Gets an action from the owning service.
+-- Can be called on a service, statevariable, action or argument.
+-- @param actionname name of the action sought (optional for arguments, will return owning action)
+-- @return the owning action for an argument, or the named action from the current objects owning service. Or nil
+-- if not found (or called on a device object)
+function upnpbase:getaction(actionname)
     local function getit()
         if self.classname ~= "argument" then return end   -- exit if no parameter
         local r = self.parent
         self._action = r
         return r
     end
-    return self._action or getit()
+    if actionname == nil then
+      return self._action or getit()
+    else
+      return ((self:getservice() or {}).actionlist or {})[string.lower(actionname)]
+    end
+end
+
+-----------------------------------------------------------------------------------------
+-- Gets a variable from the owning service.
+-- Can be called on a service, statevariable, action or argument.
+-- @param varname name of the statevariable sought
+-- @return the named statevariable from the current objects owning service. Or nil
+-- if not found (or called on a device object)
+function upnpbase:getstatevariable(varname)
+  return ((self:getservice() or {}).servicestatetable or {})[string.lower(varname or "")]
 end
 
 -----------------------------------------------------------------------------------------

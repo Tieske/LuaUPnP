@@ -328,6 +328,7 @@ end
 -- @see statevariable:beforeset
 -- @see device:afterset
 function device:beforeset(service, statevariable, newval)
+  logger:debug("device:beforeset() is being called for '%s', newvalue: '%s'", statevariable._name, tostring(newval))
   return newval
 end
 
@@ -343,6 +344,7 @@ end
 -- @see statevariable:beforeset
 -- @see device:beforeset
 function device:afterset(service, statevariable, oldval)
+  logger:debug("device:afterset() is being called for '%s', oldvalue: '%s'", statevariable._name, tostring(oldval))
 end
 
 -----------------------------------------------------------------------------------------
