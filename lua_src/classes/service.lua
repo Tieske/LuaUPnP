@@ -209,23 +209,27 @@ function service:addaction(action)
 end
 
 -----------------------------------------------------------------------------------------
--- Execute an action of the service. This will call basically the 
--- <a href="upnp.action.html#action:execute"><code>action:_execute()</code></a> 
--- method, but additionally, if the action does not exist, it will return the proper UPnP error.
--- @param actionname (string) name of action to execute
+-- Execute an action owned by the service. Preferably call the <code>device:executeaction()</code>
+-- method, as that ensures that all objects in the hierarchy are informed about the results, additionally
+-- it will check and convert parameters in and results going out.
+-- @param actionname (string or table) name of action to execute, or action table/object
 -- @param params (table) table of parameter values, keyed by parameter names
 -- @return 2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure
+-- @see device:executeaction
+-- @see action:execute
 function service:executeaction(actionname, params)
-    params = params or {}
-    actionname = string.lower(tostring(actionname or ""))
-    local action = (self.actionlist or {})[actionname]
-    if action then
-        -- found, execute it
-        return action:_execute(params)
-    else
-        -- not found, error out
-        return nil, "Invalid Action; no action by name '" .. actionname .. "'", 401
+  -- find action
+  local action
+  if type(actionname) == "table" then
+    action = actionname
+  else
+    action = self.actionlist[string.lower(tostring(actionname))]
+    if not action then
+      return nil, "Invalid Action; no action by name '" .. actionname .. "'", 401
     end
+  end
+  -- execute it
+  return action:execute(params)
 end
 
 -----------------------------------------------------------------------------------------

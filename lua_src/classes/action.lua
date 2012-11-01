@@ -172,8 +172,13 @@ function action:addargument(argument)
 end
 
 
--- Checks parameters, completeness and conversion to Lua values/types
-local function checkparams(self, params)
+-----------------------------------------------------------------------------------------
+-- Checks parameters, completeness and conversion to Lua values/types.
+-- <br><strong>NOTE:</strong> the same table is returned, so the original table will be modified
+-- when the values have been converted to their Lua type counterparts.
+-- @param params table with parameters provided (key value list, where key is the parameter name)
+-- @return params table, or <code>nil + errormsg + errornumber</code> in case of an error
+function action:checkparams(params)
     -- convert parameters to lowercase for matching
     local lcase = {}
     for name, value in pairs(params) do
@@ -215,79 +220,14 @@ local function checkparams(self, params)
 end
 
 -----------------------------------------------------------------------------------------
--- Executes the action.
--- Override in descendant classes to implement the actual device behaviour. <br/><strong>NOTE 1</strong>: if not
--- overridden, the default result will be an error; <code>602, Optional Action Not Implemented</code> (hence;
--- from the descedant overridden method, DO NOT call the ancestor method, as it will only return the error), 
--- alternatively, if parsed from an xml file the <code>genericgetter()/genericsetter()</code> may be set as the 
--- <code>execute()</code> method.
--- <br/><strong>NOTE 2</strong>: this method is wrapped by <code>action:_execute()</code> from which it will be
--- called. So never call this method directly, if you need to execute, call <code>_execute()</code>. If called
--- externally, it is best to call <a href="upnp.service.html#service:executeaction"><code>service:executeaction()</code></a>
--- as that will also return the proper UPnP error if the action doesn't exist.
--- @param params table with named arguments (each argument indexed
--- by its name). Before calling the arguments will have been checked, converted and counted.
--- @return table with named return values (each indexed by its name). The
--- returned values can be the Lua types, will be converted to UPnP types (and validated) before sending.
--- Upon an error the function should return; <code>nil, errorstring, errornumber</code> (see
--- the 6xx error codes in the UPnP 1.0 architecture document, section 3.2.2)
--- @see action:_execute
--- @see service:executeaction
--- @see action:genericgetter
--- @see action:genericsetter
-function action:execute(params)
-    logger:warning("Action '%s' has not been implemented!", tostring(self._name))
-    return nil, "Optional Action Not Implemented; " .. tostring(self._name), 602
-end
-
------------------------------------------------------------------------------------------
--- Executes the action while checking inputs and outputs. Parameter values may be in either UPnP or Lua format.
--- The actual implementation is in <code>action:execute()</code> which will be called by this method.
--- <br/>Actual execution order;
--- <br/>1) <code>action:_execute()</code> verifies correctness of all arguments provided and converts them to Lua equivalents
--- <br/>2) <code>action:execute()</code> gets called to perform actual device behaviour
--- <br/>3) <code>action:_execute()</code> verifies the return values and converts them to UPnP formats
--- <br/>So to implement device behaviour, override the <code>action:execute()</code> method, to execute the action
--- call <code>action:_execute()</code> or even better call <a href="upnp.service.html#service:executeaction"><code>service:executeaction()</code></a>
--- as that will also return the proper UPnP error if the action doesn't exist.
--- @param params table with argument values, indexed by argument name.
+-- Checks return values, completeness and conversion to UPnP values/types.
+-- Transforms the results in 2 lists, names and values, in proper UPnP order, and UPnP typed.
+-- @param result table with parameters provided (key value list, where key is the parameter name)
 -- @return 2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure
--- @see action:execute
--- @see service:executeaction
-function action:_execute(params)
-    logger:debug("Entering action:_execute() for action '%s'", tostring(self._name))
-    local names, values, success
-    
-    -- 1) check and convert parameters provided
-    local result, err, errnr = checkparams(self, params)
-    if not result then
-        -- parameter check failed
-        logger:error("action:_execute() checking parameters failed; %s", tostring(err))
-        return result, err, errnr
-    else
-        -- parameter check succeeded, updated list was returned
-        params = result     -- update local params table
-    end
-
-    -- 2) execute the action
-    success, result, err, errnr = pcall(self.execute, self, params)
-    if not success then
-        -- pcall error...
-        logger:error("action:execute() failed (pcall); %s", tostring(result))
-        errnr = 501
-        err = "Action Failed. Internal error; " .. tostring(result)
-        result = nil
-        return nil, err, errnr
-    end
-    if not result and (err ~= nil or errnr ~= nil) then
-        -- execution failed
-        logger:error("action:execute() failed (returned error); %s", tostring(err))
-        return nil, err, errnr
-    end
-    
-    -- 3) create the results to return
+function action:checkresults(result)
     -- transform result in 2 lists, names and values
     -- proper order, and UPnP typed values
+    logger:debug("Entering action:checkresults() for action '%s'", tostring(self._name))
     result = result or {}
     names = {}
     values = {}
@@ -305,9 +245,31 @@ function action:_execute(params)
         end
     end
 
-    logger:debug("Leaving action:_execute()")
+    logger:debug("Leaving action:checkresults()")
     return names, values
 end
+
+-----------------------------------------------------------------------------------------
+-- Executes the action.
+-- Override in descendant classes to implement the actual device behaviour. 
+-- Preferably call the <code>device:executeaction()</code>
+-- method, as that ensures that all objects in the hierarchy are informed about the results, additionally
+-- it will check and convert parameters in and results going out.
+-- <br><strong>NOTE:</strong> If parsed from an 
+-- xml file the <code>genericgetter()/genericsetter()</code> might automatically have been set as the 
+-- <code>execute()</code> method.
+-- @param params table with named 'out' arguments (each argument indexed by its name). 
+-- @return table with named return values (each indexed by its lowercase name). Upon an error the function 
+-- should return; <code>nil, errorstring, errornumber</code> (see
+-- the 6xx error codes in the UPnP 1.0 architecture document, section 3.2.2)
+-- @see device:executeaction
+-- @see service:executeaction
+-- @see action:genericgetter
+-- @see action:genericsetter
+function action:execute(params)
+    return {}, {}
+end
+
 
 -- Clears all the lazy-elements set. Applies to <code>getaction(), getservice(), getdevice(),
 -- getroot(), gethandle()</code> methods.
@@ -331,7 +293,7 @@ end
 -- <li>none of the arguments has a related statevariable which name starts with <code>'A_ARG_TYPE_'</code> (case independent)</li>
 -- </ul><p> then the <code>genericgetter</code> will automatically be set as the <code>execute()</code>
 -- method for the action.
--- @param params list of parameters (not used, but is standard in <code>execute()</code> method signature)
+-- @param params list of parameters (not used by getters, but is standard in <code>execute()</code> method signature)
 -- @return table with named return arguments (see <code>action:execute()</code> for format)
 -- @example# -- usage for generic getter, assign to execute method
 -- myAction.execute = upnp.classes.action.genericgetter

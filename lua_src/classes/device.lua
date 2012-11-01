@@ -346,6 +346,63 @@ function device:afterset(service, statevariable, oldval)
 end
 
 -----------------------------------------------------------------------------------------
+-- Executes an action on a service owned by the device.
+-- <br>Call order: <code>device:executeaction() -&gt; action:checkparams() -&gt; service:executeaction() -&gt; action:execute() -&gt; action:checkresults()</code>
+-- @param serviceid ServiceId string, or service table/object
+-- @param actionname Name of the action to execute, or action table/object
+-- @param params table with argument values, indexed by argument name.
+-- @return 2 lists (names and values) of the 'out' arguments (in proper UPnP order), or <code>nil, errormsg, errornumber</code> upon failure
+-- @see service:executeaction
+-- @see action:execute
+-- @see action:checkparams
+-- @see action:checkresults
+function device:executeaction(serviceid, actionname, params)
+  -- find service
+  local service
+  if type(serviceid) == "table" then
+    service = serviceid
+  else
+    service = self.servicelist[string.lower(tostring(serviceid))]
+    if not service then
+      return nil, "Invalid Action; no service '" .. tostring(serviceid) .. "'", 401
+    end
+  end
+  -- find action
+  local action
+  if type(actionname) == "table" then
+    action = actionname
+  else
+    action = service.actionlist[string.lower(tostring(actionname))]
+    if not action then
+      return nil, "Invalid Action; no action by name '" .. actionname .. "'", 401
+    end
+  end
+  -- check params
+  local checked, errmsg, errnr
+  checked, errmsg, errnr = action:checkparams(params or {})
+  if not checked then
+    return nil, errmsg, errnr
+  end
+  -- execute action
+  local success, results
+  success, results, errmsg, errnr = pcall(service.execute, service, action, params)
+  if not success then
+      -- pcall error...
+      logger:error("action:execute() failed (pcall); %s", tostring(results))
+      errnr = 501
+      errmsg = "Action Failed. Internal error; " .. tostring(results)
+      return nil, errmsg, errnr
+  end
+  if not results and (errmsg ~= nil or errnr ~= nil) then
+      -- execution failed
+      logger:error("action:execute() failed (returned error); %s %s", tostring(errnr), tostring(errmsg))
+      return nil, errmsg, errnr
+  end
+  -- return updated checked and formatted results (or nil + error info)
+  return action:checkresults(results)
+end
+
+-----------------------------------------------------------------------------------------
 -- Startup handler. Called by <code>upnpbase</code> ancestor object for the event <code>upnp.events.UPnPstarted</code> (event
 -- through the Copas Timer eventer mechanism)
 -- When called it will call the <code>start()</code> method on all sub-devices. Override
