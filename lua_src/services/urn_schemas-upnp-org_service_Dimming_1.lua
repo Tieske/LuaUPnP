@@ -1,6 +1,4 @@
 
-local dimlevels = 15
-local zeroisoff = true
 
 local newservice = function()
   return {
@@ -9,33 +7,7 @@ local newservice = function()
     -------------------------------------------------------------
     --  SPECIFIC SERVICE IMPLEMENTATION
     -------------------------------------------------------------
-    dimlevels = dimlevels, -- how many dim levels does the device support, count from 0 to dimlevels
-    zeroisoff = zeroisoff, -- if level is 0 is the Light then completely off?
-    
-    callback = nil, -- function(service, target, level, power) -- should set the device to this level, no questions asked
-    -- when done, the callback function should set LoadLevelStatus to the value of 'target'
-    -- level is the level number (0 to dimlevels)
-    -- power is boolean, whether power should be on/off
-    
-    -------------------------------------------------------------
-    -- Returns the load percentage for the given dimlevel
-    -- @param level The level to be converted into a load %
-    -- @return percentage load for the given level
-    level2perc = function(self, level)
-      local levels = self.dimlevels or dimlevels
-      if not self.zeroisoff then levels = levels + 1 end  -- off is an extra level
-to be done    
-    end,
-    -------------------------------------------------------------
-    -- Returns the dimlevel for a given load percentage 
-    -- @param perc % to be converted to a dimlevel
-    -- @return dimlevel to go with the given %
-    perc2level = function(self, perc)
-      local levels = self.dimlevels or dimlevels
-      if not self.zeroisoff then levels = levels + 1 end  -- off is an extra level
-to be done      
-    end,
-    
+        
     -------------------------------------------------------------
     --  ACTION LIST IMPLEMENTATION
     -------------------------------------------------------------
@@ -55,10 +27,6 @@ to be done
           end
           -- set statevariable
           self:getstatevariable("loadleveltarget"):set(params.newloadleveltarget)
-          -- call callback to inform driver to set a new level
-          self:getservice():callback(params.newloadleveltarget, 
-                -- note: perc2level return 2 values!
-                self:getservice():perc2level(params.newloadleveltarget))
         end,
       },
 			{ name = "GetLoadLevelTarget",
@@ -204,11 +172,20 @@ to be done
       },
       { name = "PauseRamp", 
         execute = function(self, params)
+          if self:getstatevariable("isramping"):get() == 0 then
+            return nil, "Cannot pause ramping, no ramping is in progress", 700
+          end
 -- to be implemented          
         end,
       },
       { name = "ResumeRamp",
         execute = function(self, params)
+          if self:getstatevariable("isramping"):get() == 0 then
+            return nil, "Cannot resume ramping, no ramping is in progress", 700
+          end
+          if self:getstatevariable("ramppaused"):get() ~= 1 then
+            return nil, "Cannot resume ramping, ramping is not paused", 700
+          end
 -- to be implemented          
         end,
       },
@@ -253,9 +230,6 @@ to be done
           minimum = "0",
           maximum = "100",
         },
-        afterset = function(self, oldval)
--- to be implemented          
-        end,
       },
       { name = "LoadLevelStatus",
         sendEvents = true,
