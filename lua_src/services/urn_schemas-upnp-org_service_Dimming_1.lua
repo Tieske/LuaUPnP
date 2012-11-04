@@ -1,4 +1,4 @@
-
+local date = require("date")
 
 local newservice = function()
   return {
@@ -79,7 +79,6 @@ local newservice = function()
         execute = function(self, params)
           local level = self:getstatevariable("loadleveltarget"):get()
           level = level + self:getstatevariable("stepsize"):get()
-          if level > 100 then level = 100 end
           self:getaction("setloadleveltarget"):execute( { newloadleveltarget = level } )
         end,
       },
@@ -87,7 +86,6 @@ local newservice = function()
         execute = function(self, params)
           local level = self:getstatevariable("loadleveltarget"):get()
           level = level - self:getstatevariable("stepsize"):get()
-          if level < 0 then level = 0 end
           self:getaction("setloadleveltarget"):execute( { newloadleveltarget = level } )
         end,
       },
@@ -109,10 +107,12 @@ local newservice = function()
       },
       { name = "StopRamp", 
         execute = function(self, params)
-          self:getstatevariable("isramping"):set(0)          
-          self:getstatevariable("ramppaused"):set(0)
--- to be implemented          
--- cancel ramp timer
+          local service = self:getservice()
+          service:getstatevariable("isramping"):set(0)          
+          service:getstatevariable("ramppaused"):set(0)
+          if service.ramptimer then
+            service.ramptimer:cancel()
+          end
         end,
       },
       { name = "StartRampToLevel",
@@ -128,12 +128,48 @@ local newservice = function()
         },
         execute = function(self, params)
           -- if ramping, stop now
-          local isramping = self:getstatevariable("isramping"):get()
-          if isramping == 1 then
+          if self:getstatevariable("isramping"):get() == 1 then
             self:getaction("stopramping"):execute()
           end
--- to be implemented          
--- start ramp timer
+          local service = self:getservice()
+          if not service.ramptimer then
+            -- create new timer with upvalues
+            local ramptarget
+            local callback = function()
+              -- this will run as a timer callback, on the MAIN Lua thread, so not a scheduler thread
+              -- what fraction of time still to go?
+              local fullruntime = date.diff(service.rampendtime, service.rampstarttime):spanticks()
+              local fraction = date.diff(service.rampendtime, date()):spanticks() / fullruntime
+              -- calculate new target value
+              local newtarget = service.ramptarget - (service.ramptarget - service.rampstartlevel) * fraction
+              local newtarget = math.floor(newtarget + 0.5)  -- round to full %
+              if newtarget < 0 then newtarget = 0 elseif newtarget > 100 then newtarget = 100 end
+              -- if we've approached target within 3%, then close enough so set target now
+              if newtarget-service.ramptarget >= -3 and newtarget-service.ramptarget <= 3 then
+                newtarget = service.ramptarget
+              end
+              -- set variables
+              service:getvariable("ramptime"):set(date.diff(service.rampendtime, date()):spanseconds() * 1000)
+              service:getvariable("loadleveltarget"):set(newtarget)
+              -- check whether we're done
+              if newtarget == service.ramptarget then
+                service:getaction("stopramping"):execute()    -- done, so stop
+              else
+                service.ramptimer:arm(1)                      -- not done, arm timer for next second
+              end
+            end
+            service.ramptimer = copas.newtimer(nil, callback, nil, false, nil)
+          end
+          
+          service:getstatevariable("isramping"):set(1)          
+          service:getstatevariable("ramppaused"):set(0)
+          service.rampstartlevel = tonumber(service:getvariable("loadleveltarget"):get()) or 100
+          service.ramptarget = tonumber(params.newloadleveltarget) or 1000 -- unit is millisecs
+          service:getvariable("ramptime"):set(params.newramptime)
+          service.rampstarttime = date()
+          service.rampendtime = date():addseconds((tonumber(params.newramptime) or 1000)/1000)
+          -- execute now (will arm timer)
+          callback()
         end,
       },
       { name = "SetStepDelta",
@@ -175,7 +211,8 @@ local newservice = function()
           if self:getstatevariable("isramping"):get() == 0 then
             return nil, "Cannot pause ramping, no ramping is in progress", 700
           end
--- to be implemented          
+          self:getstatevariable("ramppaused"):set(1)
+          self:getservice().ramptimer:cancel()
         end,
       },
       { name = "ResumeRamp",
@@ -186,7 +223,15 @@ local newservice = function()
           if self:getstatevariable("ramppaused"):get() ~= 1 then
             return nil, "Cannot resume ramping, ramping is not paused", 700
           end
--- to be implemented          
+          self:getstatevariable("ramppaused"):set(0)
+          -- get remaining ramptime and restart from now
+          local service = self:getservice()
+          local rt = self:getvariable("ramptime"):get()
+          service.rampstarttime = date()
+          service.rampendtime = date():addseconds((tonumber(rt) or 1000)/1000)
+          service.rampstartlevel = tonumber(service:getvariable("loadleveltarget"):get()) or 100
+          
+          self:getservice().ramptimer:arm(0) -- at 0; execute now (=asap)
         end,
       },
       { name = "GetIsRamping",
