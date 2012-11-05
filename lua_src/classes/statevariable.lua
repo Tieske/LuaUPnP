@@ -148,8 +148,15 @@ local parseallowedlist = function(ielement, plist)
     local elem = ielement:getFirstChild()
     while elem do
         if string.lower(elem:getNodeName()) == "allowedvalue" then
-            local v = elem:getNodeValue()
-            al[v] = v
+            local n = nil
+            n = elem:getFirstChild()
+            while n and n:getNodeType() ~= "TEXT_NODE" do
+                n = n:getNextSibling()
+            end
+            if n then   -- store property value
+              local v = n:getNodeValue()
+              al[v] = v
+            end
         end
         elem = elem:getNextSibling()
     end

@@ -154,7 +154,7 @@ function action:addargument(argument)
     assert(type(argument) == "table", "Expected argument table, got nil")
     assert(argument.direction == "in" or argument.direction == "out", "Direction must be either 'in' or 'out', not; " .. tostring(argument.direction))
     if self.argumentcount > 0 and argument.direction == "in" then
-        assert(self.argumentlist[self.argumentcount] == "in", "All 'in' arguments must preceed the 'out' arguments")
+        assert(self.argumentlist[self.argumentcount].direction == "in", "All 'in' arguments must preceed the 'out' arguments")
     end
     -- increase count
     self.argumentcount = self.argumentcount + 1

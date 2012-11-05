@@ -137,7 +137,7 @@ local newdevice = function()
   logger:info("Switching 'BinaryLight' to '"..dev.deviceType.."' device")
 
   -- add dimmer service
-  local serv = dimming()
+  local serv = dimmer()
   serv.serviceId = "urn:upnp-org:device:Dimming:1"
   logger:info("adding '"..serv.serviceId.."' service")
   table.insert(dev.serviceList, serv)
@@ -152,10 +152,10 @@ local newdevice = function()
   dev.statefromdevice = statefromdevice
   dev.statetodevice = statetodevice
   -- set the update handlers for Target and LoadLevelTarget variables
-  dev.servicelist[1].serviceStateTable[1].afterset = setstate -- add update method for Power; Switch service is nr 1 in list, Target is variable 1
-  dev.servicelist[1].serviceStateTable[1].beforeset = powerbeforeset
-  dev.servicelist[2].serviceStateTable[1].afterset = setstate -- add update method for Dimmer; LoadLevelStatus is nr 1 in variablelist
-  dev.servicelist[2].serviceStateTable[4].beforeset = oneffectbeforeset  -- OnEffect is nr 4 in variablelist
+  dev.serviceList[1].serviceStateTable[1].afterset = setstate -- add update method for Power; Switch service is nr 1 in list, Target is variable 1
+  dev.serviceList[1].serviceStateTable[1].beforeset = powerbeforeset
+  dev.serviceList[2].serviceStateTable[1].afterset = setstate -- add update method for Dimmer; LoadLevelStatus is nr 1 in variablelist
+  dev.serviceList[2].serviceStateTable[4].beforeset = oneffectbeforeset  -- OnEffect is nr 4 in variablelist
 
   return dev
 end
