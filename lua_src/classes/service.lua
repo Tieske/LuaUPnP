@@ -43,7 +43,7 @@ function service:initialize()
     self.parent = nil                   -- owning UPnP device of this service
     self.actionlist = {}               -- table with actions, indexed by name
     self.servicestatetable = {}               -- table with statevariables, indexed by name
-    classname = classname          -- set object classname
+    self.classname = classname          -- set object classname
 
     logger:debug("Initializing class '%s' completed", classname)
 
@@ -134,7 +134,9 @@ function service:parsefromxml(xmldoc, creator, parent, plist)
     -- ielement now contains the 'scpd' element
     -- go create service object
     logger:debug("service:parsefromxml(), calling 'creator' to create a service object, or a service baseclass if nothing is returned")
-    local serv = (creator(plist, "service", parent) or upnp.classes.service(plist))
+    local serv = creator(plist, "service", parent)
+    assert(serv == nil or serv.classname == "service","Creator didn't deliver a service object")
+    if not serv then serv = upnp.classes.service(plist) end
 
     -- get started parsing...
     local lst = ielement:getFirstChild()
@@ -177,6 +179,8 @@ end
 -- @param statevar statevariable object to add
 function service:addstatevariable(statevar)
     assert(type(statevar) == "table", "Expected statevariable table, got nil")
+    assert(statevar:subclassof(upnp.classes.statevariable), "The statevariable is not a subclass of upnp.classes.statevariable")
+assert(statevar.classname == "statevariable")    
     assert(statevar.name, "Statevariable name not set, can't add to service")
     -- add to list
     logger:info("service:addstatevariable(); adding '%s'", tostring(statevar.name))
@@ -195,6 +199,8 @@ end
 -- @param action action object to add
 function service:addaction(action)
     assert(type(action) == "table", "Expected action table, got nil")
+    assert(action:subclassof(upnp.classes.action), "The action is not a subclass of upnp.classes.action")
+assert(action.classname == "action")    
     assert(action.name, "Action name not set, can't add to service")
     -- add to list
     logger:info("service:addaction(); adding '%s'", tostring(action.name))

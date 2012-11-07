@@ -146,6 +146,7 @@ function device:parsefromxml(xmldoc, creator, parent)
     -- now go create an object with it.
     logger:debug("device:parsefromxml(), instantiating device through 'creator'")
     local dev = creator(plist, "device", parent)
+    assert(dev == nil or dev.classname == "device","Creator didn't deliver a device object")
     if not dev then
         logger:debug("device:parsefromxml(), 'creator' didn't deliver, now instantiating a generic device base class")
         dev = upnp.classes.device(plist)
@@ -291,6 +292,8 @@ end
 -- @param service service object to add
 function device:addservice(service)
     assert(type(service) == "table", "Expected service table, got nil")
+    assert(service:subclassof(upnp.classes.service), "The service is not a subclass of upnp.classes.service")
+assert(service.classname == "service")    
     assert(service.serviceid, "ServiceId not set, can't add to device")
     logger:info("device:addservice(), adding service; %s", tostring(service.serviceid))
     -- add to list
@@ -306,6 +309,8 @@ end
 function device:adddevice(device)
     logger:debug("device:adddevice(), adding sub-device")
     assert(type(device) == "table", "Expected device table, got nil")
+    assert(device:subclassof(upnp.classes.device), "The device is not a subclass of upnp.classes.device")
+assert(device.classname == "device")    
     assert(device._udn, "Sub-device udn (unique device name; UUID) not set, can't add to device")
     -- add to list
     self.devicelist = self.devicelist or {}

@@ -239,8 +239,10 @@ function statevariable:parsefromxml(xmldoc, creator, parent)
     plist._value   , plist.value    = plist.value   , nil
     -- go create the object
     logger:debug("statevariable:parsefromxml(), parsing done, now creating object")
-    local var = (creator(plist, "statevariable", parent) or upnp.classes.statevariable(plist))
-
+    local var = creator(plist, "statevariable", parent)
+    assert(var == nil or var.classname == "statevariable","Creator didn't deliver a statevariable object")
+    if not var then var = upnp.classes.statevariable(plist) end
+    
     logger:debug("Leaving statevariable:parsefromxml()...")
     return var  -- parsing service will add it to the parent service
 end

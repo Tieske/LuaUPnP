@@ -107,7 +107,10 @@ function action:parsefromxml(xmldoc, creator, parent)
         ielement = ielement:getNextSibling()
     end
     -- go create the object
-    local act = (creator(plist, "action", parent) or upnp.classes.action:new(plist))
+    local act = creator(plist, "action", parent)
+    assert(act == nil or act.classname == "action","Creator didn't deliver an action object")
+    if not act then act = upnp.classes.action:new(plist) end
+    
     -- parse the argument list
     if alist then
         local success, err
@@ -152,6 +155,8 @@ end
 -- @param argument the argument object to be added to the argumentlist
 function action:addargument(argument)
     assert(type(argument) == "table", "Expected argument table, got nil")
+    assert(argument:subclassof(upnp.classes.argument), "The argument is not a subclass of upnp.classes.argument")
+assert(argument.classname == "argument")    
     assert(argument.direction == "in" or argument.direction == "out", "Direction must be either 'in' or 'out', not; " .. tostring(argument.direction))
     if self.argumentcount > 0 and argument.direction == "in" then
         assert(self.argumentlist[self.argumentcount].direction == "in", "All 'in' arguments must preceed the 'out' arguments")

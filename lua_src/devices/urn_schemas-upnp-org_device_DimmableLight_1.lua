@@ -35,8 +35,8 @@ local setstate = function(self, oldval)  -- self = variable object!
 
   local cb = function()  -- in a function to prepare for a coroutine
     -- set results to statevars, sending UPnP events
-    self.servicelist[1]:getvariable("status"):set(power)
-    self.servicelist[2]:getvariable("loadlevelstatus"):set(level)
+    self.servicelist[1]:getstatevariable("status"):set(power)
+    self.servicelist[2]:getstatevariable("loadlevelstatus"):set(level)
   end
 
   -- set the device (only if changed from last time)
@@ -110,12 +110,12 @@ local powerbeforeset = function(self, newval)
     -- being switched off
     self.servicelist[2]:getaction("stopramping"):execute()
   end
-  if newval == 1 and self:getvariable("status"):get() == 0 then
+  if newval == 1 and self:getstatevariable("status"):get() == 0 then
     -- being switched on
-    local dimmer = self:getdevice().serviceList[2]
-    if dimmer:getvariable("oneffect"):get() == "OnEffectLevel" then
+    local dimmer = self:getdevice().servicelist["urn:upnp-org:device:Dimming:1"]
+    if dimmer:getstatevariable("oneffect"):get() == "OnEffectLevel" then
       -- must set OnEffectLevel before powering up
-      dimmer:getvariable("loadleveltarget"):set(dimmer:getvariable("oneffectlevel"):get())
+      dimmer:getstatevariable("loadleveltarget"):set(dimmer:getstatevariable("oneffectlevel"):get())
     end
   end
 end

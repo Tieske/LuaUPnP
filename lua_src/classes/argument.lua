@@ -90,8 +90,10 @@ function argument:parsefromxml(xmldoc, creator, parent, service)
     plist.statevariable = service.servicestatetable[plist.relatedstatevariable]
     plist.relatedstatevariable = nil
     -- go create the object
-    local arg = (creator(plist, "argument", parent) or upnp.classes.argument(plist))
-
+    local arg = creator(plist, "argument", parent)
+    assert(arg == nil or arg.classname == "argument","Creator didn't deliver an argument object")
+    if not arg then arg = upnp.classes.argument(plist) end
+    
     return arg  -- the parsing action will add it to the parent action
 end
 

@@ -149,8 +149,8 @@ local newservice = function()
                 newtarget = service.ramptarget
               end
               -- set variables
-              service:getvariable("ramptime"):set(date.diff(service.rampendtime, date()):spanseconds() * 1000)
-              service:getvariable("loadleveltarget"):set(newtarget)
+              service:getstatevariable("ramptime"):set(date.diff(service.rampendtime, date()):spanseconds() * 1000)
+              service:getstatevariable("loadleveltarget"):set(newtarget)
               -- check whether we're done
               if newtarget == service.ramptarget then
                 service:getaction("stopramping"):execute()    -- done, so stop
@@ -163,9 +163,9 @@ local newservice = function()
           
           service:getstatevariable("isramping"):set(1)          
           service:getstatevariable("ramppaused"):set(0)
-          service.rampstartlevel = tonumber(service:getvariable("loadleveltarget"):get()) or 100
+          service.rampstartlevel = tonumber(service:getstatevariable("loadleveltarget"):get()) or 100
           service.ramptarget = tonumber(params.newloadleveltarget) or 1000 -- unit is millisecs
-          service:getvariable("ramptime"):set(params.newramptime)
+          service:getstatevariable("ramptime"):set(params.newramptime)
           service.rampstarttime = date()
           service.rampendtime = date():addseconds((tonumber(params.newramptime) or 1000)/1000)
           -- execute now (will arm timer)
@@ -226,10 +226,10 @@ local newservice = function()
           self:getstatevariable("ramppaused"):set(0)
           -- get remaining ramptime and restart from now
           local service = self:getservice()
-          local rt = self:getvariable("ramptime"):get()
+          local rt = self:getstatevariable("ramptime"):get()
           service.rampstarttime = date()
           service.rampendtime = date():addseconds((tonumber(rt) or 1000)/1000)
-          service.rampstartlevel = tonumber(service:getvariable("loadleveltarget"):get()) or 100
+          service.rampstartlevel = tonumber(service:getstatevariable("loadleveltarget"):get()) or 100
           
           self:getservice().ramptimer:arm(0) -- at 0; execute now (=asap)
         end,
