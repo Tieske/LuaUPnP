@@ -81,14 +81,14 @@ local newservice = function()
       { name = "StepUp", 
         execute = function(self, params)
           local level = self:getstatevariable("loadleveltarget"):get()
-          level = level + self:getstatevariable("stepsize"):get()
+          level = level + self:getstatevariable("StepDelta"):get()
           self:getaction("setloadleveltarget"):execute( { newloadleveltarget = level } )
         end,
       },
       { name = "StepDown", 
         execute = function(self, params)
           local level = self:getstatevariable("loadleveltarget"):get()
-          level = level - self:getstatevariable("stepsize"):get()
+          level = level - self:getstatevariable("StepDelta"):get()
           self:getaction("setloadleveltarget"):execute( { newloadleveltarget = level } )
         end,
       },

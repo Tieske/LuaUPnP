@@ -22,7 +22,7 @@
   </iconList><% end %>
   <% if #(device.serviceList or {}) > 0 then %><serviceList>
     <% for i, service in ipairs(device.serviceList) do %><service>
-      <serviceType>urn:schemas-upnp-org:service:SwitchPower:1</serviceType>
+      <serviceType><%= service.serviceType %></serviceType>
       <serviceId><%= service.serviceId %></serviceId>
       <SCPDURL><%= service.SCPDURL %></SCPDURL>
       <controlURL><%= service.controlURL %></controlURL>
