@@ -5,9 +5,12 @@ local newservice = function()
     serviceType = "urn:schemas-upnp-org:service:Dimming:1",
     
     -------------------------------------------------------------
-    --  SPECIFIC SERVICE IMPLEMENTATION
+    --  CUSTOM IMPLEMENTATION
     -------------------------------------------------------------
-        
+    customList = {
+      -- all elements here are copied into the final object
+      -- by devicefactory.builddevice()
+    },
     -------------------------------------------------------------
     --  ACTION LIST IMPLEMENTATION
     -------------------------------------------------------------

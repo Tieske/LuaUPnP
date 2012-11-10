@@ -17,8 +17,10 @@ local binary = require("upnp.devices.urn_schemas-upnp-org_device_BinaryLight_1")
 -- @param oldval the previous value of the statevariable (will not be used)
 local setstate = function(self, oldval)  -- self = variable object!
   local self = self:getdevice() -- redefine self
-  local power = self.servicelist[1]:getstatevariable("target"):get()
-  local level = self.servicelist[2]:getstatevariable("loadleveltarget"):get()
+  local switch = self.servicelist["urn:upnp-org:service:SwitchPower:1"]
+  local dimmer = self.servicelist["urn:upnp-org:service:Dimming:1"]
+  local power = switch:getstatevariable("target"):get()
+  local level = dimmer:getstatevariable("loadleveltarget"):get()
 
   -- calculate device level and powerstate from % level
   local levels = self.dimlevels
@@ -35,8 +37,8 @@ local setstate = function(self, oldval)  -- self = variable object!
 
   local cb = function()  -- in a function to prepare for a coroutine
     -- set results to statevars, sending UPnP events
-    self.servicelist[1]:getstatevariable("status"):set(power)
-    self.servicelist[2]:getstatevariable("loadlevelstatus"):set(level)
+    self.servicelist["urn:upnp-org:service:SwitchPower:1"]:getstatevariable("status"):set(power)
+    self.servicelist["urn:upnp-org:service:Dimming:1"]:getstatevariable("loadlevelstatus"):set(level)
   end
 
   -- set the device (only if changed from last time)
@@ -85,11 +87,11 @@ local statefromdevice = function(self, power, level)
       levels = levels + 1
     end
     local target = math.floor(100/(levels-1)*level + 0.5)
-    self.servicelist[2]:getaction("setloadleveltarget").execute( { newloadleveltarget = target } )
+    self.servicelist["urn:upnp-org:service:Dimming:1"]:getaction("setloadleveltarget").execute( { newloadleveltarget = target } )
     if power then
-      self.servicelist[1]:getaction("settarget").execute( { newtargetvalue = "1" } )
+      self.servicelist["urn:upnp-org:service:SwitchPower:1"]:getaction("settarget").execute( { newtargetvalue = "1" } )
     else
-      self.servicelist[1]:getaction("settarget").execute( { newtargetvalue = "0" } )
+      self.servicelist["urn:upnp-org:service:SwitchPower:1"]:getaction("settarget").execute( { newtargetvalue = "0" } )
     end
   end
 end
@@ -98,7 +100,7 @@ end
 -- Stops the device while stopping ramping to close timers.
 -- @param self (table) dimmablelight device object
 local stopdimmablelight = function(self)
-  self.servicelist[2]:getaction("stopramping"):execute()
+  self.servicelist["urn:upnp-org:service:Dimming:1"]:getaction("stopramp"):execute()
   upnp.classes.device.stop(self)
 end
 
@@ -106,18 +108,19 @@ end
 -- Stops ramping upon powering off a device, and sets the OnEffect upon powering up a device.
 -- @param self (table) statevariable object
 local powerbeforeset = function(self, newval)
+  local dimmer = self:getdevice().servicelist["urn:upnp-org:service:Dimming:1"]
   if newval == 0 then
     -- being switched off
-    self.servicelist[2]:getaction("stopramping"):execute()
+    dimmer:getaction("stopramp"):execute()
   end
   if newval == 1 and self:getstatevariable("status"):get() == 0 then
     -- being switched on
-    local dimmer = self:getdevice().servicelist["urn:upnp-org:device:Dimming:1"]
     if dimmer:getstatevariable("oneffect"):get() == "OnEffectLevel" then
       -- must set OnEffectLevel before powering up
       dimmer:getstatevariable("loadleveltarget"):set(dimmer:getstatevariable("oneffectlevel"):get())
     end
   end
+  return newval
 end
 
 ---------------------------------------------------------------
@@ -138,24 +141,26 @@ local newdevice = function()
 
   -- add dimmer service
   local serv = dimmer()
-  serv.serviceId = "urn:upnp-org:device:Dimming:1"
+  serv.serviceId = "urn:upnp-org:service:Dimming:1"
   logger:info("adding '"..serv.serviceId.."' service")
   table.insert(dev.serviceList, serv)
 
-  -- update device elements
-  dev.dimlevels = dimlevels
-  dev.zeroisoff = zeroisoff
-  dev.lastpower = nil
-  dev.lastlevel = nil
-  dev.stop = stopdimmablelight
-  -- add methods to interact with hardware
-  dev.statefromdevice = statefromdevice
-  dev.statetodevice = statetodevice
   -- set the update handlers for Target and LoadLevelTarget variables
   dev.serviceList[1].serviceStateTable[1].afterset = setstate -- add update method for Power; Switch service is nr 1 in list, Target is variable 1
   dev.serviceList[1].serviceStateTable[1].beforeset = powerbeforeset
   dev.serviceList[2].serviceStateTable[1].afterset = setstate -- add update method for Dimmer; LoadLevelStatus is nr 1 in variablelist
   dev.serviceList[2].serviceStateTable[4].beforeset = oneffectbeforeset  -- OnEffect is nr 4 in variablelist
+  
+  -- update device elements in customList
+  dev.customList = dev.customList or {}
+  dev.customList.dimlevels = dimlevels
+  dev.customList.zeroisoff = zeroisoff
+  dev.customList.lastpower = nil
+  dev.customList.lastlevel = nil
+  dev.customList.stop = stopdimmablelight
+  -- add methods to interact with hardware
+  dev.customList.statefromdevice = statefromdevice
+  dev.customList.statetodevice = statetodevice
 
   return dev
 end

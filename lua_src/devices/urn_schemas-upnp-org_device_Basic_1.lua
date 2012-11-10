@@ -3,6 +3,9 @@ local logger = upnp.logger
 local newdevice = function()
   logger:info("Creating a new 'urn:schemas-upnp-org:device:Basic:1' device")
   return {
+    -------------------------------------------------------------
+    --  DEVICE IMPLEMENTATION
+    -------------------------------------------------------------
     UDN = upnp.lib.util.CreateUUID(),
 		deviceType = "urn:schemas-upnp-org:device:Basic:1",
 		friendlyName = "short user-friendly title",
@@ -22,6 +25,14 @@ local newdevice = function()
     deviceList = {
     },
     -- presentationURL = "",
+    
+    -------------------------------------------------------------
+    --  CUSTOM IMPLEMENTATION
+    -------------------------------------------------------------
+    customList = {
+      -- all elements here are copied into the final object
+      -- by devicefactory.builddevice()
+    },
   }
 end
 

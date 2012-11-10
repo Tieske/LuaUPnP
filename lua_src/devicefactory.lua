@@ -12,6 +12,35 @@ local xmlfactory = require("upnp.xmlfactory")
 local logger = upnp.logger
 local devicefactory = {}
 
+-- list of elements NOT to copy when building a service
+local servicedonotcopy = { 
+  SCPDURL = 1, 
+  controlURL = 1,
+  eventSubURL = 1,
+  serviceId = 1,
+  serviceType = 1,
+  actionList = 1,
+  serviceStateTable = 1,
+}
+-- list of elements NOT to copy when building a device
+local devicedonotcopy = {
+  deviceType = 1,
+  friendlyName = 1,
+  manufacturer = 1,
+  manufacturerURL = 1,
+  modelDescription = 1,
+  modelName = 1,
+  modelNumber = 1,
+  modelURL = 1,
+  serialNumber = 1,
+  UDN = 1,
+  UPC = 1,
+  iconList = 1,
+  deviceList = 1,
+  serviceList = 1,
+  presentationURL = 1,
+}
+
 -- Checks a type, or creates one from the elements. Either the separate elements are given, or the 
 -- first argument can be the full string.
 -- @param domain string, domainname to use; standard = <code>"schemas.upnp.org"</code>. 
@@ -130,6 +159,13 @@ end
 -- }
 devicefactory.customizeservice = function(service, customtable)
   if customtable == nil then return service end
+  if customtable.customList then
+    service.customList = service.customList or {}
+    for k,v in pairs(customtable.customList) do
+      logger:debug("devicefactory.customizeservice: customList found, now copying '%s'", tostring(k))
+      service[k] = v
+    end
+  end
   if customtable.serviceStateTable and next(customtable.serviceStateTable) then
     for i,v in ipairs(service.serviceStateTable or {}) do
       local variable = customtable.serviceStateTable[v.name]
@@ -244,12 +280,18 @@ devicefactory.customizedevice = function(device, customtable)
     device.stop = customtable.stop
     logger:debug("devicefactory.customizedevice: adding 'stop' implementation")
   end
+  if customtable.customList then
+    device.customList = device.customList or {}
+    for k,v in pairs(customtable.customList) do
+      logger:debug("devicefactory.customizedevice: customList found, now copying '%s'", tostring(k))
+      device[k] = v
+    end
+  end
   if customtable.serviceList and next(customtable.serviceList) then
     for i,v in ipairs(device.serviceList or {}) do
       local service = customtable.serviceList[v.serviceId]
       if service == nil then
         logger:debug("devicefactory.customizedevice: service '%s' not found in customtable", tostring(v.serviceId))
-for k,v in pairs(customtable.serviceList) do print(k,v) end        
       elseif service == false then 
         table.remove(device.serviceList, i)
         logger:debug("devicefactory.customizedevice: dropping service '%s'", tostring(v.serviceId))
@@ -371,6 +413,9 @@ devicefactory.builddevice = function(domain, devicetype, version, customtable)
       -- implement/customize device methods
       target.start = source.start or target.start
       target.stop = source.stop or target.stop
+      for k,v in pairs(source.customList) do
+        target[k] = v
+      end
     
     elseif classname == "service" then
       for _, serv in pairs(creations[parent].serviceList) do
@@ -381,7 +426,10 @@ devicefactory.builddevice = function(domain, devicetype, version, customtable)
       end
       assert(source, "devicefactory.builddevice[creator]; unkown service: serviceId = " .. tostring(plist.serviceid))
       logger:debug("devicefactory.builddevice; creator: created service with serviceId = %s", tostring(plist.serviceid))
-      -- has no custom methods, nothing further to do here
+      -- implement/customize service methods
+      for k,v in pairs(source.customList) do
+        target[k] = v
+      end
     
     elseif classname == "argument" then
       logger:debug("devicefactory.builddevice; creator: created argument named = %s", tostring(plist.name))

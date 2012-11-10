@@ -452,9 +452,12 @@ function statevariable:set(value, noevent)
         return nil, errstr, errnr
     end
     -- call before handler
-    newval, errstr, errnr = self:beforeset(newval)
-    if not newval then
-        return nil, errstr, errnr
+    if self.beforeset then
+        newval, errstr, errnr = self:beforeset(newval)
+        if newval == nil then
+            assert(errstr ~= nil, "statevariable:set() for variable '"..tostring(self._name).."' failed, 'nil' was returned, but the error message is missing. On success it should return the new value to set, or on error it should return; 'nil', 'errormsg', 'errornr'")
+            return nil, errstr, errnr
+        end
     end
 
     if self._value ~= newval then
@@ -472,7 +475,9 @@ function statevariable:set(value, noevent)
             end
         end
         -- call the after handler
-        self:afterset(oldval)
+        if self.afterset then
+            self:afterset(oldval)
+        end
     else
         logger:debug("statevariable:set() not setting variable '%s' to '%s' because it already has the same value", self._name, tostring(newval))
     end

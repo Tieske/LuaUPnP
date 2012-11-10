@@ -57,6 +57,13 @@ local newservice = function()
         defaultValue = "0",
       },
     },
+    -------------------------------------------------------------
+    --  CUSTOM IMPLEMENTATION
+    -------------------------------------------------------------
+    customList = {
+      -- all elements here are copied into the final object
+      -- by devicefactory.builddevice()
+    },
   }
 end
 
