@@ -97,7 +97,7 @@ local newservice = function()
           local level = self:getstatevariable("loadleveltarget"):get()
           local rate = self:getstatevariable("ramprate"):get()
           local ramptime = math.floor(((100-level)/rate) * 1000)
-          self:getaction("ramptolevel"):execute( { newloadleveltarget = 100, newramptime = ramptime } )
+          self:getaction("startramptolevel"):execute( { newloadleveltarget = 100, newramptime = ramptime } )
         end,
       },
       { name = "StartRampDown", 
@@ -105,7 +105,7 @@ local newservice = function()
           local level = self:getstatevariable("loadleveltarget"):get()
           local rate = self:getstatevariable("ramprate"):get()
           local ramptime = math.floor(((level)/rate) * 1000)
-          self:getaction("ramptolevel"):execute( { newloadleveltarget = 0, newramptime = ramptime } )
+          self:getaction("startramptolevel"):execute( { newloadleveltarget = 0, newramptime = ramptime } )
         end,
       },
       { name = "StopRamp", 
@@ -135,32 +135,32 @@ local newservice = function()
             self:getaction("stopramping"):execute()
           end
           local service = self:getservice()
-          if not service.ramptimer then
-            -- create new timer with upvalues
-            local ramptarget
-            local callback = function()
-              -- this will run as a timer callback, on the MAIN Lua thread, so not a scheduler thread
-              -- what fraction of time still to go?
-              local fullruntime = date.diff(service.rampendtime, service.rampstarttime):spanticks()
-              local fraction = date.diff(service.rampendtime, date()):spanticks() / fullruntime
-              -- calculate new target value
-              local newtarget = service.ramptarget - (service.ramptarget - service.rampstartlevel) * fraction
-              local newtarget = math.floor(newtarget + 0.5)  -- round to full %
-              if newtarget < 0 then newtarget = 0 elseif newtarget > 100 then newtarget = 100 end
-              -- if we've approached target within 3%, then close enough so set target now
-              if newtarget-service.ramptarget >= -3 and newtarget-service.ramptarget <= 3 then
-                newtarget = service.ramptarget
-              end
-              -- set variables
-              service:getstatevariable("ramptime"):set(date.diff(service.rampendtime, date()):spanseconds() * 1000)
-              service:getstatevariable("loadleveltarget"):set(newtarget)
-              -- check whether we're done
-              if newtarget == service.ramptarget then
-                service:getaction("stopramping"):execute()    -- done, so stop
-              else
-                service.ramptimer:arm(1)                      -- not done, arm timer for next second
-              end
+          -- create new timer with upvalues
+          local ramptarget
+          local callback = function()
+            -- this will run as a timer callback, on the MAIN Lua thread, so not a scheduler thread
+            -- what fraction of time still to go?
+            local fullruntime = date.diff(service.rampendtime, service.rampstarttime):spanticks()
+            local fraction = date.diff(service.rampendtime, date()):spanticks() / fullruntime
+            -- calculate new target value
+            local newtarget = service.ramptarget - (service.ramptarget - service.rampstartlevel) * fraction
+            local newtarget = math.floor(newtarget + 0.5)  -- round to full %
+            if newtarget < 0 then newtarget = 0 elseif newtarget > 100 then newtarget = 100 end
+            -- if we've approached target within 3%, then close enough so set target now
+            if newtarget-service.ramptarget >= -3 and newtarget-service.ramptarget <= 3 then
+              newtarget = service.ramptarget
             end
+            -- set variables
+            service:getstatevariable("ramptime"):set(date.diff(service.rampendtime, date()):spanseconds() * 1000)
+            service:getstatevariable("loadleveltarget"):set(newtarget)
+            -- check whether we're done
+            if newtarget == service.ramptarget then
+              service:getaction("stopramping"):execute()    -- done, so stop
+            else
+              service.ramptimer:arm(1)                      -- not done, arm timer for next second
+            end
+          end
+          if not service.ramptimer then
             service.ramptimer = copas.newtimer(nil, callback, nil, false, nil)
           end
           
