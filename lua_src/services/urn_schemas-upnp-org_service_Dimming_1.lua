@@ -1,4 +1,4 @@
-local date = require("date")
+local gettime = require("socket").gettime
 
 local newservice = function()
   return {
@@ -26,7 +26,7 @@ local newservice = function()
           -- if ramping, stop now
           local isramping = self:getstatevariable("isramping"):get()
           if isramping == 1 then
-            self:getaction("stopramping"):execute()
+            self:getaction("stopramp"):execute()
           end
           -- set statevariable
           self:getstatevariable("loadleveltarget"):set(params.newloadleveltarget)
@@ -113,6 +113,7 @@ local newservice = function()
           local service = self:getservice()
           service:getstatevariable("isramping"):set(0)          
           service:getstatevariable("ramppaused"):set(0)
+          service:getstatevariable("ramptime"):set(0)
           if service.ramptimer then
             service.ramptimer:cancel()
           end
@@ -132,7 +133,7 @@ local newservice = function()
         execute = function(self, params)
           -- if ramping, stop now
           if self:getstatevariable("isramping"):get() == 1 then
-            self:getaction("stopramping"):execute()
+            self:getaction("stopramp"):execute()
           end
           local service = self:getservice()
           -- create new timer with upvalues
@@ -140,8 +141,8 @@ local newservice = function()
           local callback = function()
             -- this will run as a timer callback, on the MAIN Lua thread, so not a scheduler thread
             -- what fraction of time still to go?
-            local fullruntime = date.diff(service.rampendtime, service.rampstarttime):spanticks()
-            local fraction = date.diff(service.rampendtime, date()):spanticks() / fullruntime
+            local fullruntime = service.rampendtime - service.rampstarttime   -- all in seconds
+            local fraction = (service.rampendtime - gettime()) / fullruntime
             -- calculate new target value
             local newtarget = service.ramptarget - (service.ramptarget - service.rampstartlevel) * fraction
             local newtarget = math.floor(newtarget + 0.5)  -- round to full %
@@ -151,11 +152,11 @@ local newservice = function()
               newtarget = service.ramptarget
             end
             -- set variables
-            service:getstatevariable("ramptime"):set(date.diff(service.rampendtime, date()):spanseconds() * 1000)
+            service:getstatevariable("ramptime"):set((service.rampendtime - gettime()) * 1000)  -- in msec
             service:getstatevariable("loadleveltarget"):set(newtarget)
             -- check whether we're done
             if newtarget == service.ramptarget then
-              service:getaction("stopramping"):execute()    -- done, so stop
+              service:getaction("stopramp"):execute()    -- done, so stop
             else
               service.ramptimer:arm(1)                      -- not done, arm timer for next second
             end
@@ -169,8 +170,8 @@ local newservice = function()
           service.rampstartlevel = tonumber(service:getstatevariable("loadleveltarget"):get()) or 100
           service.ramptarget = tonumber(params.newloadleveltarget) or 1000 -- unit is millisecs
           service:getstatevariable("ramptime"):set(params.newramptime)
-          service.rampstarttime = date()
-          service.rampendtime = date():addseconds((tonumber(params.newramptime) or 1000)/1000)
+          service.rampstarttime = gettime()   -- in seconds
+          service.rampendtime = gettime() + ((tonumber(params.newramptime) or 1000)/1000)   -- in seconds
           -- execute now (will arm timer)
           callback()
         end,
@@ -230,8 +231,8 @@ local newservice = function()
           -- get remaining ramptime and restart from now
           local service = self:getservice()
           local rt = self:getstatevariable("ramptime"):get()
-          service.rampstarttime = date()
-          service.rampendtime = date():addseconds((tonumber(rt) or 1000)/1000)
+          service.rampstarttime = gettime()
+          service.rampendtime = gettime() + ((tonumber(rt) or 1000)/1000)
           service.rampstartlevel = tonumber(service:getstatevariable("loadleveltarget"):get()) or 100
           
           self:getservice().ramptimer:arm(0) -- at 0; execute now (=asap)
