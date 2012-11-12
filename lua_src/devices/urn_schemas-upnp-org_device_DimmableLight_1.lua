@@ -1,3 +1,26 @@
+---------------------------------------------------------------------------
+-- Standard device; "urn:schemas-upnp-org:device:DimmableLight:1".
+-- When required, it returns a single function which generates a new device table 
+-- on every call (it takes no parameters). The <code>upnp.devicefactory</code> module 
+-- takes the device/service tables to build device/service objects.
+-- <br><br>Requires to implement the following elements;
+-- </p>
+-- <ul>
+-- <li><code>device.statetodevice</code> handler to update device status when the target values have changed on the UPnP side</li>
+-- </ul>
+-- <p>
+-- @class module
+-- @name urn_schemas-upnp-org_device_DimmableLight_1
+
+-----------------------------------------------------------------------------------------
+-- Members of the DimmableLight object
+-- @class table
+-- @name DimmableLight fields/properties
+-- @field dimlevels (integer) the number of levels the device supports, indexed from 0 (eg. 15 means levels 0-15, so 16 levels)
+-- @field zeroisoff (boolean) when <code>true</code> then the device is completely off at dimlevel 0
+-- @field lastpower (boolean) the last power value set in/received from the hardware
+-- @field lastlevel (integer) the last dimlevel value set in/received from the hardware
+
 -- default device properties
 local dimlevels = 15    -- how many dim levels does the device support, count from 0 to dimlevels
 local zeroisoff = true  -- if level is 0 is the Light then completely off?
@@ -8,7 +31,6 @@ local dimmer = require("upnp.services.urn_schemas-upnp-org_service_Dimming_1")
 local binary = require("upnp.devices.urn_schemas-upnp-org_device_BinaryLight_1")
 
 
---------------------------------------------------------------
 -- Set device state, in the 'afterset' handler. It will instruct the
 -- device to actually set the proper values in the hardware through calling
 -- <code>device:statetodevice()</code>.
@@ -52,11 +74,12 @@ local setstate = function(self, oldval)  -- self = variable object!
   end
 end
 
+local statetodevice -- local to trick luadoc
 ---------------------------------------------------------------
 -- Sets provided values into the actual device (hardware). This method must be overriden
 -- to communicate with the hardware.
 -- <br><strong>NOTE:</strong> setting values in hardware might require use of a coroutine
--- for a socket/IO scheduler. Hence the <code>callback<code> to allow the creation of (for
+-- for a socket/IO scheduler. Hence the <code>callback</code> to allow the creation of (for
 -- example) a Copas task to send the command to the hardware over an outgoing TCP connection.
 -- If you do not do this when using possibly blocking IO calls, then the call might become a
 -- blocking call, freezing the entire engine.
@@ -64,17 +87,19 @@ end
 -- @param power (boolean) powerstate to set (<code>true</code> = on)
 -- @param level (integer) dim device level to set (0 to <code>dimlevels</code>)
 -- @param callback (function) callback function to call when hardware has been updated (has no arguments)
-local statetodevice = function(self, power, level, callback)
+statetodevice = function(self, power, level, callback)
   logger:error("setdevicestate method on a DimmableLight device has not been set!! must implement it")
 end
 
+
+local statefromdevice -- local to trick luadoc
 ---------------------------------------------------------------
 -- Sets provided values into the UPnP device (software representation). This method must be
 -- called from the devicedriver to update changes from the hardware to the UPnP device.
 -- @param self (table) dimmablelight device object
--- @param power (boolean) powerstate to set (true = on)
+-- @param power (boolean) powerstate to set (<code>true</code> = on)
 -- @param level (integer) dim level to set (0 to dimlevels)
-local statefromdevice = function(self, power, level)
+statefromdevice = function(self, power, level)
   if power == self.lastpower and level == self.lastlevel then
     -- nothing changed, no updates, do nothing
   else
@@ -96,7 +121,6 @@ local statefromdevice = function(self, power, level)
   end
 end
 
----------------------------------------------------------------
 -- Stops the device while stopping ramping to close timers.
 -- @param self (table) dimmablelight device object
 local stopdimmablelight = function(self)
@@ -104,7 +128,6 @@ local stopdimmablelight = function(self)
   upnp.classes.device.stop(self)
 end
 
----------------------------------------------------------------
 -- Stops ramping upon powering off a device, and sets the OnEffect upon powering up a device.
 -- @param self (table) statevariable object
 local powerbeforeset = function(self, newval)
@@ -123,7 +146,6 @@ local powerbeforeset = function(self, newval)
   return newval
 end
 
----------------------------------------------------------------
 -- Handles the 'Default' value for OnEffect.
 -- @param self (table) statevariable object
 local oneffectbeforeset = function(self, newval)
@@ -145,7 +167,8 @@ local newdevice = function()
   logger:info("adding '"..serv.serviceId.."' service")
   table.insert(dev.serviceList, serv)
 
-  -- set the update handlers for Target and LoadLevelTarget variables
+  -- set the update handlers for Target and LoadLevelTarget variables and start/stop methods
+  dev.stop = stopdimmablelight
   dev.serviceList[1].serviceStateTable[1].afterset = setstate -- add update method for Power; Switch service is nr 1 in list, Target is variable 1
   dev.serviceList[1].serviceStateTable[1].beforeset = powerbeforeset
   dev.serviceList[2].serviceStateTable[1].afterset = setstate -- add update method for Dimmer; LoadLevelStatus is nr 1 in variablelist
@@ -157,7 +180,6 @@ local newdevice = function()
   dev.customList.zeroisoff = zeroisoff
   dev.customList.lastpower = nil
   dev.customList.lastlevel = nil
-  dev.customList.stop = stopdimmablelight
   -- add methods to interact with hardware
   dev.customList.statefromdevice = statefromdevice
   dev.customList.statetodevice = statetodevice

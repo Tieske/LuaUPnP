@@ -1,3 +1,18 @@
+---------------------------------------------------------------------------
+-- Standard service; "urn:schemas-upnp-org:service:Dimming:1".
+-- When required, it returns a single function which generates a new service table 
+-- on every call (it takes no parameters). The <code>upnp.devicefactory</code> module 
+-- takes the device/service tables to build device/service objects.
+-- <br><br>Requires to implement the following elements;
+-- </p>
+-- <ul>
+-- <li><code>service.serviceStateTable.loadLevelTarget.afterset = function(self, oldval) ... end</code> to process the changed loadLevelTarget value</li>
+-- <li>When a containing device stops, is should stop ramping when ramping is in progress</li>
+-- </ul>
+-- <p>
+-- @class module
+-- @name urn_schemas-upnp-org_service_Dimming_1
+
 local gettime = require("socket").gettime
 
 local newservice = function()
@@ -279,6 +294,26 @@ local newservice = function()
           minimum = "0",
           maximum = "100",
         },
+        ---------------------------------------------------------
+        -- Implement this handler to add Dimming capability.
+        -- The handler should implement the actual dimming behaviour and set the
+        -- 'LoadLevelStatus' variable to the new value when done.
+        -- @param self statevariable object for the 'LoadLevelTarget' statevariable
+        -- @param oldval the previous value of 'LoadLevelTarget'
+        -- @example# -- Create a new Dimming service
+        -- local service = require("upnp.services.urn_schemas-upnp-org_service_Dimming_1")()
+        -- <br>
+        -- -- add implementation
+        -- service.serviceStateTable[1].afterset = function(self, oldval)
+        --     -- do something useful here...
+        --     print("Setting the Dimming value to", self:get(), "from", oldval)
+        -- <br>
+        --     -- When done update value of Status to reflect the change
+        --     self:getstatevariable("status"):set(self:get())
+        -- end
+        -- @see statevariable:afterset
+        afterset = function(self, oldval)
+        end,        
       },
       { name = "LoadLevelStatus",
         sendEvents = true,
