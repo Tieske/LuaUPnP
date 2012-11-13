@@ -24,7 +24,6 @@
 -- default device properties
 local dimlevels = 15    -- how many dim levels does the device support, count from 0 to dimlevels
 local zeroisoff = true  -- if level is 0 is the Light then completely off?
-local oneffectdefault = "LastSetting" -- What to use when set to 'Default'; either 'OnEffectLevel' or 'LastSetting'
 
 local logger = upnp.logger
 local dimmer = require("upnp.services.urn_schemas-upnp-org_service_Dimming_1")
@@ -150,7 +149,7 @@ end
 -- @param self (table) statevariable object
 local oneffectbeforeset = function(self, newval)
   if newval == "Default" then
-    return oneffectdefault
+    return self.defaultvalue
   end
   return newval
 end

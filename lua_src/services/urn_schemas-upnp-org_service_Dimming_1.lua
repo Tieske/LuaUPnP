@@ -9,7 +9,9 @@
 -- <li><code>service.serviceStateTable.loadLevelTarget.afterset = function(self, oldval) ... end</code> to process the changed loadLevelTarget value</li>
 -- <li>When a containing device stops, is should stop ramping when ramping is in progress</li>
 -- </ul>
--- <p>
+-- <p><strong>Note:</strong> the RampRate variable deviates from the standard because 
+-- the default value is not 0 but 5. The specified 0 is an illegal value, and is preventing 
+-- RampUp() and RampDown() from working without first altering RampRate.
 -- @class module
 -- @name urn_schemas-upnp-org_service_Dimming_1
 
@@ -109,16 +111,22 @@ local newservice = function()
       },
       { name = "StartRampUp", 
         execute = function(self, params)
-          local level = self:getstatevariable("loadleveltarget"):get()
           local rate = self:getstatevariable("ramprate"):get()
+          if rate == 0 then
+            return nil, "Action Failed: statevariable ramprate must be greater than 0", 501
+          end
+          local level = self:getstatevariable("loadleveltarget"):get()
           local ramptime = math.floor(((100-level)/rate) * 1000)
           self:getaction("startramptolevel"):execute( { newloadleveltarget = 100, newramptime = ramptime } )
         end,
       },
       { name = "StartRampDown", 
         execute = function(self, params)
-          local level = self:getstatevariable("loadleveltarget"):get()
           local rate = self:getstatevariable("ramprate"):get()
+          if rate == 0 then
+            return nil, "Action Failed: statevariable ramprate must be greater than 0", 501
+          end
+          local level = self:getstatevariable("loadleveltarget"):get()
           local ramptime = math.floor(((level)/rate) * 1000)
           self:getaction("startramptolevel"):execute( { newloadleveltarget = 0, newramptime = ramptime } )
         end,
@@ -336,7 +344,7 @@ local newservice = function()
       { name = "OnEffect",
         sendEvents = false,
         dataType = "string",
-        defaultValue = "Default",
+        defaultValue = "OnEffectLevel",
         allowedValueList = { "OnEffectLevel", "LastSetting", "Default" },
       },
       { name = "StepDelta",
@@ -351,7 +359,7 @@ local newservice = function()
       { name = "RampRate",
         sendEvents = true,
         dataType = "ui1",
-        defaultValue = "0",
+        defaultValue = "5",
         allowedValueRange = {
           minimum = "0",
           maximum = "100",
