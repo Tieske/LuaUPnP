@@ -162,8 +162,8 @@ devicefactory.customizeservice = function(service, customtable)
   if customtable.customList then
     service.customList = service.customList or {}
     for k,v in pairs(customtable.customList) do
-      logger:debug("devicefactory.customizeservice: customList found, now copying '%s'", tostring(k))
-      service[k] = v
+      logger:debug("devicefactory.customizeservice: customList found, now copying '%s' = %s", tostring(k), tostring(v))
+      service.customList[k] = v
     end
   end
   if customtable.serviceStateTable and next(customtable.serviceStateTable) then
@@ -283,8 +283,8 @@ devicefactory.customizedevice = function(device, customtable)
   if customtable.customList then
     device.customList = device.customList or {}
     for k,v in pairs(customtable.customList) do
-      logger:debug("devicefactory.customizedevice: customList found, now copying '%s'", tostring(k))
-      device[k] = v
+      logger:debug("devicefactory.customizedevice: customList found, now copying '%s' = %s", tostring(k), tostring(v))
+      device.customList[k] = v
     end
   end
   if customtable.serviceList and next(customtable.serviceList) then

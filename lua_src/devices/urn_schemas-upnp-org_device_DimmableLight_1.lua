@@ -88,7 +88,7 @@ local statetodevice -- local to trick luadoc
 -- @param level (integer) dim device level to set (0 to <code>dimlevels</code>)
 -- @param callback (function) callback function to call when hardware has been updated (has no arguments)
 statetodevice = function(self, power, level, callback)
-  logger:error("setdevicestate method on a DimmableLight device has not been set!! must implement it")
+  logger:error("statetodevice() method on a DimmableLight device has not been set!! must implement it")
 end
 
 

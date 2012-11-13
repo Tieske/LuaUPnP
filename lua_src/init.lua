@@ -360,7 +360,8 @@ function upnp.startdevice(rootdev)
     url = string.gsub(url, "\\/", "/")
     url = string.gsub(url, "\\", "/")      -- entire path is now single-foward-slash-separated
     -- start it
-    local hdl, err = lib.RegisterRootDevice(url, upnp.UPnPCallback)
+    logger:info("upnp.startdevice(); starting from '%s'", url)
+    local hdl, err = lib.RegisterRootDevice(url)
     if hdl then
         logger:info("upnp.startdevice(); advertizing '%s' with id '%s'", tostring(rootdev.friendlyname), tostring(rootdev:getudn()))
         hdl:SendAdvertisement(100)

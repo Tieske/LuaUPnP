@@ -61,7 +61,7 @@ local statetodevice -- local to trick luadoc
 -- @param power (boolean) powerstate to set (<code>true</code> = on)
 -- @param callback (function) callback function to call when hardware has been updated (has no arguments)
 statetodevice = function(self, power, callback)
-  logger:error("setdevicestate method on a BinaryLight device has not been set!! must implement it")
+  logger:error("statetodevice() method on a BinaryLight device has not been set!! must implement it")
 end
 
 
