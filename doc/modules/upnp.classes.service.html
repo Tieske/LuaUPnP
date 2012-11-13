@@ -78,7 +78,19 @@
 	</li>
 
 	<li>
-		<a href="../modules/urn_schemas-upnp-org_SwitchPower_1.html">urn_schemas-upnp-org_SwitchPower_1</a>
+		<a href="../modules/urn_schemas-upnp-org_device_BinaryLight_1.html">urn_schemas-upnp-org_device_BinaryLight_1</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_device_DimmableLight_1.html">urn_schemas-upnp-org_device_DimmableLight_1</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_service_Dimming_1.html">urn_schemas-upnp-org_service_Dimming_1</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_service_SwitchPower_1.html">urn_schemas-upnp-org_service_SwitchPower_1</a>
 	</li>
 
 </ul>
@@ -134,8 +146,18 @@
     </tr>
 
     <tr>
+    <td class="name" nowrap><a href="#service:afterset">service:afterset</a>&nbsp;(statevariable, oldval)</td>
+    <td class="summary">Handler called after the new value has been set to an owned statevariable.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#service:beforeset">service:beforeset</a>&nbsp;(statevariable, newval)</td>
+    <td class="summary">Handler called before the new value is set to an owned statevariable.</td>
+    </tr>
+
+    <tr>
     <td class="name" nowrap><a href="#service:executeaction">service:executeaction</a>&nbsp;(actionname, params)</td>
-    <td class="summary">Execute an action of the service.</td>
+    <td class="summary">Execute an action owned by the service.</td>
     </tr>
 
     <tr>
@@ -268,16 +290,124 @@ Adds a statevariable to the service statetable.
 
 
 
-<dt><a name="service:executeaction"></a><strong>service:executeaction</strong>&nbsp;(actionname, params)</dt>
+<dt><a name="service:afterset"></a><strong>service:afterset</strong>&nbsp;(statevariable, oldval)</dt>
 <dd>
-Execute an action of the service. This will call basically the <a href="upnp.action.html#action:execute"><code>action:_execute()</code></a> method, but additionally, if the action does not exist, it will return the proper UPnP error.
+Handler called after the new value has been set to an owned statevariable. <br/><strong>NOTE:</strong> this will only be called when the value has actually changed, so setting the current value again will not trigger it! Override in descendant classes to implement device behaviour (when overriding, do not forget to call the ancestor method to make this 'event' bubble up to the device level) <br>Call order; <code>statevariable:afterset() -&gt; service:afterset() -&gt; device:afterset()</code>
 
 
 <h3>Parameters:</h3>
 <ul>
 	
 	<li>
-	  <code><em>actionname</em></code>: (string) name of action to execute
+	  <code><em>statevariable</em></code>: the statevariable (table/object) whose value is being changed
+	</li>
+	
+	<li>
+	  <code><em>oldval</em></code>: the previous value of the statevariable
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+
+
+<div>
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="../modules/upnp.classes.statevariable.html#statevariable:beforeset">
+		statevariable:beforeset
+	</a></li>
+	
+	<li><a href="../modules/upnp.classes.service.html#service:beforeset">
+		service:beforeset
+	</a></li>
+	
+</ul>
+
+</div>
+
+
+</dd>
+
+
+
+
+<dt><a name="service:beforeset"></a><strong>service:beforeset</strong>&nbsp;(statevariable, newval)</dt>
+<dd>
+Handler called before the new value is set to an owned statevariable. The new value will have been checked and converted before this handler is called. Override in descendant classes to implement device behaviour (when overriding, do not forget to call the ancestor method to make this 'event' bubble up to the device level). While the <code>afterset()</code> will only be called when the value being set is actually different from the current value, the <code>beforeset()</code> will always be run. Hence, <code>beforeset()</code> has the opportunity to change the value being set. <br>Call order; <code>statevariable:beforeset() -&gt; service:beforeset() -&gt; device:beforeset()</code>
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>statevariable</em></code>: the statevariable (table/object) whose value is being changed
+	</li>
+	
+	<li>
+	  <code><em>newval</em></code>: the new value to be set
+	</li>
+	
+</ul>
+
+
+
+
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+newval to be set (Lua type) or <code>nil, error message, error number</code> upon failure
+
+</div>
+
+
+
+
+
+
+<div>
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="../modules/upnp.classes.statevariable.html#statevariable:beforeset">
+		statevariable:beforeset
+	</a></li>
+	
+	<li><a href="../modules/upnp.classes.service.html#service:afterset">
+		service:afterset
+	</a></li>
+	
+</ul>
+
+</div>
+
+
+</dd>
+
+
+
+
+<dt><a name="service:executeaction"></a><strong>service:executeaction</strong>&nbsp;(actionname, params)</dt>
+<dd>
+Execute an action owned by the service. Preferably call the <code>device:executeaction()</code> method, as that ensures that all objects in the hierarchy are informed about the results, additionally it will check and convert parameters in and results going out.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>actionname</em></code>: (string or table) name of action to execute, or action table/object
 	</li>
 	
 	<li>
@@ -302,6 +432,23 @@ Execute an action of the service. This will call basically the <a href="upnp.act
 
 
 
+
+<div>
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="../modules/upnp.classes.device.html#device:executeaction">
+		device:executeaction
+	</a></li>
+	
+	<li><a href="../modules/upnp.classes.action.html#action:execute">
+		action:execute
+	</a></li>
+	
+</ul>
+
+</div>
 
 
 </dd>

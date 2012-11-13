@@ -78,7 +78,19 @@
 	</li>
 
 	<li>
-		<a href="../modules/urn_schemas-upnp-org_SwitchPower_1.html">urn_schemas-upnp-org_SwitchPower_1</a>
+		<a href="../modules/urn_schemas-upnp-org_device_BinaryLight_1.html">urn_schemas-upnp-org_device_BinaryLight_1</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_device_DimmableLight_1.html">urn_schemas-upnp-org_device_DimmableLight_1</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_service_Dimming_1.html">urn_schemas-upnp-org_service_Dimming_1</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_service_SwitchPower_1.html">urn_schemas-upnp-org_service_SwitchPower_1</a>
 	</li>
 
 </ul>
@@ -228,7 +240,7 @@
 
 <dt><a name="statevariable:afterset"></a><strong>statevariable:afterset</strong>&nbsp;(oldval)</dt>
 <dd>
-Handler called after the new value has been set. <br/><strong>NOTE:</strong> this will only be called when the value has actually changed, so setting the current value again will not trigger it! Override in descendant classes to implement device behaviour.
+Handler called after the new value has been set. <br/><strong>NOTE:</strong> this will only be called when the value has actually changed, so setting the current value again will not trigger it! Override in descendant classes to implement device behaviour (when overriding, do not forget to call the ancestor method to make this 'event' bubble up to the device level). <br>Call order; <code>statevariable:afterset() -&gt; service:afterset() -&gt; device:afterset()</code>
 
 
 <h3>Parameters:</h3>
@@ -270,7 +282,7 @@ Handler called after the new value has been set. <br/><strong>NOTE:</strong> thi
 
 <dt><a name="statevariable:beforeset"></a><strong>statevariable:beforeset</strong>&nbsp;(newval)</dt>
 <dd>
-Handler called before the new value is set. The new value will have been checked and converted before this handler is called. Override in descendant classes to implement device behaviour. While the <code>afterset()</code> will only be called when the value being set is actually different from the current value, the <code>beforeset()</code> will always be run. Hence, <code>beforeset()</code> has the opportunity to change the value being set.
+Handler called before the new value is set. The new value will have been checked and converted before this handler is called. Override in descendant classes to implement device behaviour (when overriding, do not forget to call the ancestor method to make this 'event' bubble up to the device level). While the <code>afterset()</code> will only be called when the value being set is actually different from the current value, the <code>beforeset()</code> will always be run. Hence, <code>beforeset()</code> has the opportunity to change the value being set. <br>Call order; <code>statevariable:beforeset() -&gt; service:beforeset() -&gt; device:beforeset()</code>
 
 
 <h3>Parameters:</h3>
@@ -296,6 +308,19 @@ newval to be set (Lua type) or <code>nil, error message, error number</code> upo
 
 
 
+ 
+<div>
+
+<h3>Example:</h3>
+<ul>
+	
+	<pre class="example">-- example 1) using a descendant class (inheritance)<br/>function mydescendant:beforeset(newval)<br/>&nbsp;&nbsp;print("New value being set:",newval)<br/>&nbsp;&nbsp;-- call ancestor method through the superclass() method<br/>&nbsp;&nbsp;return self:superclass().beforeset(self, newval)  -- NOTE: do not use colon syntax!<br/>end</pre>
+	
+	<pre class="example">-- example 2) use when replacing a method (use from <code>devicefactory</code>)<br/>beforeset = function(self, newval)<br/>&nbsp;&nbsp;print("New value being set:",newval)<br/>&nbsp;&nbsp;-- assuming the ancestor is the base statevariable class, call it directly on that class<br/>&nbsp;&nbsp;return upnp.classes.statevariable.beforeset(self, newval)   -- NOTE: do not use colon syntax!<br/>end</pre>
+	
+</ul>
+
+</div>
 
 
 
