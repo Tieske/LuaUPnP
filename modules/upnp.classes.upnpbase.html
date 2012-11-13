@@ -78,7 +78,19 @@
 	</li>
 
 	<li>
-		<a href="../modules/urn_schemas-upnp-org_SwitchPower_1.html">urn_schemas-upnp-org_SwitchPower_1</a>
+		<a href="../modules/urn_schemas-upnp-org_device_BinaryLight_1.html">urn_schemas-upnp-org_device_BinaryLight_1</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_device_DimmableLight_1.html">urn_schemas-upnp-org_device_DimmableLight_1</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_service_Dimming_1.html">urn_schemas-upnp-org_service_Dimming_1</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_service_SwitchPower_1.html">urn_schemas-upnp-org_service_SwitchPower_1</a>
 	</li>
 
 </ul>
@@ -129,8 +141,8 @@
     </tr>
 
     <tr>
-    <td class="name" nowrap><a href="#upnpbase:getaction">upnpbase:getaction</a>&nbsp;()</td>
-    <td class="summary">Gets the owning action.</td>
+    <td class="name" nowrap><a href="#upnpbase:getaction">upnpbase:getaction</a>&nbsp;(actionname)</td>
+    <td class="summary">Gets an action from the owning service.</td>
     </tr>
 
     <tr>
@@ -151,6 +163,11 @@
     <tr>
     <td class="name" nowrap><a href="#upnpbase:getservice">upnpbase:getservice</a>&nbsp;()</td>
     <td class="summary">Gets the owning service.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#upnpbase:getstatevariable">upnpbase:getstatevariable</a>&nbsp;(varname)</td>
+    <td class="summary">Gets a variable from the owning service.</td>
     </tr>
 
     <tr>
@@ -248,14 +265,31 @@ Clears all the lazy-elements set. Applies to <code>getaction(), getservice(), ge
 
 
 
-<dt><a name="upnpbase:getaction"></a><strong>upnpbase:getaction</strong>&nbsp;()</dt>
+<dt><a name="upnpbase:getaction"></a><strong>upnpbase:getaction</strong>&nbsp;(actionname)</dt>
 <dd>
-Gets the owning action. Only applicable for arguments.
+Gets an action from the owning service. Can be called on a service, statevariable, action or argument.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>actionname</em></code>: name of the action sought (optional for arguments, will return owning action)
+	</li>
+	
+</ul>
 
 
 
 
 
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+the owning action for an argument, or the named action from the current objects owning service. Or nil if not found (or called on a device object)
+
+</div>
 
 
 
@@ -336,6 +370,43 @@ Gets the owning service.
 
 
 
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="upnpbase:getstatevariable"></a><strong>upnpbase:getstatevariable</strong>&nbsp;(varname)</dt>
+<dd>
+Gets a variable from the owning service. Can be called on a service, statevariable, action or argument.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>varname</em></code>: name of the statevariable sought
+	</li>
+	
+</ul>
+
+
+
+
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+the named statevariable from the current objects owning service. Or nil if not found (or called on a device object)
+
+</div>
 
 
 

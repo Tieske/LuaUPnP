@@ -78,7 +78,19 @@
 	</li>
 
 	<li>
-		<a href="../modules/urn_schemas-upnp-org_SwitchPower_1.html">urn_schemas-upnp-org_SwitchPower_1</a>
+		<a href="../modules/urn_schemas-upnp-org_device_BinaryLight_1.html">urn_schemas-upnp-org_device_BinaryLight_1</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_device_DimmableLight_1.html">urn_schemas-upnp-org_device_DimmableLight_1</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_service_Dimming_1.html">urn_schemas-upnp-org_service_Dimming_1</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_service_SwitchPower_1.html">urn_schemas-upnp-org_service_SwitchPower_1</a>
 	</li>
 
 </ul>
@@ -124,18 +136,33 @@
 <table class="function_list">
 
     <tr>
-    <td class="name" nowrap><a href="#action:_execute">action:_execute</a>&nbsp;(params)</td>
-    <td class="summary">Executes the action while checking inputs and outputs.</td>
-    </tr>
-
-    <tr>
     <td class="name" nowrap><a href="#action:addargument">action:addargument</a>&nbsp;(argument)</td>
     <td class="summary">Adds an argument to the actions argument list.</td>
     </tr>
 
     <tr>
+    <td class="name" nowrap><a href="#action:checkparams">action:checkparams</a>&nbsp;(params)</td>
+    <td class="summary">Checks parameters, completeness and conversion to Lua values/types.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#action:checkresults">action:checkresults</a>&nbsp;(result)</td>
+    <td class="summary">Checks return values, completeness and conversion to UPnP values/types.</td>
+    </tr>
+
+    <tr>
     <td class="name" nowrap><a href="#action:execute">action:execute</a>&nbsp;(params)</td>
     <td class="summary">Executes the action.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#action:genericgetter">action:genericgetter</a>&nbsp;(params)</td>
+    <td class="summary">Generic function for standard actions 'getVariableName'.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#action:genericsetter">action:genericsetter</a>&nbsp;(params)</td>
+    <td class="summary">Generic function for standard actions 'setVariableName'.</td>
     </tr>
 
     <tr>
@@ -201,60 +228,6 @@
 
 
 
-<dt><a name="action:_execute"></a><strong>action:_execute</strong>&nbsp;(params)</dt>
-<dd>
-Executes the action while checking inputs and outputs. Parameter values may be in either UPnP or Lua format. The actual implementation is in <code>action:execute()</code> which will be called by this method. <br/>Actual execution order; <br/>1) <code>action:_execute()</code> verifies correctness of all arguments provided and converts them to Lua equivalents <br/>2) <code>action:execute()</code> gets called to perform actual device behaviour <br/>3) <code>action:_execute()</code> verifies the return values and converts them to UPnP formats <br/>So to implement device behaviour, override the <code>action:execute()</code> method, to execute the action call <code>action:_execute()</code> or even better call <a href="upnp.service.html#service:executeaction"><code>service:executeaction()</code></a> as that will also return the proper UPnP error if the action doesn't exist.
-
-
-<h3>Parameters:</h3>
-<ul>
-	
-	<li>
-	  <code><em>params</em></code>: table with argument values, indexed by argument name.
-	</li>
-	
-</ul>
-
-
-
-
-
-<div>
-
-
-<h3 class="inline-block">Return value:</h3>
-2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure
-
-</div>
-
-
-
-
-
-
-<div>
-
-<h3>See also:</h3>
-<ul>
-	
-	<li><a href="../modules/upnp.classes.action.html#action:execute">
-		action:execute
-	</a></li>
-	
-	<li><a href="../modules/upnp.classes.service.html#service:executeaction">
-		service:executeaction
-	</a></li>
-	
-</ul>
-
-</div>
-
-
-</dd>
-
-
-
-
 <dt><a name="action:addargument"></a><strong>action:addargument</strong>&nbsp;(argument)</dt>
 <dd>
 Adds an argument to the actions argument list. This will append an argument, so adding must be done in proper UPnP order!
@@ -284,16 +257,16 @@ Adds an argument to the actions argument list. This will append an argument, so 
 
 
 
-<dt><a name="action:execute"></a><strong>action:execute</strong>&nbsp;(params)</dt>
+<dt><a name="action:checkparams"></a><strong>action:checkparams</strong>&nbsp;(params)</dt>
 <dd>
-Executes the action. Override in descendant classes to implement the actual device behaviour. <br/><strong>NOTE 1</strong>: if not overridden, the default result will be an error; <code>602, Optional Action Not Implemented</code> (hence; from the descedant overridden method, DO NOT call the ancestor method, as it will only return the error) <br/><strong>NOTE 2</strong>: this method is wrapped by <code>action:_execute()</code> from which it will be called. So never call this method directly, if you need to execute, call <code>_execute()</code>. If called externally, it is best to call <a href="upnp.service.html#service:executeaction"><code>service:executeaction()</code></a> as that will also return the proper UPnP error if the action doesn't exist.
+Checks parameters, completeness and conversion to Lua values/types. <br><strong>NOTE:</strong> a copy of the table is returned, so the original table will not be modified.
 
 
 <h3>Parameters:</h3>
 <ul>
 	
 	<li>
-	  <code><em>params</em></code>: table with named arguments (each argument indexed by its name). Before calling the arguments will have been checked, converted and counted.
+	  <code><em>params</em></code>: table with parameters provided (key value list, where key is the parameter name, value is the Lua typed value)
 	</li>
 	
 </ul>
@@ -306,7 +279,81 @@ Executes the action. Override in descendant classes to implement the actual devi
 
 
 <h3 class="inline-block">Return value:</h3>
-table with named return values (each indexed by its name). The returned values can be the Lua types, will be converted to UPnP types (and validated) before sending. Upon an error the function should return; <code>nil, errorstring, errornumber</code> (see the 6xx error codes in the UPnP 1.0 architecture document, section 3.2.2)
+params table, or <code>nil + errormsg + errornumber</code> in case of an error
+
+</div>
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="action:checkresults"></a><strong>action:checkresults</strong>&nbsp;(result)</dt>
+<dd>
+Checks return values, completeness and conversion to UPnP values/types. Transforms the results in 2 lists, names and values, in proper UPnP order, and UPnP typed.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>result</em></code>: table with parameters provided (key value list, where key is the parameter name)
+	</li>
+	
+</ul>
+
+
+
+
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+2 lists (names and values) of the 'out' arguments (in proper order), or <code>nil, errormsg, errornumber</code> upon failure
+
+</div>
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="action:execute"></a><strong>action:execute</strong>&nbsp;(params)</dt>
+<dd>
+Executes the action. Override in descendant classes to implement the actual device behaviour. Preferably call the <code>device:executeaction()</code> method, as that ensures that all objects in the hierarchy are informed about the results, additionally it will check and convert parameters in and results going out. <br><strong>NOTE:</strong> If parsed from an xml file the <code>genericgetter()/genericsetter()</code> might automatically have been set as the <code>execute()</code> method.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>params</em></code>: table with named 'out' arguments (each argument indexed by its name).
+	</li>
+	
+</ul>
+
+
+
+
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+table with named return values (each indexed by its lowercase name). Upon an error the function should return; <code>nil, errorstring, errornumber</code> (see the 6xx error codes in the UPnP 1.0 architecture document, section 3.2.2)
 
 </div>
 
@@ -320,12 +367,142 @@ table with named return values (each indexed by its name). The returned values c
 <h3>See also:</h3>
 <ul>
 	
-	<li><a href="../modules/upnp.classes.action.html#action:_execute">
-		action:_execute
+	<li><a href="../modules/upnp.classes.device.html#device:executeaction">
+		device:executeaction
 	</a></li>
 	
 	<li><a href="../modules/upnp.classes.service.html#service:executeaction">
 		service:executeaction
+	</a></li>
+	
+	<li><a href="../modules/upnp.classes.action.html#action:genericgetter">
+		action:genericgetter
+	</a></li>
+	
+	<li><a href="../modules/upnp.classes.action.html#action:genericsetter">
+		action:genericsetter
+	</a></li>
+	
+</ul>
+
+</div>
+
+
+</dd>
+
+
+
+
+<dt><a name="action:genericgetter"></a><strong>action:genericgetter</strong>&nbsp;(params)</dt>
+<dd>
+Generic function for standard actions 'getVariableName'. This method is capable of returning multiple parameters, it will simply report all 'out' arguments of the action based on the related statevariables current value. <br><strong>NOTE:</strong> when an action is parsed from an xml, and the following conditions are met;</p><ul> <li>action name starts with <code>'get'</code> (case independent)</li> <li>the action has 1 or more arguments</li> <li>all arguments are direction <code>'out'</code></li> <li>none of the arguments has a related statevariable which name starts with <code>'A_ARG_TYPE_'</code> (case independent)</li> </ul><p> then the <code>genericgetter</code> will automatically be set as the <code>execute()</code> method for the action.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>params</em></code>: list of parameters (not used by getters, but is standard in <code>execute()</code> method signature)
+	</li>
+	
+</ul>
+
+
+
+
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+table with named return arguments (see <code>action:execute()</code> for format)
+
+</div>
+
+
+
+ 
+<div>
+
+<h3 class="inline-block">Example:</h3>
+<pre class="example">-- usage for generic getter, assign to execute method<br/>myAction.execute = upnp.classes.action.genericgetter</pre>
+
+</div>
+
+
+
+<div>
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="../modules/upnp.classes.action.html#action:execute">
+		action:execute
+	</a></li>
+	
+</ul>
+
+</div>
+
+
+</dd>
+
+
+
+
+<dt><a name="action:genericsetter"></a><strong>action:genericsetter</strong>&nbsp;(params)</dt>
+<dd>
+Generic function for standard actions 'setVariableName'. This method is capable of aetting multiple statevariable values, it will simply store all values of the parameters in the related statevariables. <br><strong>NOTE:</strong> when an action is parsed from an xml, and the following conditions are met;</p><ul> <li>action name starts with <code>'set'</code> (case independent)</li> <li>the action has 1 or more arguments</li> <li>all arguments are direction <code>'in'</code></li> <li>none of the arguments has a related statevariable which name starts with <code>'A_ARG_TYPE_'</code> (case independent)</li> </ul><p> then the <code>genericsetter</code> will automatically be set as the <code>execute()</code> method for the action.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>params</em></code>: list of parameters
+	</li>
+	
+</ul>
+
+
+
+
+
+<div>
+
+
+<h3>Return values:</h3>
+<ol>
+	
+	<li><code>1</code> on success, or <code>nil</code> on error</li>
+	
+	<li><code>errorstring</code> on error</li>
+	
+	<li><code>errornr</code> on error</li>
+	
+</ol>
+
+</div>
+
+
+
+ 
+<div>
+
+<h3 class="inline-block">Example:</h3>
+<pre class="example">-- usage for generic getter, assign to execute method<br/>myAction.execute = upnp.classes.action.genericgetter</pre>
+
+</div>
+
+
+
+<div>
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="../modules/upnp.classes.action.html#action:execute">
+		action:execute
 	</a></li>
 	
 </ul>
