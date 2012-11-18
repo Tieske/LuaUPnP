@@ -7,6 +7,7 @@ So far the following has been achieved;
 
  - [proof of concept 1](http://www.thijsschreijer.nl/blog/?p=634)
  - [proof of concept 2](http://www.thijsschreijer.nl/blog/?p=650)
+ - [proof of concept 3](http://www.thijsschreijer.nl/blog/?p=660)
 
 Documentation
 ==========
