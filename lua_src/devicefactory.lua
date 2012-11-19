@@ -355,7 +355,7 @@ devicefactory.builddevice = function(domain, devicetype, version, customtable)
   customtable = customtable or {}
   
   -- create device table for the standardized device
-  logger:debug("devicefactory.builddevice; creating device table %s, %s, %s", tostring(domain), tostring(devicetype or ""), tostring(version or ""))
+  logger:info("devicefactory.builddevice; creating device table %s, %s, %s", tostring(domain), tostring(devicetype or ""), tostring(version or ""))
   success, devtable, err = pcall(devicefactory.createdevice, domain, servicetype, version)
   if not success then return nil, devtable end -- pcall; devtable holds error
   if devtable == nil then return nil, err end -- contained error (nil + errmsg)
@@ -479,7 +479,7 @@ devicefactory.builddevice = function(domain, devicetype, version, customtable)
   if device == nil then return nil, err end -- contained error (nil + errmsg)
   
   -- set xml location in device (required by upnp.startdevice()) and return the device
-  logger:debug("devicefactory.builddevice; device created")
+  logger:info("devicefactory.builddevice; device created")
   device.devicexmlurl = xmllist[1]
   return device
 end

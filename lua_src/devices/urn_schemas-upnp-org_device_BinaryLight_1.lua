@@ -71,7 +71,7 @@ local statefromdevice -- local to trick luadoc
 -- called from the devicedriver to update changes from the hardware to the UPnP device.
 -- @param self (table) binarylight device object
 -- @param power (boolean) powerstate to set (<code>true</code> = on)
-statefromdevice = function(self, power, level)
+statefromdevice = function(self, power)
   if power == self.lastpower then
     -- nothing changed, no updates, do nothing
   else
