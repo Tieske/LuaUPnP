@@ -99,12 +99,12 @@
     <ClCompile Include="..\dss\darksidesync_aux.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="document.c" />
-    <ClCompile Include="element.c" />
-    <ClCompile Include="LuaIXML.c" />
+    <ClCompile Include="luaIXMLdocument.c" />
+    <ClCompile Include="luaIXMLelement.c" />
+    <ClCompile Include="luaIXML.c" />
     <ClCompile Include="LuaUPnP.c" />
-    <ClCompile Include="node.c" />
-    <ClCompile Include="IXMLsupport.c" />
+    <ClCompile Include="luaIXMLnode.c" />
+    <ClCompile Include="luaIXMLsupport.c" />
     <ClCompile Include="UPnPcallback.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -114,12 +114,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dss\darksidesync_api.h" />
-    <ClInclude Include="document.h" />
-    <ClInclude Include="element.h" />
-    <ClInclude Include="IXMLsupport.h" />
-    <ClInclude Include="LuaIXML.h" />
+    <ClInclude Include="luaIXMLdocument.h" />
+    <ClInclude Include="luaIXMLelement.h" />
+    <ClInclude Include="luaIXMLsupport.h" />
+    <ClInclude Include="luaIXML.h" />
     <ClInclude Include="LuaUPnP.h" />
-    <ClInclude Include="node.h" />
+    <ClInclude Include="luaIXMLnode.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="install.bat" />

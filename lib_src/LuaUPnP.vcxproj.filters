@@ -21,22 +21,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="LuaIXML.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="document.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="element.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="node.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LuaUPnP.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="IXMLsupport.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UPnPsupport.c">
@@ -48,27 +33,42 @@
     <ClCompile Include="..\dss\darksidesync_aux.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="luaIXMLsupport.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaIXML.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaIXMLnode.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaIXMLelement.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaIXMLdocument.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="LuaIXML.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="LuaUPnP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\dss\darksidesync_api.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IXMLsupport.h">
+    <ClInclude Include="luaIXMLdocument.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="document.h">
+    <ClInclude Include="luaIXMLelement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="node.h">
+    <ClInclude Include="luaIXMLsupport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="element.h">
+    <ClInclude Include="luaIXML.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaIXMLnode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
