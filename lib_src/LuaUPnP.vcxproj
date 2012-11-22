@@ -109,6 +109,7 @@
   <ItemGroup>
     <ClInclude Include="..\dss\darksidesync_api.h" />
     <ClInclude Include="..\dss\darksidesync_aux.h" />
+    <ClInclude Include="luaIXMLdefinitions.h" />
     <ClInclude Include="luaIXMLdocument.h" />
     <ClInclude Include="luaIXMLelement.h" />
     <ClInclude Include="luaIXMLsupport.h" />

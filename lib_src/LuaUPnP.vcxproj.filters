@@ -80,6 +80,9 @@
     <ClInclude Include="..\dss\darksidesync_aux.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="luaIXMLdefinitions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="IXMLtest.lua">
