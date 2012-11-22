@@ -4,7 +4,7 @@
 #include <ixml.h>
 #include <lua.h>
 #include <lauxlib.h>
-#include "LuaIXML.h"
+#include "luaIXML.h"
 
 /*
 ** ===============================================================

@@ -1,4 +1,4 @@
-#include "IXMLsupport.h"
+#include "luaIXMLsupport.h"
 
 /*
 ** ===============================================================

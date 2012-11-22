@@ -1,17 +1,5 @@
-#include "LuaIXML.h"
+#include "luaIXML.h"
 // TODO: locking on IXML objects needs to be done, might get modified or freed by UPnP lib !! or just make copies... always
-
-
-/*
-** ===============================================================
-**  Core code files
-** ===============================================================
-*/
-
-//#include "IXMLsupport.c"
-//#include "node.c"
-//#include "document.c"
-//#include "element.c"
 
 
 /*

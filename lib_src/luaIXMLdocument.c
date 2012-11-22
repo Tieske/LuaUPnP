@@ -1,4 +1,4 @@
-#include "document.h"
+#include "luaIXMLdocument.h"
 
 
 /*

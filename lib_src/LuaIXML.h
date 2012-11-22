@@ -20,10 +20,10 @@ typedef struct LuaNodeRecord {
 #define LPNP_WTABLE_IXML "LuaUPnP.IXMLuserdata"
 
 // include support functions
-#include "IXMLsupport.h"
-#include "element.h"
-#include "node.h"
-#include "document.h"
+#include "luaIXMLsupport.h"
+#include "luaIXMLelement.h"
+#include "luaIXMLnode.h"
+#include "luaIXMLdocument.h"
 
 // forward declaration
 //int L_getNodeType(lua_State *L);
