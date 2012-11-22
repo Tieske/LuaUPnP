@@ -6,6 +6,7 @@
 #include "uuid.h"
 #include <lua.h>
 #include <lauxlib.h>
+#include "LuaIXML.h"
 
 // Define platform specific extern statement
 #ifdef WIN32

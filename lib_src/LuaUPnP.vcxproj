@@ -99,22 +99,12 @@
     <ClCompile Include="..\dss\darksidesync_aux.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="document.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="element.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="LuaIXML.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="document.c" />
+    <ClCompile Include="element.c" />
+    <ClCompile Include="LuaIXML.c" />
     <ClCompile Include="LuaUPnP.c" />
-    <ClCompile Include="node.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="IXMLsupport.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="node.c" />
+    <ClCompile Include="IXMLsupport.c" />
     <ClCompile Include="UPnPcallback.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -124,8 +114,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dss\darksidesync_api.h" />
+    <ClInclude Include="document.h" />
+    <ClInclude Include="element.h" />
+    <ClInclude Include="IXMLsupport.h" />
     <ClInclude Include="LuaIXML.h" />
     <ClInclude Include="LuaUPnP.h" />
+    <ClInclude Include="node.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="install.bat" />

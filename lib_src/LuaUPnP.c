@@ -13,7 +13,7 @@
 ** ===============================================================
 */
 
-#include "LuaIXML.c"
+//#include "LuaIXML.c"
 #include "UPnPsupport.c"
 
 /*

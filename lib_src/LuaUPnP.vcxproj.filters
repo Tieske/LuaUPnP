@@ -59,6 +59,18 @@
     <ClInclude Include="..\dss\darksidesync_api.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IXMLsupport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="document.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="element.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="IXMLtest.lua">

@@ -1,4 +1,4 @@
-#include "LuaIXML.h"
+#include "IXMLsupport.h"
 
 /*
 ** ===============================================================
@@ -314,7 +314,7 @@ int pushIXMLerror(lua_State *L, int err)
 ** ===============================================================
 */
 
-int L_tostring(lua_State *L)
+static int L_tostring(lua_State *L)
 {
     char buf[32];
 	L_getNodeType(L);			// pushes string with node type
