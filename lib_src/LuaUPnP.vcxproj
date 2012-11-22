@@ -117,6 +117,7 @@
     <ClInclude Include="luaUPnP.h" />
     <ClInclude Include="luaIXMLnode.h" />
     <ClInclude Include="luaUPnPcallback.h" />
+    <ClInclude Include="luaUPnPdefinitions.h" />
     <ClInclude Include="luaUPnPsupport.h" />
   </ItemGroup>
   <ItemGroup>

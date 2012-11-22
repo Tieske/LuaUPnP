@@ -2,10 +2,14 @@
 #define LuaUPnPcallback_h
 
 //#include <ixml.h>
-//#include <lua.h>
+#include <lua.h>
+#include "upnptools.h"
 //#include <lauxlib.h>
-//#include "luaIXML.h"
-#include "luaUPnP.h"
+#include "luaIXML.h"
+//#include "darksidesync_api.h"
+#include "darksidesync_aux.h"
+#include "luaUPnPdefinitions.h"
+#include "luaUPnPsupport.h"
 
 /*
 ** ===============================================================
