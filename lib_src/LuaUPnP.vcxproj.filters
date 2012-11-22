@@ -50,9 +50,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="LuaUPnP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\dss\darksidesync_api.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -69,6 +66,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="luaIXMLnode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaUPnP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaUPnPcallback.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaUPnPsupport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dss\darksidesync_aux.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

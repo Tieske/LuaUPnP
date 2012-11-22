@@ -96,9 +96,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\dss\darksidesync_aux.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="..\dss\darksidesync_aux.c" />
     <ClCompile Include="luaIXMLdocument.c" />
     <ClCompile Include="luaIXMLelement.c" />
     <ClCompile Include="luaIXML.c" />
@@ -110,12 +108,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dss\darksidesync_api.h" />
+    <ClInclude Include="..\dss\darksidesync_aux.h" />
     <ClInclude Include="luaIXMLdocument.h" />
     <ClInclude Include="luaIXMLelement.h" />
     <ClInclude Include="luaIXMLsupport.h" />
     <ClInclude Include="luaIXML.h" />
-    <ClInclude Include="LuaUPnP.h" />
+    <ClInclude Include="luaUPnP.h" />
     <ClInclude Include="luaIXMLnode.h" />
+    <ClInclude Include="luaUPnPcallback.h" />
+    <ClInclude Include="luaUPnPsupport.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="install.bat" />

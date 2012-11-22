@@ -12,25 +12,25 @@
 ** ===============================================================
 */
 
-static void clearLuaNode(IXML_Node *node);
-static pLuaNode pushLuaNode(lua_State *L, IXML_Node *node);
-static pLuaNode pushLuaElement(lua_State *L, IXML_Element *elem);
-static pLuaNode pushLuaDocument(lua_State *L, IXML_Document *doc);
-static pLuaNode pushLuaAttr(lua_State *L, IXML_Attr *attr);
-static pLuaNode pushLuaCDATASection(lua_State *L, IXML_CDATASection *cds);
-static void pushLuaNodeList(lua_State *L, IXML_NodeList *list);
-static void pushLuaNodeNamedMap(lua_State *L, IXML_NamedNodeMap *nnmap);
+void clearLuaNode(IXML_Node *node);
+pLuaNode pushLuaNode(lua_State *L, IXML_Node *node);
+pLuaNode pushLuaElement(lua_State *L, IXML_Element *elem);
+pLuaNode pushLuaDocument(lua_State *L, IXML_Document *doc);
+pLuaNode pushLuaAttr(lua_State *L, IXML_Attr *attr);
+pLuaNode pushLuaCDATASection(lua_State *L, IXML_CDATASection *cds);
+void pushLuaNodeList(lua_State *L, IXML_NodeList *list);
+void pushLuaNodeNamedMap(lua_State *L, IXML_NamedNodeMap *nnmap);
 
 /*
 ** ===============================================================
 **  Collecting objects from Lua
 ** ===============================================================
 */
-static IXML_Node* checknode(lua_State *L, int idx);
-static IXML_Element* checkelement(lua_State *L, int idx);
-static IXML_Document* checkdocument(lua_State *L, int idx);
-static IXML_Attr* checkattr(lua_State *L, int idx);
-static IXML_CDATASection* checkcdata(lua_State *L, int idx);
+IXML_Node* checknode(lua_State *L, int idx);
+IXML_Element* checkelement(lua_State *L, int idx);
+IXML_Document* checkdocument(lua_State *L, int idx);
+IXML_Attr* checkattr(lua_State *L, int idx);
+IXML_CDATASection* checkcdata(lua_State *L, int idx);
 
 /*
 ** ===============================================================
@@ -45,7 +45,7 @@ int pushIXMLerror(lua_State *L, int err);
 **  tostring method for the node userdatas
 ** ===============================================================
 */
-static int L_tostring(lua_State *L);
+int L_tostring(lua_State *L);
 
 
 /*
@@ -53,7 +53,7 @@ static int L_tostring(lua_State *L);
 **  Destroying objects from Lua
 ** ===============================================================
 */
-static void FreeCallBack(IXML_Node* node);
-static int L_DestroyNode(lua_State *L);
+void FreeCallBack(IXML_Node* node);
+int L_DestroyNode(lua_State *L);
 
 #endif  /* LuaIXMLsupport_h */

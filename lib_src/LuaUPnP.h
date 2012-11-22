@@ -7,6 +7,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include "luaIXML.h"
+#include "darksidesync_aux.h"
 
 // Define platform specific extern statement
 #ifdef WIN32
@@ -78,5 +79,8 @@ typedef struct _cbdelivery {
 	int handle;			// either client or device handle
 } cbdelivery;
 
+
+#include "luaUPnPsupport.h"
+#include "luaUPnPcallback.h"
 
 #endif  /* LuaUPnP_h */

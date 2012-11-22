@@ -1,4 +1,4 @@
-#include "LuaUPnP.h"
+#include "luaUPnPsupport.h"
 
 /*
 ** ===============================================================
@@ -16,7 +16,7 @@
 
 // Pushes the Device as a userdata on the stack
 // returns the userdata, or NULL.
-static pLuaDevice pushLuaDevice(lua_State *L, UpnpDevice_Handle dev)
+pLuaDevice pushLuaDevice(lua_State *L, UpnpDevice_Handle dev)
 {
 	pLuaDevice ld = NULL;
 
@@ -64,7 +64,7 @@ static pLuaDevice pushLuaDevice(lua_State *L, UpnpDevice_Handle dev)
 
 // Pushes the Client as a userdata on the stack
 // returns the userdata, or NULL.
-static pLuaClient pushLuaClient(lua_State *L, UpnpClient_Handle client)
+pLuaClient pushLuaClient(lua_State *L, UpnpClient_Handle client)
 {
 	pLuaClient lc = NULL;
 
@@ -120,7 +120,7 @@ static pLuaClient pushLuaClient(lua_State *L, UpnpClient_Handle client)
 // Get the requested index from the stack and verify it being a proper Device
 // throws an error if it fails.
 // HARD ERROR
-static UpnpDevice_Handle checkdevice(lua_State *L, int idx)
+UpnpDevice_Handle checkdevice(lua_State *L, int idx)
 {
 	pLuaDevice dev;
 	luaL_checkudata(L, idx, LPNP_DEVICE_MT);
@@ -132,7 +132,7 @@ static UpnpDevice_Handle checkdevice(lua_State *L, int idx)
 // Get the requested index from the stack and verify it being a proper Device
 // returns -1 if it is not a valid device (either no device, or already NULL)
 // SOFT ERROR
-static UpnpDevice_Handle getdevice(lua_State *L, int idx)
+UpnpDevice_Handle getdevice(lua_State *L, int idx)
 {
 	// TODO: implement properly, as soft error!!
 	return checkdevice(L, idx);
@@ -141,7 +141,7 @@ static UpnpDevice_Handle getdevice(lua_State *L, int idx)
 // Get the requested index from the stack and verify it being a proper Client
 // throws an error if it fails.
 // HARD ERROR
-static UpnpClient_Handle checkclient(lua_State *L, int idx)
+UpnpClient_Handle checkclient(lua_State *L, int idx)
 {
 	pLuaClient client;
 	luaL_checkudata(L, idx, LPNP_CLIENT_MT);
@@ -153,13 +153,13 @@ static UpnpClient_Handle checkclient(lua_State *L, int idx)
 // Get the requested index from the stack and verify it being a proper Client
 // returns -1 if it is not a valid client (either no client, or already NULL)
 // SOFT ERROR
-static UpnpClient_Handle getclient(lua_State *L, int idx)
+UpnpClient_Handle getclient(lua_State *L, int idx)
 {
 	return checkclient(L, idx);
 }
 
 // Get the Upnp_DescType from Lua
-static Upnp_DescType checkUpnp_DescType(lua_State *L, int idx)
+Upnp_DescType checkUpnp_DescType(lua_State *L, int idx)
 {
 // TODO: replace this code with the OPTION CHECKs lua provides
 	const char* etype = NULL;
@@ -258,7 +258,7 @@ int L_clienttostring(lua_State *L)
 */
 
 // GC method for device object
-static int L_DestroyDevice(lua_State *L)
+int L_DestroyDevice(lua_State *L)
 {
 	pLuaDevice dev = (pLuaDevice)lua_touserdata(L, 1);
 	if (UPnPStarted)	UpnpUnRegisterRootDevice(dev->device);
@@ -266,7 +266,7 @@ static int L_DestroyDevice(lua_State *L)
 }
 
 // GC method for client object
-static int L_DestroyClient(lua_State *L)
+int L_DestroyClient(lua_State *L)
 {
 	pLuaClient client = (pLuaClient)lua_touserdata(L, 1);
 	if (UPnPStarted)	UpnpUnRegisterClient(client->client);

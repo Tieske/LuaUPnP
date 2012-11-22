@@ -1,4 +1,4 @@
-#include "LuaUPnP.h"
+#include "luaUPnP.h"
 
 /*
 ** ===============================================================
@@ -9,20 +9,10 @@
 
 /*
 ** ===============================================================
-**  Core code files
-** ===============================================================
-*/
-
-//#include "LuaIXML.c"
-#include "UPnPsupport.c"
-
-/*
-** ===============================================================
 **  UPnP API: Callbacks
 ** ===============================================================
 */
 #include "darksidesync_aux.c"
-#include "UPnPcallback.c"
 
 static int LuaCallback(Upnp_EventType EventType, const void *Event, void *Cookie)
 {

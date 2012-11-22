@@ -1,8 +1,4 @@
-#include "LuaUPnP.h"
-#include "upnp.h"
-#include "upnpdebug.h"
-//#include "lauxlib.h"
-#include "string.h"
+#include "luaUPnPcallback.h"
 
 /*
 ** ===============================================================
