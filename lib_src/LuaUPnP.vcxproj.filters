@@ -21,15 +21,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="LuaUPnP.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UPnPsupport.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UPnPcallback.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\dss\darksidesync_aux.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -46,6 +37,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="luaIXMLdocument.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaUPnP.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaUPnPcallback.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaUPnPsupport.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

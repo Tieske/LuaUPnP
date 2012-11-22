@@ -102,15 +102,11 @@
     <ClCompile Include="luaIXMLdocument.c" />
     <ClCompile Include="luaIXMLelement.c" />
     <ClCompile Include="luaIXML.c" />
-    <ClCompile Include="LuaUPnP.c" />
+    <ClCompile Include="luaUPnP.c" />
     <ClCompile Include="luaIXMLnode.c" />
     <ClCompile Include="luaIXMLsupport.c" />
-    <ClCompile Include="UPnPcallback.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="UPnPsupport.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="luaUPnPcallback.c" />
+    <ClCompile Include="luaUPnPsupport.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dss\darksidesync_api.h" />
