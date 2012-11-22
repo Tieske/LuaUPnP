@@ -5,6 +5,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include "luaIXMLdefinitions.h"
+#include "luaIXMLsupport.h"
 
 /*
 ** ===============================================================

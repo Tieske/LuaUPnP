@@ -12,7 +12,6 @@
 **  UPnP API: Callbacks
 ** ===============================================================
 */
-#include "darksidesync_aux.c"
 
 static int LuaCallback(Upnp_EventType EventType, const void *Event, void *Cookie)
 {

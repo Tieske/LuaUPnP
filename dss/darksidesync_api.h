@@ -1,4 +1,3 @@
-
 #ifndef darksidesync_api_h
 #define darksidesync_api_h
 

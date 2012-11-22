@@ -85,7 +85,7 @@ static int decodeUpnpDiscovery(lua_State *L, void* pData, void* pUtilData, void*
 	return result;
 }
 
-static int deliverUpnpDiscovery(Upnp_EventType EventType, const UpnpDiscovery *dEvent, void* cookie)
+int deliverUpnpDiscovery(Upnp_EventType EventType, const UpnpDiscovery *dEvent, void* cookie)
 {
 	int err = DSS_SUCCESS;
 	cbdelivery* mydata = (cbdelivery*)malloc(sizeof(cbdelivery));
@@ -159,7 +159,7 @@ static int decodeUpnpActionComplete(lua_State *L, void* pData, void* pUtilData, 
 	return result;
 }
 
-static int deliverUpnpActionComplete(Upnp_EventType EventType, const UpnpActionComplete *acEvent, void* cookie)
+int deliverUpnpActionComplete(Upnp_EventType EventType, const UpnpActionComplete *acEvent, void* cookie)
 {
 	int err = DSS_SUCCESS;
 	cbdelivery* mydata = (cbdelivery*)malloc(sizeof(cbdelivery));
@@ -244,7 +244,7 @@ static int decodeUpnpStateVarComplete(lua_State *L, void* pData, void* pUtilData
 	return result;
 }
 
-static int deliverUpnpStateVarComplete(Upnp_EventType EventType, const UpnpStateVarComplete *svcEvent, void* cookie)
+int deliverUpnpStateVarComplete(Upnp_EventType EventType, const UpnpStateVarComplete *svcEvent, void* cookie)
 {
 	int err = DSS_SUCCESS;
 	cbdelivery* mydata = (cbdelivery*)malloc(sizeof(cbdelivery));
@@ -307,7 +307,7 @@ static int decodeUpnpEvent(lua_State *L, void* pData, void* pUtilData, void* uti
 	return result;
 }
 
-static int deliverUpnpEvent(Upnp_EventType EventType, const UpnpEvent *eEvent, void* cookie)
+int deliverUpnpEvent(Upnp_EventType EventType, const UpnpEvent *eEvent, void* cookie)
 {
 	int err = DSS_SUCCESS;
 	cbdelivery* mydata = (cbdelivery*)malloc(sizeof(cbdelivery));
@@ -388,7 +388,7 @@ static int decodeUpnpEventSubscribe(lua_State *L, void* pData, void* pUtilData, 
 	return result;
 }
 
-static int deliverUpnpEventSubscribe(Upnp_EventType EventType, const UpnpEventSubscribe *esEvent, void* cookie)
+int deliverUpnpEventSubscribe(Upnp_EventType EventType, const UpnpEventSubscribe *esEvent, void* cookie)
 {
 	int err = DSS_SUCCESS;
 	cbdelivery* mydata = (cbdelivery*)malloc(sizeof(cbdelivery));
@@ -528,7 +528,7 @@ static int returnUpnpSubscriptionRequest(lua_State *L, void* pData, void* pUtilD
 	}
 }
 
-static int deliverUpnpSubscriptionRequest(Upnp_EventType EventType, const UpnpSubscriptionRequest *srEvent, void* cookie)
+int deliverUpnpSubscriptionRequest(Upnp_EventType EventType, const UpnpSubscriptionRequest *srEvent, void* cookie)
 {
 	int err = DSS_SUCCESS;
 	cbdelivery* mydata = (cbdelivery*)malloc(sizeof(cbdelivery));
@@ -571,7 +571,7 @@ static int deliverUpnpSubscriptionRequest(Upnp_EventType EventType, const UpnpSu
 // =================== StateVar request events ==========================
 
 // Method is optional and has been deprecated.
-static int deliverUpnpStateVarRequest(Upnp_EventType EventType, const UpnpStateVarRequest *svrEvent, void* cookie)
+int deliverUpnpStateVarRequest(Upnp_EventType EventType, const UpnpStateVarRequest *svrEvent, void* cookie)
 {
 	// set response for not-implemented as per UPnP architecture 1.0, section 3.3.2 Control: Query: Response
 	UpnpStateVarRequest_set_ErrCode((UpnpStateVarRequest *)svrEvent, 401);
@@ -793,7 +793,7 @@ static int returnUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 	}
 }
 
-static int deliverUpnpActionRequest(Upnp_EventType EventType, const UpnpActionRequest *arEvent, void* cookie)
+int deliverUpnpActionRequest(Upnp_EventType EventType, const UpnpActionRequest *arEvent, void* cookie)
 {
 	int err = DSS_SUCCESS;
 	cbdelivery* mydata = (cbdelivery*)malloc(sizeof(cbdelivery));

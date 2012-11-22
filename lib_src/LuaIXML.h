@@ -1,7 +1,38 @@
 #ifndef LuaIXML_h
 #define LuaIXML_h
 
+#include <lua.h>
+//#include <lauxlib.h>
 #include "luaIXMLdefinitions.h"
+#include "luaIXMLsupport.h"
+#include "luaIXMLelement.h"
+#include "luaIXMLnode.h"
+#include "luaIXMLdocument.h"
+
+// forward declaration
+//int L_getNodeType(lua_State *L);
+
+/*
+** ===============================================================
+** IXML API
+** ===============================================================
+*/
+int L_PrintDocument(lua_State *L);
+int L_PrintNode(lua_State *L);
+int L_DocumenttoString(lua_State *L);
+int L_NodetoString(lua_State *L);
+int L_RelaxParser(lua_State *L);
+int L_ParseBufferEx(lua_State *L);
+int L_LoadDocumentEx(lua_State *L);
+/*
+** ===============================================================
+**  API doubles
+** ===============================================================
+*/
+int L_getElementsByTagName(lua_State *L);		// Document and Element
+int L_getElementsByTagNameNS(lua_State *L);		// Document and Element
+int L_item(lua_State *L);						// NamedNodeMap and NodeList
+
 
 /*
 ** ===============================================================
