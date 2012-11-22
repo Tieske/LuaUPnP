@@ -15,7 +15,7 @@
 */
 
 // Removes the Lua side reference to an IXML node
-static void clearLuaNode(IXML_Node *node)
+void clearLuaNode(IXML_Node *node)
 {
 	pLuaNode ln = NULL;
 
@@ -33,7 +33,7 @@ static void clearLuaNode(IXML_Node *node)
 
 // Pushes the node as a userdata on the stack, or nil if the node is NULL
 // returns the userdata, or NULL.
-static pLuaNode pushLuaNode(lua_State *L, IXML_Node *node)
+pLuaNode pushLuaNode(lua_State *L, IXML_Node *node)
 {
 	pLuaNode ln = NULL;
 
@@ -84,25 +84,25 @@ static pLuaNode pushLuaNode(lua_State *L, IXML_Node *node)
 	lua_remove(L,-2);	// pop the ref table, only the userdata or a nil is left now.
 	return ln;
 }
-static pLuaNode pushLuaElement(lua_State *L, IXML_Element *elem)
+pLuaNode pushLuaElement(lua_State *L, IXML_Element *elem)
 {
 	return pushLuaNode(L, (IXML_Node*)elem);
 }
-static pLuaNode pushLuaDocument(lua_State *L, IXML_Document *doc)
+pLuaNode pushLuaDocument(lua_State *L, IXML_Document *doc)
 {
 	return pushLuaNode(L, (IXML_Node*)doc);
 }
-static pLuaNode pushLuaAttr(lua_State *L, IXML_Attr *attr)
+pLuaNode pushLuaAttr(lua_State *L, IXML_Attr *attr)
 {
 	return pushLuaNode(L, (IXML_Node*)attr);
 }
-static pLuaNode pushLuaCDATASection(lua_State *L, IXML_CDATASection *cds)
+pLuaNode pushLuaCDATASection(lua_State *L, IXML_CDATASection *cds)
 {
 	return pushLuaNode(L, (IXML_Node*)cds);
 }
 // Pushes the nodelist as a table on the stack (array)
 // or nil, if the list is empty.
-static void pushLuaNodeList(lua_State *L, IXML_NodeList *list)
+void pushLuaNodeList(lua_State *L, IXML_NodeList *list)
 {
 	unsigned long l = 0;	// length of list
 	unsigned long c;		// counter
@@ -129,7 +129,7 @@ static void pushLuaNodeList(lua_State *L, IXML_NodeList *list)
 
 // Pushes the namednodemap as a table ???? on the stack (array)
 // or nil, of the list is empty.
-static void pushLuaNodeNamedMap(lua_State *L, IXML_NamedNodeMap *nnmap)
+void pushLuaNodeNamedMap(lua_State *L, IXML_NamedNodeMap *nnmap)
 {
 	unsigned long l = 0;	// length of list
 	unsigned long c = 1;		// counter
@@ -164,7 +164,7 @@ static void pushLuaNodeNamedMap(lua_State *L, IXML_NamedNodeMap *nnmap)
 // Get the requested index from the stack and verify it being a proper Node
 // throws an error if it fails.
 // HARD ERROR
-static IXML_Node* checknode(lua_State *L, int idx)
+IXML_Node* checknode(lua_State *L, int idx)
 {
 	pLuaNode node;
 	luaL_checkudata(L, idx, LPNP_NODE_MT);
@@ -176,7 +176,7 @@ static IXML_Node* checknode(lua_State *L, int idx)
 // Get the requested index from the stack and verify it being a proper Element
 // throws an error if it fails.
 // HARD ERROR
-static IXML_Element* checkelement(lua_State *L, int idx)
+IXML_Element* checkelement(lua_State *L, int idx)
 {
 	Nodeptr node = checknode(L, idx);
 	if (ixmlNode_getNodeType(node) != eELEMENT_NODE) luaL_error(L, "Wrong node type; expected Element");
@@ -185,7 +185,7 @@ static IXML_Element* checkelement(lua_State *L, int idx)
 // Get the requested index from the stack and verify it being a proper Document
 // throws an error if it fails.
 // HARD ERROR
-static IXML_Document* checkdocument(lua_State *L, int idx)
+IXML_Document* checkdocument(lua_State *L, int idx)
 {
 	Nodeptr doc = checknode(L, idx);
 	if (ixmlNode_getNodeType(doc) != eDOCUMENT_NODE) luaL_error(L, "Wrong node type; expected Document");
@@ -194,7 +194,7 @@ static IXML_Document* checkdocument(lua_State *L, int idx)
 // Get the requested index from the stack and verify it being a proper Attribute
 // throws an error if it fails.
 // HARD ERROR
-static IXML_Attr* checkattr(lua_State *L, int idx)
+IXML_Attr* checkattr(lua_State *L, int idx)
 {
 	Nodeptr attr = checknode(L, idx);
 	if (ixmlNode_getNodeType(attr) != eATTRIBUTE_NODE) luaL_error(L, "Wrong node type; expected Attribute");
@@ -203,7 +203,7 @@ static IXML_Attr* checkattr(lua_State *L, int idx)
 // Get the requested index from the stack and verify it being a proper CDATASection
 // throws an error if it fails.
 // HARD ERROR
-static IXML_CDATASection* checkcdata(lua_State *L, int idx)
+IXML_CDATASection* checkcdata(lua_State *L, int idx)
 {
 	Nodeptr cdata = checknode(L, idx);
 	if (ixmlNode_getNodeType(cdata) != eCDATA_SECTION_NODE) luaL_error(L, "Wrong node type; expected CDATASection");
@@ -314,7 +314,7 @@ int pushIXMLerror(lua_State *L, int err)
 ** ===============================================================
 */
 
-static int L_tostring(lua_State *L)
+int L_tostring(lua_State *L)
 {
     char buf[32];
 	L_getNodeType(L);			// pushes string with node type
@@ -330,7 +330,7 @@ static int L_tostring(lua_State *L)
 */
 
 // Will be called for each Node freed from IXML side
-static void FreeCallBack(IXML_Node* node)
+void FreeCallBack(IXML_Node* node)
 {
 	pLuaNode ln;
 	if (node != NULL)
@@ -346,7 +346,7 @@ static void FreeCallBack(IXML_Node* node)
 }
 
 // GC method for object
-static int L_DestroyNode(lua_State *L)
+int L_DestroyNode(lua_State *L)
 {
 	pLuaNode node = (pLuaNode)lua_touserdata(L, 1);
 	if (node->node != NULL)
