@@ -122,9 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="install.bat" />
-    <None Include="IXMLtest.lua">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </None>
+    <None Include="IXMLtest.lua" />
     <None Include="TestDevice\NetworkLight.lua" />
     <None Include="TestDevice\testcode.lua" />
     <None Include="TestDevice\web\DimmableLight_dcp.xml">

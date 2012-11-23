@@ -52,7 +52,7 @@ struct _EventTypes {
 	/*! Error description. */
 	const char *etTypeDesc;
 };
-struct _EventTypes EventTypes[] = {
+static struct _EventTypes EventTypes[] = {
 	{UPNP_CONTROL_ACTION_REQUEST, "UPNP_CONTROL_ACTION_REQUEST"},
 	{UPNP_CONTROL_ACTION_COMPLETE, "UPNP_CONTROL_ACTION_COMPLETE"},
 	{UPNP_CONTROL_GET_VAR_REQUEST, "UPNP_CONTROL_GET_VAR_REQUEST"},

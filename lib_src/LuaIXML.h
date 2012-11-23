@@ -39,7 +39,7 @@ int L_item(lua_State *L);						// NamedNodeMap and NodeList
 ** Library initialization
 ** ===============================================================
 */
-const struct luaL_Reg IXMLfunctions[] = {
+static const struct luaL_Reg IXMLfunctions[] = {
 	// IXML API
 	{"PrintDocument",L_PrintDocument},
 	{"PrintNode",L_PrintNode},
@@ -125,7 +125,7 @@ const struct luaL_Reg IXMLfunctions[] = {
 };
 
 // Methods for the nodes
-const struct luaL_Reg LPNP_Node_Methods[] = {
+static const struct luaL_Reg LPNP_Node_Methods[] = {
 	// Node API
 	{"getNodeName",L_getNodeName},
 	{"getNodeValue",L_getNodeValue},
