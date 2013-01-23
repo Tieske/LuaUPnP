@@ -44,7 +44,7 @@ typedef struct LuaClientRecord {
 } LuaClient;
 
 // tracker for library being started or not
-static int UPnPStarted;
+extern volatile int UPnPStarted;
 
 struct _EventTypes {
 	/*! Error code. */
@@ -75,7 +75,7 @@ typedef struct _cbdelivery {
 	Upnp_EventType EventType;
 	void* Event;
 	void* Cookie;
-	void* Extra;	// just an extra pointer
+	void* Extra;		// just an extra pointer
 	int handle;			// either client or device handle
 } cbdelivery;
 

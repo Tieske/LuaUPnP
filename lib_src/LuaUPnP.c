@@ -1,5 +1,6 @@
 #include "luaUPnP.h"
 
+volatile int UPnPStarted;
 /*
 ** ===============================================================
 **  Forward declarations
