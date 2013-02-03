@@ -106,8 +106,8 @@ xmlfactory.rootxml = function(rootdev)
     local name
     for _, filename in ipairs(servicelist or {}) do
       if servicelist[filename] == xml then
-        -- this is the same xml
-        name = filename
+        -- this is the same xml, grab filename only, drop path
+        name = filename:match("/(.+%.xml)$")
       end
     end
     if not name then

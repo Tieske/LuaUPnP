@@ -5,11 +5,12 @@
 -- @name upnp.drivers.xplrfx
 
 local driver = {}
-driver._COPYRIGHT   = "Copyright (C) 2012 Thijs Schreijer"
-driver._DESCRIPTION = "UPnP gateway driver for RFXCOM (see www.rfxcom.com) device xPL RFXLAN"
-driver.version = "0.1"
-driver._VERSION     = "xplrfx " .. driver.version
-driver.configfilename = "xplrfx"
+driver.version        = "0.1"
+driver.name           = "xplrfx"
+driver._COPYRIGHT     = "Copyright (C) 2012 Thijs Schreijer"
+driver._DESCRIPTION   = "UPnP gateway driver for RFXCOM (see www.rfxcom.com) device xPL RFXLAN"
+driver._VERSION       = driver.name .. " " .. driver.version
+driver.configfilename = driver.name
 
 local configfilecore = [=[
 

@@ -20,6 +20,10 @@
 -- @copyright 2012 <a href="http://www.thijsschreijer.nl">Thijs Schreijer</a>, <a href="http://github.com/Tieske/LuaUPnP">LuaUPnP</a> is licensed under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>
 -- @release Version 0.x, LuaUPnP.
 
+local myVersion = "0.1"
+local myName = "LuaUPnP"
+local myDescription = "Lua enabled UPnP engine, copyright 2013 Thijs Schreijer, http://www.thijsschreijer.nl"
+
 -----------------------------------------------------------------------
 -- List of members and namespaces within LuaUPnP.
 -- @name upnp members and namespaces
@@ -69,8 +73,11 @@ logger:debug("Loading UPnP core")
 local lib = require("upnp.core")            -- load UPnP core module (C code)
 
 -- create a global table
-logger:debug("Setting up globals and classes")
 upnp = {}   -- create a global table
+upnp._VERSION = myName .. " " .. myVersion
+upnp._DESCRIPTION = myDescription
+logger:info(upnp._VERSION .. "; " .. upnp._DESCRIPTION)
+logger:debug("Setting up globals and classes")
 upnp.logger = logger
 upnp.classes               = upnp.classes or {}
 --upnp.classes.base          = require("upnp.classes.base")
@@ -82,7 +89,7 @@ upnp.classes.action        = require("upnp.classes.action")
 upnp.classes.argument      = require("upnp.classes.argument")
 upnp.devices = {}          -- global list of UPnP devices, by their UDN
 upnp.lib = lib             -- export the core UPnP lib
-upnp.configroot = "."     -- base directory for configuration information
+upnp.configroot = "./"     -- base directory for configuration information
 
 -- webserver setup
 logger:debug("Configuring webserver")

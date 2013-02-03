@@ -12,7 +12,7 @@ local xmlfactory = require("upnp.xmlfactory")
 local logger = upnp.logger
 local devicefactory = {}
 
--- list of elements NOT to copy when building a service
+--[[ list of elements NOT to copy when building a service
 local servicedonotcopy = { 
   SCPDURL = 1, 
   controlURL = 1,
@@ -39,7 +39,7 @@ local devicedonotcopy = {
   deviceList = 1,
   serviceList = 1,
   presentationURL = 1,
-}
+}  --]]
 
 -- Checks a type, or creates one from the elements. Either the separate elements are given, or the 
 -- first argument can be the full string.
@@ -51,7 +51,7 @@ local devicedonotcopy = {
 local typecheck = function(domain, elementtype, typename, version)
   if not typename or not version then
     -- must split domain parameter
-    local et, sdom
+    local _, et, sdom
     _, _, sdom, et, typename, version = domain:find("^urn%:(.-)%:(.-)%:(.-)%:(.-)$")
     if et ~= elementtype then
       local err = string.format("typecheck failed; '%s' is of type '%s', expected type '%s'", tostring(domain), tostring(et), tostring(elementtype))
@@ -66,12 +66,12 @@ end
 
 -- @param elemtype is either "device" or "service"
 local creategeneric = function(domain, elemtype, typename, version)
-  fulltype = typecheck(domain, elemtype, typename, version)
+  local fulltype = typecheck(domain, elemtype, typename, version)
   if not fulltype then return nil, string.format("cannot create %s, typecheck failed", tostring(elemtype)) end
   
   local success, creator = pcall(require, "upnp."..elemtype.."s."..fulltype:gsub("%:","_"):gsub("%.","_"))
   if not success then
-    return nil, string.format("cannot create '%s', no module found for it or error loading. ErrMsg: %s", tostring(devtype), tostring(creator))
+    return nil, string.format("cannot create '%s', no module found for it or error loading. ErrMsg: %s", tostring(elemtype), tostring(creator))
   end
   
   return creator()
@@ -319,10 +319,10 @@ devicefactory.customizedevice = function(device, customtable)
 end
 
 --------------------------------------------------------------------------------------
--- Creates a standard device, customizes it, generates xml's, parses them and returns the UPnP device object.
+-- Creates a (standard) device, customizes it, generates xml's, parses them and returns the UPnP device object.
 -- This method takes a number of steps to create a fully functional device;</p>
 -- <ol>
--- <li>Creates a device table for a standard device (<code>devicefactory.createdevice()</code>)</li>
+-- <li>Creates a device table for a standard device (<code>devicefactory.createdevice()</code>) or takes a device table</li>
 -- <li>Drops optionals as set in the <code>customtable</code> parameter (<code>devicefactory.customizedevice()</code>)
 -- and adds the implementations of device/variable/action methods from the <code>customtable</code> to the device table</li>
 -- <li>Creates the XML's for the device and its services (<code>xmlfactory.rootxml()</code>)</li>
@@ -335,33 +335,44 @@ end
 -- @see xmlfactory.rootxml
 -- @see xmlfactory.writetoweb
 -- @see upnp.classes.device:parsefromxml
--- @param domain domainname of the type to create, alternatively, the full <code>deviceType</code> contents. In the latter case the <code>devicetype</code> and <code>version</code> arguments can be omitted.
+-- @param domain domainname of the type to create, alternatively, the full <code>deviceType</code> contents or a device table. In the latter 2 cases the <code>devicetype</code> and <code>version</code> arguments can be omitted.
 -- @param devicetype [optional] name of the type to create, or nil if the domain contains the full type identifier
 -- @param version [optional] version number of the type to create, or nil if the domain contains the full type identifier
 -- @param customtable [optional] table with customizations (see <code>devicefactory.customizedevice()</code>)
 -- @return device a <code>upnp.classes.device</code> object representing the device, or <code>nil + errormsg</code>
--- @example# -- two ways to create the same device, both without customization/implementation
+-- @example# -- three ways to create the same device, all without customization/implementation
 -- devicefactory.builddevice("schemas.upnp.org", "BinaryLight", "1", {} )
 --   -- or full schema and no customtable
 -- devicefactory.builddevice("urn:schemas-upnp-org:device:BinaryLight:1")
+--   -- or a device table and empty customtable
+-- local d = require("upnp.devices.urn_schemas-upnp-org_device_Basic_1")()
+-- devicefactory.builddevice(d, {})
 devicefactory.builddevice = function(domain, devicetype, version, customtable)
   local devtable, xmllist, device, err, err2, success, devicepath
   
-  if type(devicetype) ~= "string" and customtable == nil then
+  if type(domain) ==  "table" then
+    -- no type provided, but already a device table
+    customtable = devicetype
+    devicetype = nil
+    devtable = domain
+    domain = nil
+  elseif type(devicetype) ~= "string" and customtable == nil then
     -- the optionals not provided, reshuffle arguments
     customtable = devicetype
     devicetype = nil
   end
   customtable = customtable or {}
   
-  -- create device table for the standardized device
-  logger:info("devicefactory.builddevice; creating device table %s, %s, %s", tostring(domain), tostring(devicetype or ""), tostring(version or ""))
-  success, devtable, err = pcall(devicefactory.createdevice, domain, servicetype, version)
-  if not success then return nil, devtable end -- pcall; devtable holds error
-  if devtable == nil then return nil, err end -- contained error (nil + errmsg)
+  if not devtable then
+    -- create device table for the standardized device
+    logger:info("devicefactory.builddevice; creating device table %s, %s, %s", tostring(domain), tostring(devicetype or ""), tostring(version or ""))
+    success, devtable, err = pcall(devicefactory.createdevice, domain, devicetype, version)
+    if not success then return nil, devtable end -- pcall; devtable holds error
+    if devtable == nil then return nil, err end -- contained error (nil + errmsg)
+  end
   
   -- customize the standard device
-  logger:debug("devicefactory.builddevice; device table created, now start customizing")
+  logger:debug("devicefactory.builddevice; device table ready, now start customizing")
   success, devtable, err = pcall(devicefactory.customizedevice, devtable, customtable)
   if not success then return nil, devtable end -- pcall; devtable holds error
   if devtable == nil then return nil, err end -- contained error (nil + errmsg)
