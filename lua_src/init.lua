@@ -62,7 +62,7 @@ function print(...)
     logger:info(result)
 end
 
-
+local lfs = require('lfs')
 logger:debug("Loading Copas Timer")
 local copas = require('copas.timer')        -- load Copas socket scheduler
 logger:debug("Loading Copas Eventer")
@@ -389,24 +389,48 @@ function upnp.stopdevice(hdl)
 end
 
 -----------------------------------------------------------------------------------------
+-- Takes a config filename and returns the path to the file to open. An automatic extension
+-- <code>'.config'</code> will be appended.
+-- @param configname filename of configfile (only the filename part of a path will be used)
+-- @return path to config file, being <code>upnp.configroot</code> combined with the config filename
+-- @see upnp.configroot #upnp members and namespaces
+local function getconfigfilename(configname)
+	configname = configname:gsub("%.config$","")
+	configname = "x/"..configname:gsub("\\","/")
+	configname = configname:match(".+%/(.-)$")
+  
+  local path = upnp.configroot:gsub("\\","/")
+  if #path>0 and path:sub(-1,-1) ~= "/" then
+    path = path .. "/"
+  end
+  return path .. configname .. ".config"
+end
+
+-----------------------------------------------------------------------------------------
+-- Does a configfile exist. 
+-- @param configname configuration filename to check.
+-- @return boolean
+-- @see upnp.configroot #upnp members and namespaces
+-- @see upnp.readconfigfile
+-- @see upnp.writeconfigfile
+function upnp.existsconfigfile(configname)
+  configname = getconfigfilename(configname)
+  return lfs.attributes(configname,'mode') == 'file'
+end
+
+-----------------------------------------------------------------------------------------
 -- Read a configfile. The configfile must be a lua table format, starting with '<code>
 -- return {</code>' and ending with '<code>}</code>'.
 -- @param configname configuration filename to load. This should only be a filename
 -- (no path), and it will be sought for in the <code>upnp.configroot</code> directory.
 -- @return table with configuration loaded, or <code>nil + error</code> if it failed
 -- @see upnp.configroot #upnp members and namespaces
-function readconfigfile(configname)
-  local path = upnp.configroot:gsub("\\","/")
-  if #path>0 and path:sub(-1,-1) ~= "/" then
-    path = path .. "/"
-  end
-  while configname:sub(1,1) == "/" do
-    configname = configname:sub(2, -1)
-  end
-  path = path .. configname
-
-  logger:debug("upnp.readconfigfile, reading from: " .. path)
-  local success, result = pcall(dofile, path)
+-- @see upnp.existsconfigfile
+-- @see upnp.writeconfigfile
+function upnp.readconfigfile(configname)
+  configname = getconfigfilename(configname)
+  logger:debug("upnp.readconfigfile, reading from: " .. configname)
+  local success, result = pcall(dofile, configname)
   if not success then
     logger:error("upnp.readconfigfile: " .. tostring(result))
     return nil, result  -- return error
@@ -422,24 +446,26 @@ end
 -- @param content the content to write, must be valid Lua code returning a table.
 -- @return 1 on success, <code>nil + errormsg</code> upon failure
 -- @see upnp.configroot #upnp members and namespaces
-function writeconfigfile(configname, content)
-  local path = upnp.configroot:gsub("\\","/")
-  if #path>0 and path:sub(-1,-1) ~= "/" then
-    path = path .. "/"
-  end
-  while configname:sub(1,1) == "/" do
-    configname = configname:sub(2, -1)
-  end
-  path = path .. configname
-
-  logger:debug("upnp.writeconfigfile, writing to: " .. path)
-  local file, err = io.open(path, "w")
+-- @see upnp.readconfigfile
+-- @see upnp.existsconfigfile
+function upnp.writeconfigfile(configname, content)
+  configname = getconfigfilename(configname)
+  logger:debug("upnp.writeconfigfile, writing to: " .. configname)
+  local file, err = io.open(configname, "w")
   if not file then
-    logger:error("upnp.readconfigfile: " .. tostring(err))
+    logger:error("upnp.writeconfigfile: Error opening file for writing: " .. tostring(err))
     return nil, err  -- return error
   end
-  file:write(content)
-  file:close()
+  local result
+  result, err = file:write(content)
+  if not result then
+    file:close()
+    logger:error("upnp.writeconfigfile: Error writing to file: " .. tostring(err))
+  end
+  result, err = file:close()
+  if not result then
+    logger:error("upnp.writeconfigfile: Error closing file: " .. tostring(err))
+  end
   return 1
 end
 -----------------------------------------------------------------------------------------

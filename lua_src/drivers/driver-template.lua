@@ -5,7 +5,7 @@ upnp.devicefactory = require("upnp.devicefactory")
 local logger = upnp.logger
 
 local driver = {
-  _NAME = ({...})[1],  -- the module name provide to 'require()'
+  _NAME = ({...})[1],  -- the module name provided to 'require()'
   _VERSION = "0.1",
   _DESCRIPTION = "Template driver code file",
 }

@@ -3,6 +3,7 @@ package.path = "./lua/?.lua;./lua/?/init.lua;./lua/?/?.lua;" .. package.path
 
 local cli = require 'cliargs'
 local print = print -- make local becasue UPnP redefines its
+local configfile = "LuaUPnP"  -- filename for configuration
 
 cli:set_name("LuaUPnP")
 cli:add_flag("--version", "prints the program's version and exits")
@@ -42,9 +43,32 @@ if args then
   upnp.configroot = args.configpath
   upnp.webroot = args.webroot
 
+  -- Load configuration
+  local config
+  if not upnp.existsconfigfile(configfile) then
+    -- no configfile yet, so set defaults
+    config = [[
+      -- LuaUPnP configuration file
+      return {
+        friendlyName = "%s",
+        UDN = "%s",
+      }
+    ]]
+    config = string.format(config,"LuaUPnP gateway", upnp.lib.util.CreateUUID())
+    upnp.writeconfigfile(configfile, config)
+  end
+  
+  config = upnp.readconfigfile(configfile)
+  if not config then
+    -- something is wrong, exit
+    logger:fatal("Failed loading '%s' configfile", configfile)
+    os.exit()
+  end
+  
   -- create device
   local device = require("upnp.devices.urn_schemas-upnp-org_device_Basic_1")()
-  device.friendlyName = "LuaUPnP gateway"
+  device.UDN = config.UDN
+  device.friendlyName = config.friendlyName
 	device.manufacturer = "Thijs Schreijer"
   device.manufacturerURL = "http://www.thijsschreijer.nl"
   device.modelDescription = "A generic gateway device powered by the Lua scripting language, easily customized to add your own devices"
@@ -89,7 +113,12 @@ if args then
   
   -- build the device and xmls from the device table
   upnp.devicefactory = require("upnp.devicefactory")
-  local upnpdevice = upnp.devicefactory.builddevice(device)
+  local upnpdevice, e = upnp.devicefactory.builddevice(device)
+  if not upnpdevice then
+    logger:fatal("Failed to build device; %s", e)
+    os.exit()
+  end
+  
 
   -- start the engine by starting the copas loop
   require('copas.timer').loop()
