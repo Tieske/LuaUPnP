@@ -12,35 +12,6 @@ local xmlfactory = require("upnp.xmlfactory")
 local logger = upnp.logger
 local devicefactory = {}
 
---[[ list of elements NOT to copy when building a service
-local servicedonotcopy = { 
-  SCPDURL = 1, 
-  controlURL = 1,
-  eventSubURL = 1,
-  serviceId = 1,
-  serviceType = 1,
-  actionList = 1,
-  serviceStateTable = 1,
-}
--- list of elements NOT to copy when building a device
-local devicedonotcopy = {
-  deviceType = 1,
-  friendlyName = 1,
-  manufacturer = 1,
-  manufacturerURL = 1,
-  modelDescription = 1,
-  modelName = 1,
-  modelNumber = 1,
-  modelURL = 1,
-  serialNumber = 1,
-  UDN = 1,
-  UPC = 1,
-  iconList = 1,
-  deviceList = 1,
-  serviceList = 1,
-  presentationURL = 1,
-}  --]]
-
 -- Checks a type, or creates one from the elements. Either the separate elements are given, or the 
 -- first argument can be the full string.
 -- @param domain string, domainname to use; standard = <code>"schemas.upnp.org"</code>. 

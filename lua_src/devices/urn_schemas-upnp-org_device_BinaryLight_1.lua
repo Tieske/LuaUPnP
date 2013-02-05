@@ -29,7 +29,8 @@ local basic = require("upnp.devices.urn_schemas-upnp-org_device_Basic_1")
 -- This method should be used as the handler for the SwitchPower-Target variable.
 -- @param self the statevariable table/object
 -- @param oldval the previous value of the statevariable (will not be used)
-local setpower = function(self, oldval)  -- self = variable object!
+local setpower = function(self, oldval)  -- self = statevariable object!
+  local device = self:getdevice()
   local power = self:getstatevariable("target"):get()
   local devpower = (power == 1)
 
@@ -39,9 +40,9 @@ local setpower = function(self, oldval)  -- self = variable object!
   end
 
   -- set the device (only if changed from last time)
-  if self.lastpower ~= devpower then
-    self:statetodevice(devpower, cb) -- provide cb to allow for coroutine in an IO scheduler
-    self.lastpower = devpower
+  if device.lastpower ~= devpower then
+    device:statetodevice(devpower, cb) -- provide cb to allow for coroutine in an IO scheduler
+    device.lastpower = devpower
   else
     -- didn't change on hardware level, so set values and send events now
     cb()

@@ -7,7 +7,7 @@ local logger = upnp.logger
 local driver = {
   _NAME = ({...})[1],  -- the module name provide to 'require()'
   _VERSION = "0.1",
-  _DESCRIPTION = "Demo driver, providing software only devices",
+  _DESCRIPTION = "Demo2 driver, providing software only devices",
 }
 logger:info("Loading driver '%s' version %s; %s", driver._NAME, driver._VERSION, driver._DESCRIPTION)
 
@@ -47,25 +47,25 @@ end
 function driver:getdevice()
   -- create a basic device for this demo driver
   local device = require("upnp.devices.urn_schemas-upnp-org_device_Basic_1")()
-  device.friendlyName = "LuaUPnP demo driver"
+  device.friendlyName = "LuaUPnP demo2 driver"
 	device.manufacturer = "Thijs Schreijer"
   device.manufacturerURL = "http://www.thijsschreijer.nl"
-  device.modelDescription = "Demo showing 2 software only devices; BinaryLight and DimmableLight"
-  device.modelName = "LuaUPnP demo driver"
+  device.modelDescription = "Demo2 showing 2 software only devices; BinaryLight and DimmableLight"
+  device.modelName = "LuaUPnP demo2 driver"
   
   -- create the devices from a default implementation
   local binary = upnp.devicefactory.customizedevice(
     -- create a standard device
     upnp.devicefactory.createdevice("urn:schemas-upnp-org:device:BinaryLight:1"),
     -- apply a customization table
-    { friendlyName = "Binary demo device",
+    { friendlyName = "Binary demo2 device",
       customList = {
         statetodevice = printstatus
       }
     })
   local dimmable = upnp.devicefactory.customizedevice(
     upnp.devicefactory.createdevice("urn:schemas-upnp-org:device:DimmableLight:1"), 
-    { friendlyName = "Dimmable demo device",
+    { friendlyName = "Dimmable demo2 device",
       customList = {
         statetodevice = printstatus
       }

@@ -95,6 +95,7 @@ end
 -- @return table with 2 parts; array part is a list of filenames for the xmls (element 1 is the device xml filename), the hash part will hold the actual xml documents, indexed by their filenames.
 xmlfactory.rootxml = function(rootdev)
   local servicelist = {}
+  local idcounter = 0
   local xml
   local rootpath
 
@@ -135,8 +136,9 @@ xmlfactory.rootxml = function(rootdev)
       local sxml = xmlfactory.servicexml(service)
       -- set control URLs to go in device xml
       service.SCPDURL = storeservice(service, sxml)
-      service.controlURL = "upnp/control/" .. service.SCPDURL:gsub("%.xml","")
-      service.eventSubURL = "upnp/event/" .. service.SCPDURL:gsub("%.xml","")
+      idcounter = idcounter + 1   -- makes sure control and event url's are unique rootdevice wide
+      service.controlURL = "upnp/control/" .. string.sub("00000"..idcounter,-5,-1)
+      service.eventSubURL = "upnp/event/" .. string.sub("00000"..idcounter,-5,-1)
     end
   end
 
