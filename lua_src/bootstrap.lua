@@ -9,7 +9,7 @@ cli:set_name("LuaUPnP")
 cli:add_flag("--version", "prints the program's version and exits")
 cli:optarg("DRIVER", "drivers to load and start the UPnP engine with", nil ,5)
 cli:add_option("-w, --webroot=PATH", "path to web root folder, where XML description files will be written", "./web/")
-cli:add_option("-d, --debug=INFOLEVEL", "level of output to log (DEBUG, INFO, WARN, ERROR, FATAL)", "WARN")
+cli:add_option("-d, --debug=INFOLEVEL", "level of output to log (DEBUG, INFO, WARN, ERROR, FATAL)", "INFO")
 cli:add_option("-c, --configpath=PATH", "path to the configuration files, where the drivers will load/store them (NOTE: must end with a path separator character)", "./")
 
 local args = cli:parse_args()
@@ -48,11 +48,11 @@ if args then
   if not upnp.existsconfigfile(configfile) then
     -- no configfile yet, so set defaults
     config = [[
-      -- LuaUPnP configuration file
-      return {
-        friendlyName = "%s",
-        UDN = "%s",
-      }
+-- LuaUPnP configuration file
+return {
+  friendlyName = "%s",
+  UDN = "%s",
+}
     ]]
     config = string.format(config,"LuaUPnP gateway", upnp.lib.util.CreateUUID())
     upnp.writeconfigfile(configfile, config)

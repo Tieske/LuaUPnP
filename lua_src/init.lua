@@ -391,15 +391,16 @@ end
 -----------------------------------------------------------------------------------------
 -- Takes a config filename and returns the path to the file to open. An automatic extension
 -- <code>'.config'</code> will be appended.
--- @param configname filename of configfile (only the filename part of a path will be used)
+-- @param configname filename of configfile (only the filename part of a path will be used, 
+-- path and <code>'.config'</code> extension will stripped from the provided name)
 -- @return path to config file, being <code>upnp.configroot</code> combined with the config filename
 -- @see upnp.configroot #upnp members and namespaces
 local function getconfigfilename(configname)
-	configname = configname:gsub("%.config$","")
-	configname = "x/"..configname:gsub("\\","/")
-	configname = configname:match(".+%/(.-)$")
+	configname = configname:gsub("%.config$","") -- remove .config extension
+	configname = "x/"..configname:gsub("\\","/") -- normalize on forward slashes
+	configname = configname:match(".+%/(.-)$")   -- grab filename part
   
-  local path = upnp.configroot:gsub("\\","/")
+  local path = upnp.configroot:gsub("\\","/")  -- normalize path on forward slashes
   if #path>0 and path:sub(-1,-1) ~= "/" then
     path = path .. "/"
   end
@@ -423,19 +424,28 @@ end
 -- return {</code>' and ending with '<code>}</code>'.
 -- @param configname configuration filename to load. This should only be a filename
 -- (no path), and it will be sought for in the <code>upnp.configroot</code> directory.
--- @return table with configuration loaded, or <code>nil + error</code> if it failed
+-- @param defaults table with defaults to return when the configfile does not exist. 
+-- If not provided, it will be set to an empty table.
+-- @return table with configuration loaded, or <code>defaults</code> if it failed.
+-- The returned table will have the <code>defaults</code> table set as its metatable, so any value
+-- not in the configfile will be returned from the defaults.
+-- @return 2nd return value is an error message in case an error was encountered while loading the
+-- config file. NOTE: the configfile not existing is not considered an error.
 -- @see upnp.configroot #upnp members and namespaces
 -- @see upnp.existsconfigfile
 -- @see upnp.writeconfigfile
-function upnp.readconfigfile(configname)
+function upnp.readconfigfile(configname, defaults)
+  defaults = defaults or {}
   configname = getconfigfilename(configname)
   logger:debug("upnp.readconfigfile, reading from: " .. configname)
   local success, result = pcall(dofile, configname)
   if not success then
-    logger:error("upnp.readconfigfile: " .. tostring(result))
-    return nil, result  -- return error
+    if not upnp.existsconfigfile(configname) then
+      return defaults -- file doesn't exist, so no error needs to be returned
+    end
+    return defaults, result  -- include error info
   end
-  return result
+  return setmetatable(result, defaults)
 end
 
 -----------------------------------------------------------------------------------------
@@ -443,13 +453,18 @@ end
 -- return {</code>' and ending with '<code>}</code>'.
 -- @param configname configuration filename to write to. This should only be a filename only
 -- (no path), and it will be stored in the <code>upnp.configroot</code> directory.
--- @param content the content to write, must be valid Lua code returning a table.
+-- @param content table; the content to write
+-- @param comment string (optional); text block to write at start of config file
 -- @return 1 on success, <code>nil + errormsg</code> upon failure
 -- @see upnp.configroot #upnp members and namespaces
 -- @see upnp.readconfigfile
 -- @see upnp.existsconfigfile
-function upnp.writeconfigfile(configname, content)
+function upnp.writeconfigfile(configname, content, comment)
   configname = getconfigfilename(configname)
+  if comment then
+    comment = "--[[\n" .. tostring(comment) .. "\n--]]\n\n"
+  end
+  content = (comment or "") .. "return " .. require('serpent').block(content)
   logger:debug("upnp.writeconfigfile, writing to: " .. configname)
   local file, err = io.open(configname, "w")
   if not file then
