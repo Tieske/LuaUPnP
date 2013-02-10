@@ -17,7 +17,6 @@ local upnp = require('upnp')
 upnp.devicefactory = require("upnp.devicefactory")
 local logger = upnp.logger
 local xpl = require('xpl')
-local xpldev    -- forward declaration
 
 logger:info("Loading driver '%s' version %s; %s", driver._NAME, driver._VERSION, driver._DESCRIPTION)
 
@@ -30,6 +29,7 @@ local defaultconfig = {
     xpladdress = xpl.createaddress("tieske","luaupnp","RANDOM"),
     usehub = false,
     rfxxpladdress = xpl.createaddress("rfxcom","lan","macaddress"),
+    xplbroadcast = "255.255.255.255",
     list = {},
   }
 
@@ -38,6 +38,7 @@ local configtext = string.format("LuaUPnP driver; '%s' version '%s'\n%s\n",drive
   Set options below;
   ==================
   xpladdress   : the xPL address for the driver (to announce on the xPL network) 
+  xplbroadcast : broadcast address to send xPL messages to
   usehub       : set whether the internal xPL hub should be used (true/false)
                  Do not use it when your system already runs an xPL hub.
   rfxxpladdress: the xPL address of the rfxlan device
@@ -97,88 +98,7 @@ function driver:getdevice()
   device.modelDescription = driver._DESCRIPTION
   device.modelName = driver._NAME .." "..driver._VERSION
   device.UDN = config.UDN
-  
-  local sendcommand = function(self, power, level, callback)
-    -- self == dimmable or binary light device object
-    local binary = (type(level) == "function")
-    if binary then
-      -- binary device: has no 'level' parameter, so shift 'level' value to 'callback'
-      callback = level
-      level = nil
-    end
-    logger:debug("%s; power = %s, level = %s", self.friendlyname, tostring(power), tostring(level))
     
-    -- create xPL message
-    local msg = xpl.classes.xplmessage:new({})
-    msg.type = "xpl-cmnd" 
-    msg.target = config.rfxxpladdress
-    if self.devicedata.protocol == "ac-eu" or self.devicedata.protocol == "ac-uk" then
-      msg.schema = "ac.basic"
-      msg:add("address", self.devicedata.address)
-      msg:add("unit", self.devicedata.unit)
-      msg:add("command","")
-    else
-      msg.schema = "x10.basic"
-      msg:add("device", self.devicedata.address)
-      msg:add("command","")
-      if self.devicedata.protocol ~= "x10" then msg:add("protocol", self.devicedata.protocol) end
-    end
-    
-    if not power then
-      -- power off
-      if self.lastpower then
-        -- currently on, so must switch off
-        msg:setvalue("command", "off")
-print("power off, now")        
-      else
-        -- already off, nothing to do
-        msg = nil
-print("power off, already off")        
-      end
-    else
-      -- power on
-      if binary then
-        if self.lastpower then
-          -- binary light, already on, so nothing to do
-          msg = nil
-print("binary: power on, already on")          
-        else
-          -- binary light, must switch on now
-          msg:setvalue("command", "on")
-print("binary: power on, now")          
-        end
-      else
-        if (self.lastpower == power) and (self.lastlevel == level) then
-          -- dimmable, already right power and level, nothing to do
-print("dimmable: equal, already done", power, level, self.lastpower, self.lastlevel)          
-          msg = nil
-        else
-          -- dimmable, must set new level
-          if msg.schema == "ac.basic" then
-            msg:setvalue("command", "preset")
-          else
-            msg:setvalue("command", "dim")
-          end
-          msg:add("level", level)
-print("dimmable: not equal, set now")          
-        end
-      end
-    end
-    
-    if msg and self.devicedata.protocol == "ac-eu" then msg:add("eu", "true") end
-    
-    -- actually send the message
-    if msg then
-      msg = tostring(msg)
-      xpldev:send(msg)
-      logger:debug("xplrfx driver: send xplmessage:\n%s", msg)
-    else
-      logger:debug("xplrfx driver: nothing send, old values '%s', '%s' require no change for new values '%s', '%s'", tostring(self.lastpower), tostring(self.lastlevel), tostring(power), tostring(level))
-    end
-    
-    return callback() -- make sure to call callback before returning
-  end
-  
   -- generate all devices in the list
   for _,item in pairs(config.list) do
     -- create custom table for this device
@@ -187,7 +107,7 @@ print("dimmable: not equal, set now")
       UDN = item.UDN,
       customList = {
         devicedata = item,
-        statetodevice = sendcommand,
+        statetodevice = function(...) return driver.xpldevice.sendupnpcommand(...) end,
         zeroisoff = (item.protocol ~= "ac-eu" and item.protocol ~= "ac-uk")
       }  
     }
@@ -230,121 +150,122 @@ function driver:stopped()
 end
 
 --====================================================================================
--- setup the xPL hub
+-- setup the xPL configuration
 --====================================================================================
-xpl.xplhub = config.usehub
+xpl.settings.xplhub = config.usehub
+xpl.settings.broadcast = config.xplbroadcast
 
 --====================================================================================
 -- Create our xPL device to communicate with the RFXLAN
 --====================================================================================
-xpldev = xpl.classes.xpldevice:new({    -- create a generic xPL device
+driver.xpldevice = xpl.classes.xpldevice:new({    -- create a generic xPL device
 
-    initialize = function(self)
-        self.super.initialize(self)
-        self.configurable = false
-        self.version = driver._VERSION   -- make version be reported in heartbeats
-        self.address = config.xpladdress
-    end,
+  initialize = function(self)
+    self.super.initialize(self)
+    self.configurable = false
+    self.version = driver._VERSION   -- make version be reported in heartbeats
+    self.address = config.xpladdress
+  end,
 
-    --[[ overriden to request a heartbeat on startup it set to do so.
-    start = function(self)
-        self.super.start(self)
-        if opt.hbeat then
-            local m = "xpl-cmnd\n{\nhop=1\nsource=%s\ntarget=*\n}\nhbeat.request\n{\ncommand=request\n}\n"
-            m = string.format(m, self.address)
-            xpl.send(m)
-        end
-    end,
---]]
+  start = function(self)
+    self.super.start(self)
+    logger:info("xplrfx: xPL device started %s", config.xpladdress)
+  end,
 
-    --[[ deal with incoming messages
-    handlemessage = function(self, msg)
-        local sizeup = function (t, l)
-            if #t < l then return t .. string.rep(" ", l - #t) end
-            if #t > l then return string.sub(t, 1, l) end
-            return t
-        end
-        -- call ancestor to handle hbeat messages
-        self.super.handlemessage(self, msg)
-        -- now do my thing
-        local log = ""
-        log = sizeup(log .. msg.type, 9)
-        log = sizeup(log .. msg.schema, #log + 18)
-        log = sizeup(log .. msg.source, #log + 35)
-        log = sizeup(log .. msg.target, #log + 35)
-        log = sizeup(log .. msg.from,   #log + 22)
-        print (log)
-        if opt.verbose then
-            for key, value in msg:eachkvp() do
-                log = "   "
-                log = sizeup(log .. key, #log + 16) .. "=" .. value
-                print(log)
-            end
-        end
-    end,
-    --]]
+  stop = function(self)
+    logger:info("xplrfx: xPL device stopped %s", config.xpladdress)
+    self.super.stop(self)
+  end,
+
+  statuschanged = function(self, newstatus, oldstatus)
+    logger:info("xplrfx: xPL device changing status from '%s' to '%s'", oldstatus, newstatus)
+    self.super.statuschanged(self, newstatus, oldstatus)
+  end,
     
-})
-
--- sends an xpl message to the xPLRFX device. Either a power on/off or set dimm level
--- command.
--- @param self UPnP device, must contain a key 'xplrfx' holding the deviceconfig table
--- @param value boolean in case of "power" or number (0-100) in case of "dim"
--- @param lastvalue optional old value, see return value (set to <code>nil</code> to force
--- sending a command even if the same as the last.
--- @return the value for the device being set. Use this in next call to prevent
--- sending messages (% difference, but same level) unnecessary.
-local sendcommand = function(self, value, lastvalue)
-  local command, level
-  local protocol = self.xplrfx.protocol
-  local address = self.xplrfx.address
-  local unit = self.xplrfx.unit
-  local msg = xpl.classes.xplmessage:new({})
-  
-  msg.type = "xpl-cmnd" 
-  msg.target = config.rfxxpladdress
-  
-  if type(value) == "boolean" then
-    command = value and "on" or "off"
-  else
-    command = "dim"
-    level = math.floor(tonumber(value) + .5)
-    if level < 0 then level = 0 end
-    if level > 100 then level = 100 end
-  end
-  
-  if protocol == "ac-eu" or protocol == "ac-uk" then
-    if command == "dim" then command = "preset" end
-    msg.schema = "ac.basic"
-    msg:add("address", address)
-    msg:add("unit", unit)
-    msg:add("command", command)
-    if level then
-      level = math.floor(level/(100/(15+1)))
-      if level > 15 then level = 15 end
-      msg:add("level", tostring(level))
+  -- Will send the actual UPnP change as an xPL message to the rfxlan device
+  -- call as;
+  --   sendupnpcommand(self, power, callback)         -- for binary devices
+  --   sendupnpcommand(self, power, level, callback)  -- for dimmable devices
+  sendupnpcommand = function(self, power, level, callback)
+    -- NOTE: self == dimmable or binary light device object
+    local binary = (type(level) == "function")
+    if binary then
+      -- binary device: has no 'level' parameter, so shift 'level' value to 'callback'
+      callback = level
+      level = nil
     end
-    if protocol == "ac-eu" then msg:add("eu", "true") end
-  else
-    msg.schema = "x10.basic"
-    msg:add("device", address)
-    msg:add("command", command)
-    if level then msg:add("level", value) end
-    if protocol ~= "x10" then msg:add("protocol", protocol) end
+    logger:debug("%s; power = %s, level = %s", self.friendlyname, tostring(power), tostring(level))
+    
+    -- create xPL message
+    local msg = xpl.classes.xplmessage:new({})
+    msg.type = "xpl-cmnd" 
+    msg.source = config.xpladdress
+    msg.target = config.rfxxpladdress
+    if self.devicedata.protocol == "ac-eu" or self.devicedata.protocol == "ac-uk" then
+      msg.schema = "ac.basic"
+      msg:add("address", self.devicedata.address)
+      msg:add("unit", self.devicedata.unit)
+      msg:add("command","")
+    else
+      msg.schema = "x10.basic"
+      msg:add("device", self.devicedata.address)
+      msg:add("command","")
+      if self.devicedata.protocol ~= "x10" then msg:add("protocol", self.devicedata.protocol) end
+    end
+    
+    if not power then
+      -- power off
+      if self.lastpower then
+        -- currently on, so must switch off
+        msg:setvalue("command", "off")
+      else
+        -- already off, nothing to do
+        msg = nil
+      end
+    else
+      -- power on
+      if binary then
+        if self.lastpower then
+          -- binary light, already on, so nothing to do
+          msg = nil
+        else
+          -- binary light, must switch on now
+          msg:setvalue("command", "on")
+        end
+      else
+        if (self.lastpower == power) and (self.lastlevel == level) then
+          -- dimmable, already right power and level, nothing to do
+          msg = nil
+        else
+          -- dimmable, must set new level
+          if msg.schema == "ac.basic" then
+            msg:setvalue("command", "preset")
+          else
+            msg:setvalue("command", "dim")
+          end
+          msg:add("level", level)
+        end
+      end
+    end
+    
+    if msg and self.devicedata.protocol == "ac-eu" then msg:add("eu", "true") end
+    
+    -- actually send the message
+    if msg then
+      msg = tostring(msg)
+      logger:debug("xplrfx driver: now sending xplmessage:\n%s", msg)
+      local success, err = driver.xpldevice:send(msg)
+      if not success then
+        logger:error("xplrfx driver: failed sending xPL message; %s", tostring(err))
+      end
+    else
+      logger:debug("xplrfx driver: nothing send, old values '%s', '%s' require no change for new values '%s', '%s'", tostring(self.lastpower), tostring(self.lastlevel), tostring(power), tostring(level))
+    end
+    
+    return callback() -- make sure to call callback before returning
   end
-  if type(value) ~= "boolean" then
-    value = level
-  end
-  if value ~= lastvalue then
-    msg = tostring(msg)
-    xpldev:send(msg)
-    logger:debug("xplrfx driver: send xplmessage:\n" .. msg)
-  else
-    logger:debug("xplrfx driver: nothing send, old value '%s' (%s) is the same as new value '%s' (%s)", tostring(lastvalue), type(lastvalue), tostring(value), type(value))
-  end
-  return value
-end
-
+  
+})
 
 
 logger:info("Loaded driver %s", driver._NAME)

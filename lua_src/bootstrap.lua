@@ -1,5 +1,6 @@
 -- command-line runner
 package.path = "./lua/?.lua;./lua/?/init.lua;./lua/?/?.lua;" .. package.path
+package.cpath = "./clibs/?.dll;./clibs/?/init.dll;./clibs/?/?.dll;" .. package.cpath
 
 local cli = require 'cliargs'
 local print = print -- make local becasue UPnP redefines its

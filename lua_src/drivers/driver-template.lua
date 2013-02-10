@@ -94,7 +94,7 @@ function driver:stopping()
   logger:info("Driver '%s' is now running the 'stopping' event", self._NAME)
 end
 
--- will be calling when UPnP has stopped, Copas scheduler will no longer be running, no sockets, no timers
+-- will be called when UPnP has stopped, Copas scheduler will no longer be running, no sockets, no timers
 function driver:stopped()
   logger:info("Driver '%s' is now running the 'stopped' event", self._NAME)
 end
