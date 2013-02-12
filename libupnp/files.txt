@@ -1,6 +1,8 @@
 This folder should contain the dll files for the UPnP library. These should be;
  - libupnp.dll
  - pthreadVC2.dll
+and they should be loacted in their respective "Release" and "Debug" subfolders.
+
 the post build event 'install.bat' will copy them to the lua directory.
 
 If a static build is done, then they won't be required as they will be linked in the LuaUPnP.dll

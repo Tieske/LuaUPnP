@@ -18,3 +18,5 @@
 Debug
 /*.session
 /lib_src/Release
+/Release
+/libupnp/Release
