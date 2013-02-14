@@ -1,6 +1,11 @@
 -- command-line runner
+local iswindows = (_G.package.config:sub(1,1) == "\\")
+if iswindows then
+  package.cpath = "./clibs/?.dll;./clibs/?/init.dll;./clibs/?/?.dll;" .. package.cpath
+else
+  package.cpath = "./clibs/?.so;./clibs/?/init.so;./clibs/?/?.so;" .. package.cpath
+end
 package.path = "./lua/?.lua;./lua/?/init.lua;./lua/?/?.lua;" .. package.path
-package.cpath = "./clibs/?.dll;./clibs/?/init.dll;./clibs/?/?.dll;" .. package.cpath
 
 local cli = require 'cliargs'
 local print = print -- make local becasue UPnP redefines its
@@ -37,6 +42,9 @@ if args then
   
   local upnp = require 'upnp' -- only load upnp here, because it redefines 'print'
   local logger = upnp.logger
+  logger:info("+------------------------------------+")
+  logger:info("|      Loading configuration         |")
+  logger:info("+------------------------------------+")
   -- configure engine with commandline options
   logger:info("Setting debug level to; " .. args.debug)
   logger:setLevel(args.debug)
@@ -67,6 +75,9 @@ return {
   end
   
   -- create device
+  logger:info("+------------------------------------+")
+  logger:info("|      Setting up root device        |")
+  logger:info("+------------------------------------+")
   local device = require("upnp.devices.urn_schemas-upnp-org_device_Basic_1")()
   device.UDN = config.UDN
   device.friendlyName = config.friendlyName
@@ -93,6 +104,9 @@ return {
   end
 
   -- load drivers specified on commandline and load their devices
+  logger:info("+------------------------------------+")
+  logger:info("|      Loading drivers               |")
+  logger:info("+------------------------------------+")
   upnp.drivers = upnp.drivers or {}
   for _, drivername in ipairs(args.DRIVER) do
     -- load driver
@@ -113,6 +127,9 @@ return {
   end
   
   -- build the device and xmls from the device table
+  logger:info("+------------------------------------+")
+  logger:info("|      Build the root/sub-devices    |")
+  logger:info("+------------------------------------+")
   upnp.devicefactory = require("upnp.devicefactory")
   local upnpdevice, e = upnp.devicefactory.builddevice(device)
   if not upnpdevice then
@@ -122,6 +139,9 @@ return {
   
 
   -- start the engine by starting the copas loop
+  logger:info("+------------------------------------+")
+  logger:info("|      Starting the main loop        |")
+  logger:info("+------------------------------------+")
   require('copas.timer').loop()
   
 end
