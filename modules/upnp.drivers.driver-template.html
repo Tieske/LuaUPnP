@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"> 
+<head>
+    <title>upnp.drivers.driver-template: Module Index</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+    <!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+    <div id="product_logo"></div>
+    <div id="product_name"><big><b></b></big></div>
+    <div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h2>LuaDoc</h2>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h2>Modules</h2>
+<ul>
+
+	<li>
+		<a href="../modules/upnp.html">upnp</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.bootstrap.html">upnp.bootstrap</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.action.html">upnp.classes.action</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.argument.html">upnp.classes.argument</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.device.html">upnp.classes.device</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.service.html">upnp.classes.service</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.statevariable.html">upnp.classes.statevariable</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.classes.upnpbase.html">upnp.classes.upnpbase</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.devicefactory.html">upnp.devicefactory</a>
+	</li>
+
+	<li><strong>upnp.drivers.driver-template</strong></li>
+	
+	<li>
+		<a href="../modules/upnp.drivers.xplrfx.html">upnp.drivers.xplrfx</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.lp.html">upnp.lp</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.xmlfactory.html">upnp.xmlfactory</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_device_BinaryLight_1.html">urn_schemas-upnp-org_device_BinaryLight_1</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_device_DimmableLight_1.html">urn_schemas-upnp-org_device_DimmableLight_1</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_service_Dimming_1.html">urn_schemas-upnp-org_service_Dimming_1</a>
+	</li>
+
+	<li>
+		<a href="../modules/urn_schemas-upnp-org_service_SwitchPower_1.html">urn_schemas-upnp-org_service_SwitchPower_1</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module "<code>upnp.drivers.driver-template</code>"</h1>
+
+<p>Template code file for a UPnP gateway driver. Additional drivers can be implemented using this template and can be loaded by the gateway. See <a href="../modules/upnp.bootstrap.html">upnp.bootstrap</a>.</p>
+
+
+
+
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+    <tr>
+    <td class="name" nowrap><a href="#driver:getdevice">driver:getdevice</a>&nbsp;()</td>
+    <td class="summary">Device generator.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#driver:started">driver:started</a>&nbsp;()</td>
+    <td class="summary">Eventhandler for 'started' event.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#driver:starting">driver:starting</a>&nbsp;()</td>
+    <td class="summary">Eventhandler for 'starting' event.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#driver:stopped">driver:stopped</a>&nbsp;()</td>
+    <td class="summary">Eventhandler for 'stopped' event.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#driver:stopping">driver:stopping</a>&nbsp;()</td>
+    <td class="summary">Eventhandler for 'stopping' event.</td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#driver:writeconfig">driver:writeconfig</a>&nbsp;()</td>
+    <td class="summary">Configuration file writer.</td>
+    </tr>
+
+</table>
+
+
+<br/>
+<br/>
+
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="driver:getdevice"></a><strong>driver:getdevice</strong>&nbsp;()</dt>
+<dd>
+Device generator. Will be called after loading the driver, should return a device table
+
+
+
+
+
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+device table to be inserted into the gateway device as a sub-device
+
+</div>
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="driver:started"></a><strong>driver:started</strong>&nbsp;()</dt>
+<dd>
+Eventhandler for 'started' event. Will be called when UPnP has started, copas is running, sockets and timers are running
+
+
+
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="driver:starting"></a><strong>driver:starting</strong>&nbsp;()</dt>
+<dd>
+Eventhandler for 'starting' event. Will be called when UPnP is starting, Copas scheduler will not yet be running, no sockets nor timers will be available
+
+
+
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="driver:stopped"></a><strong>driver:stopped</strong>&nbsp;()</dt>
+<dd>
+Eventhandler for 'stopped' event. Will be called when UPnP has stopped, Copas scheduler will no longer be running, no sockets, no timers
+
+
+
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="driver:stopping"></a><strong>driver:stopping</strong>&nbsp;()</dt>
+<dd>
+Eventhandler for 'stopping' event. Will be called when UPnP is stopping, copas is running, sockets and timers are running
+
+
+
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="driver:writeconfig"></a><strong>driver:writeconfig</strong>&nbsp;()</dt>
+<dd>
+Configuration file writer. Will be called to write the current configuration in a config file.
+
+
+
+
+
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+nothing, or <code>nil + errormsg</code> in case of an error
+
+</div>
+
+
+
+
+
+
+<div>
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="../modules/upnp.html#upnp.writeconfigfile">
+		upnp.writeconfigfile
+	</a></li>
+	
+</ul>
+
+</div>
+
+
+</dd>
+
+
+</dl>
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+    <p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+</body>
+</html>
