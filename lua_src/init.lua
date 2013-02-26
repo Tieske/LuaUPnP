@@ -464,7 +464,7 @@ function upnp.writeconfigfile(configname, content, comment)
   if comment then
     comment = "--[[\n" .. tostring(comment) .. "\n--]]\n\n"
   end
-  content = (comment or "") .. "return " .. require('serpent').block(content)
+  content = (comment or "") .. "return " .. require('serpent').block(content, {comment = false})
   logger:debug("upnp.writeconfigfile, writing to: " .. configname)
   local file, err = io.open(configname, "w")
   if not file then

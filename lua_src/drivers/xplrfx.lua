@@ -25,6 +25,7 @@ logger:info("Loading driver '%s' version %s; %s", driver._NAME, driver._VERSION,
 --===================================================
 local defaultconfig = {
     version = driver._VERSION,
+    UDN = nil, -- will be created if not provided
     friendlyName = "LuaUPnP gateway driver for " .. driver._NAME,
     xpladdress = xpl.createaddress("tieske","luaupnp","RANDOM"),
     usehub = false,
@@ -63,7 +64,6 @@ local configtext = string.format("LuaUPnP driver; '%s' version '%s'\n%s\n",drive
 if not upnp.existsconfigfile(driver._NAME) then
   upnp.writeconfigfile(driver._NAME, defaultconfig, configtext)
 end
-configtext = nil
 
 -- Load the configuration file
 local config, err = upnp.readconfigfile(driver._NAME, defaultconfig)
@@ -84,12 +84,16 @@ if not config.list or #config.list == 0 then
   error("The configuration file has no devices configured. Please add some.")
 end
 
+-- create UUID if not present, store in 'config' so it can be persisted
+if not config.UDN then config.UDN = upnp.lib.util.CreateUUID() end
+
 --====================================================================================
 -- DRIVER API IMPLEMENTATION
 --====================================================================================
 
 -- Will be called after loading the driver, should return a device table
 function driver:getdevice()
+  if driver.device then return driver.device end
   -- create a basic device for the driver
   local device = require("upnp.devices.urn_schemas-upnp-org_device_Basic_1")()
   device.friendlyName = config.friendlyName
@@ -101,6 +105,9 @@ function driver:getdevice()
     
   -- generate all devices in the list
   for _,item in pairs(config.list) do
+    -- create UUID if not set (set it here so it will be saved along with the config table)
+    if not item.UDN then item.UDN = upnp.lib.util.CreateUUID() end
+
     -- create custom table for this device
     local ct = {
       friendlyName = item.friendlyName,
@@ -126,7 +133,14 @@ function driver:getdevice()
   end
   
   -- all sub devices added, now return driver device (containing all subs)
+  driver.device = device
   return device
+end
+
+-- will be called to write the current configuration in a config file
+function driver:writeconfig()
+  logger:info("Driver '%s' is now writing its configuration file", self._NAME)
+  return upnp.writeconfigfile(self._NAME, config, configtext)
 end
 
 -- will be called when UPnP is starting, Copas scheduler will not yet be running, no sockets, no timers

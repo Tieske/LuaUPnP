@@ -77,6 +77,12 @@ function driver:getdevice()
   return device
 end
 
+-- will be called to write the current configuration in a config file
+function driver:writeconfig()
+  logger:info("Driver '%s' is now writing its configuration file", self._NAME)
+  --return upnp.writeconfigfile(self._NAME, config, configtext)
+end
+
 -- will be called when UPnP is starting, Copas scheduler will not yet be running, no sockets, no timers
 function driver:starting()
   logger:info("Driver '%s' is now running the 'starting' event", self._NAME)

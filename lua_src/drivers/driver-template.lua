@@ -19,11 +19,11 @@ local logger = upnp.logger
 --===================================================
 local defaultconfig = {
     version = driver._VERSION,
-    UDN = nil, -- will be set automatically
+    UDN = upnp.lib.util.CreateUUID(), 
     friendlyName = "LuaUPnP gateway driver for " .. driver._NAME
     -- add defaults here
-    
   }
+
 local configtext = string.format("LuaUPnP driver; '%s' version '%s'\n%s\n",driver._NAME, driver._VERSION, driver._DESCRIPTION)..[[
 This is text that goes into the header of the config file, describe the options here.
 ]]
@@ -51,6 +51,7 @@ end
 
 -- Will be called after loading the driver, should return a device table
 function driver:getdevice()
+  if driver.device then return driver.device end
   -- create a basic device for the driver
   local device = require("upnp.devices.urn_schemas-upnp-org_device_Basic_1")()
   device.friendlyName = config.friendlyName
@@ -76,7 +77,15 @@ function driver:getdevice()
   -- add it to the driver device
   table.insert(device.deviceList, binary)
   
+  -- store the driver device in the driver table and return it
+  driver.device = device
   return device
+end
+
+-- will be called to write the current configuration in a config file
+function driver:writeconfig()
+  logger:info("Driver '%s' is now writing its configuration file", self._NAME)
+  return upnp.writeconfigfile(self._NAME, config, configtext)
 end
 
 -- will be called when UPnP is starting, Copas scheduler will not yet be running, no sockets, no timers
