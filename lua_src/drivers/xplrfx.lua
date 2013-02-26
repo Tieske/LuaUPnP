@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
--- UPnP driver file for the rfxlan device with xPL firmware.
--- When 'required' will process its config file and setup devices.
+-- UPnP gateway driver for the rfxlan device with xPL firmware.
+-- See <a href="../modules/upnp.bootstrap.html">upnp.bootstrap</a>, which is the 
+-- entry point for loading the drivers.
 -- @class module
 -- @name upnp.drivers.xplrfx
 

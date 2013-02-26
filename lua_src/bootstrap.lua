@@ -1,3 +1,16 @@
+-----------------------------------------------------------------------------
+-- UPnP gateway.
+-- This script implements a UPnP gateway, drivers can be loaded and configured.
+-- Restarting, stopping and saving configuration actions for the gateway are 
+-- available as UPnP methods and can be executed through controlpoint like 
+-- DeviceSpy etc.<br/>
+-- Use the <code>--help</code> command line option for more information.
+-- eg: <code>lua.exe -v .\lua\upnp\bootstrap.lua --help</code><br/>
+-- See <a href="../modules/upnp.drivers.driver-template.html">upnp.drivers.driver-template</a> for
+-- a quick start in building your own drivers.
+-- @class module
+-- @name upnp.bootstrap
+-- @see upnp.drivers.driver-template
 local _VERSION = "0.1"
 local _NAME = "LuaUPnP"
 

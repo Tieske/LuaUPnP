@@ -40,6 +40,10 @@
 	</li>
 
 	<li>
+		<a href="../modules/upnp.bootstrap.html">upnp.bootstrap</a>
+	</li>
+
+	<li>
 		<a href="../modules/upnp.classes.action.html">upnp.classes.action</a>
 	</li>
 
@@ -65,6 +69,10 @@
 
 	<li><strong>upnp.devicefactory</strong></li>
 	
+	<li>
+		<a href="../modules/upnp.drivers.driver-template.html">upnp.drivers.driver-template</a>
+	</li>
+
 	<li>
 		<a href="../modules/upnp.drivers.xplrfx.html">upnp.drivers.xplrfx</a>
 	</li>
@@ -123,7 +131,7 @@
 
     <tr>
     <td class="name" nowrap><a href="#devicefactory.builddevice">devicefactory.builddevice</a>&nbsp;(domain, devicetype, version, customtable)</td>
-    <td class="summary">Creates a standard device, customizes it, generates xml's, parses them and returns the UPnP device object.</td>
+    <td class="summary">Creates a (standard) device, customizes it, generates xml's, parses them and returns the UPnP device object.</td>
     </tr>
 
     <tr>
@@ -172,14 +180,14 @@
 
 <dt><a name="devicefactory.builddevice"></a><strong>devicefactory.builddevice</strong>&nbsp;(domain, devicetype, version, customtable)</dt>
 <dd>
-Creates a standard device, customizes it, generates xml's, parses them and returns the UPnP device object. This method takes a number of steps to create a fully functional device;</p> <ol> <li>Creates a device table for a standard device (<code>devicefactory.createdevice()</code>)</li> <li>Drops optionals as set in the <code>customtable</code> parameter (<code>devicefactory.customizedevice()</code>) and adds the implementations of device/variable/action methods from the <code>customtable</code> to the device table</li> <li>Creates the XML's for the device and its services (<code>xmlfactory.rootxml()</code>)</li> <li>Writes the XML's to the webroot directory, so they are accessible (<code>xmlfactory.writetoweb()</code>)</li> <li>Parses the XML's into a root-device object structure, whilst adding the custom implementations as set in the devicetable (<code>upnp.classes.device:parsefromxml()</code>)</li> <li>sets the <code>devicexmlurl</code> on the device and returns the device object</li> <ol><p>
+Creates a (standard) device, customizes it, generates xml's, parses them and returns the UPnP device object. This method takes a number of steps to create a fully functional device;</p> <ol> <li>Creates a device table for a standard device (<code>devicefactory.createdevice()</code>) or takes a device table</li> <li>Drops optionals as set in the <code>customtable</code> parameter (<code>devicefactory.customizedevice()</code>) and adds the implementations of device/variable/action methods from the <code>customtable</code> to the device table</li> <li>Creates the XML's for the device and its services (<code>xmlfactory.rootxml()</code>)</li> <li>Writes the XML's to the webroot directory, so they are accessible (<code>xmlfactory.writetoweb()</code>)</li> <li>Parses the XML's into a root-device object structure, whilst adding the custom implementations as set in the devicetable (<code>upnp.classes.device:parsefromxml()</code>)</li> <li>sets the <code>devicexmlurl</code> on the device and returns the device object</li> <ol><p>
 
 
 <h3>Parameters:</h3>
 <ul>
 	
 	<li>
-	  <code><em>domain</em></code>: domainname of the type to create, alternatively, the full <code>deviceType</code> contents. In the latter case the <code>devicetype</code> and <code>version</code> arguments can be omitted.
+	  <code><em>domain</em></code>: domainname of the type to create, alternatively, the full <code>deviceType</code> contents or a device table. In the latter 2 cases the <code>devicetype</code> and <code>version</code> arguments can be omitted.
 	</li>
 	
 	<li>
@@ -214,7 +222,7 @@ device a <code>upnp.classes.device</code> object representing the device, or <co
 <div>
 
 <h3 class="inline-block">Example:</h3>
-<pre class="example">-- two ways to create the same device, both without customization/implementation<br/>devicefactory.builddevice("schemas.upnp.org", "BinaryLight", "1", {} )<br/>&nbsp;&nbsp;-- or full schema and no customtable<br/>devicefactory.builddevice("urn:schemas-upnp-org:device:BinaryLight:1")</pre>
+<pre class="example">-- three ways to create the same device, all without customization/implementation<br/>devicefactory.builddevice("schemas.upnp.org", "BinaryLight", "1", {} )<br/>&nbsp;&nbsp;-- or full schema and no customtable<br/>devicefactory.builddevice("urn:schemas-upnp-org:device:BinaryLight:1")<br/>&nbsp;&nbsp;-- or a device table and empty customtable<br/>local d = require("upnp.devices.urn_schemas-upnp-org_device_Basic_1")()<br/>devicefactory.builddevice(d, {})</pre>
 
 </div>
 

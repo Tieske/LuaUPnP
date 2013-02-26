@@ -38,6 +38,10 @@
 	<li><strong>upnp</strong></li>
 	
 	<li>
+		<a href="../modules/upnp.bootstrap.html">upnp.bootstrap</a>
+	</li>
+
+	<li>
 		<a href="../modules/upnp.classes.action.html">upnp.classes.action</a>
 	</li>
 
@@ -63,6 +67,10 @@
 
 	<li>
 		<a href="../modules/upnp.devicefactory.html">upnp.devicefactory</a>
+	</li>
+
+	<li>
+		<a href="../modules/upnp.drivers.driver-template.html">upnp.drivers.driver-template</a>
 	</li>
 
 	<li>
@@ -141,13 +149,18 @@
 <table class="function_list">
 
     <tr>
+    <td class="name" nowrap><a href="#getconfigfilename">getconfigfilename</a>&nbsp;(configname)</td>
+    <td class="summary">Takes a config filename and returns the path to the file to open.</td>
+    </tr>
+
+    <tr>
     <td class="name" nowrap><a href="#os.exit">os.exit</a>&nbsp;(...)</td>
     <td class="summary">wraps original os.exit() function to make sure UPnP lib is always properly stopped </td>
     </tr>
 
     <tr>
-    <td class="name" nowrap><a href="#readconfigfile">readconfigfile</a>&nbsp;(configname)</td>
-    <td class="summary">Read a configfile.</td>
+    <td class="name" nowrap><a href="#upnp.existsconfigfile">upnp.existsconfigfile</a>&nbsp;(configname)</td>
+    <td class="summary">Does a configfile exist.</td>
     </tr>
 
     <tr>
@@ -158,6 +171,11 @@
     <tr>
     <td class="name" nowrap><a href="#upnp.lib.util.CreateUUID">upnp.lib.util.CreateUUID</a>&nbsp;()</td>
     <td class="summary">wraps original function to work even when library is not started </td>
+    </tr>
+
+    <tr>
+    <td class="name" nowrap><a href="#upnp.readconfigfile">upnp.readconfigfile</a>&nbsp;(configname, defaults)</td>
+    <td class="summary">Read a configfile.</td>
     </tr>
 
     <tr>
@@ -181,7 +199,7 @@
     </tr>
 
     <tr>
-    <td class="name" nowrap><a href="#writeconfigfile">writeconfigfile</a>&nbsp;(configname, content)</td>
+    <td class="name" nowrap><a href="#upnp.writeconfigfile">upnp.writeconfigfile</a>&nbsp;(configname, content, comment)</td>
     <td class="summary">Write a configfile.</td>
     </tr>
 
@@ -317,6 +335,56 @@
 
 
 
+<dt><a name="getconfigfilename"></a><strong>getconfigfilename</strong>&nbsp;(configname)</dt>
+<dd>
+Takes a config filename and returns the path to the file to open. An automatic extension <code>'.config'</code> will be appended.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>configname</em></code>: filename of configfile (only the filename part of a path will be used, path and <code>'.config'</code> extension will stripped from the provided name)
+	</li>
+	
+</ul>
+
+
+
+
+
+<div>
+
+
+<h3 class="inline-block">Return value:</h3>
+path to config file, being <code>upnp.configroot</code> combined with the config filename
+
+</div>
+
+
+
+
+
+
+<div>
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="#upnp members and namespaces">
+		upnp.configroot
+	</a></li>
+	
+</ul>
+
+</div>
+
+
+</dd>
+
+
+
+
 <dt><a name="os.exit"></a><strong>os.exit</strong>&nbsp;(...)</dt>
 <dd>
 wraps original os.exit() function to make sure UPnP lib is always properly stopped
@@ -346,16 +414,16 @@ wraps original os.exit() function to make sure UPnP lib is always properly stopp
 
 
 
-<dt><a name="readconfigfile"></a><strong>readconfigfile</strong>&nbsp;(configname)</dt>
+<dt><a name="upnp.existsconfigfile"></a><strong>upnp.existsconfigfile</strong>&nbsp;(configname)</dt>
 <dd>
-Read a configfile. The configfile must be a lua table format, starting with '<code> return {</code>' and ending with '<code>}</code>'.
+Does a configfile exist.
 
 
 <h3>Parameters:</h3>
 <ul>
 	
 	<li>
-	  <code><em>configname</em></code>: configuration filename to load. This should only be a filename (no path), and it will be sought for in the <code>upnp.configroot</code> directory.
+	  <code><em>configname</em></code>: configuration filename to check.
 	</li>
 	
 </ul>
@@ -368,7 +436,7 @@ Read a configfile. The configfile must be a lua table format, starting with '<co
 
 
 <h3 class="inline-block">Return value:</h3>
-table with configuration loaded, or <code>nil + error</code> if it failed
+boolean
 
 </div>
 
@@ -384,6 +452,14 @@ table with configuration loaded, or <code>nil + error</code> if it failed
 	
 	<li><a href="#upnp members and namespaces">
 		upnp.configroot
+	</a></li>
+	
+	<li><a href="../modules/upnp.html#upnp.readconfigfile">
+		upnp.readconfigfile
+	</a></li>
+	
+	<li><a href="../modules/upnp.html#upnp.writeconfigfile">
+		upnp.writeconfigfile
 	</a></li>
 	
 </ul>
@@ -446,6 +522,74 @@ wraps original function to work even when library is not started
 
 
 
+
+
+</dd>
+
+
+
+
+<dt><a name="upnp.readconfigfile"></a><strong>upnp.readconfigfile</strong>&nbsp;(configname, defaults)</dt>
+<dd>
+Read a configfile. The configfile must be a lua table format, starting with '<code> return {</code>' and ending with '<code>}</code>'.
+
+
+<h3>Parameters:</h3>
+<ul>
+	
+	<li>
+	  <code><em>configname</em></code>: configuration filename to load. This should only be a filename (no path), and it will be sought for in the <code>upnp.configroot</code> directory.
+	</li>
+	
+	<li>
+	  <code><em>defaults</em></code>: table with defaults to return when the configfile does not exist. If not provided, it will be set to an empty table.
+	</li>
+	
+</ul>
+
+
+
+
+
+<div>
+
+
+<h3>Return values:</h3>
+<ol>
+	
+	<li>table with configuration loaded, or <code>defaults</code> if it failed. The returned table will have the <code>defaults</code> table set as its metatable, so any value not in the configfile will be returned from the defaults.</li>
+	
+	<li>2nd return value is an error message in case an error was encountered while loading the config file. NOTE: the configfile not existing is not considered an error.</li>
+	
+</ol>
+
+</div>
+
+
+
+
+
+
+<div>
+
+<h3>See also:</h3>
+<ul>
+	
+	<li><a href="#upnp members and namespaces">
+		upnp.configroot
+	</a></li>
+	
+	<li><a href="../modules/upnp.html#upnp.existsconfigfile">
+		upnp.existsconfigfile
+	</a></li>
+	
+	<li><a href="../modules/upnp.html#upnp.writeconfigfile">
+		upnp.writeconfigfile
+	</a></li>
+	
+</ul>
+
+</div>
 
 
 </dd>
@@ -601,7 +745,7 @@ Unsubscribe from events of upnp library.
 
 
 
-<dt><a name="writeconfigfile"></a><strong>writeconfigfile</strong>&nbsp;(configname, content)</dt>
+<dt><a name="upnp.writeconfigfile"></a><strong>upnp.writeconfigfile</strong>&nbsp;(configname, content, comment)</dt>
 <dd>
 Write a configfile. The configfile must be a string in Lua table format, starting with '<code> return {</code>' and ending with '<code>}</code>'.
 
@@ -614,7 +758,11 @@ Write a configfile. The configfile must be a string in Lua table format, startin
 	</li>
 	
 	<li>
-	  <code><em>content</em></code>: the content to write, must be valid Lua code returning a table.
+	  <code><em>content</em></code>: table; the content to write
+	</li>
+	
+	<li>
+	  <code><em>comment</em></code>: string (optional); text block to write at start of config file
 	</li>
 	
 </ul>
@@ -643,6 +791,14 @@ Write a configfile. The configfile must be a string in Lua table format, startin
 	
 	<li><a href="#upnp members and namespaces">
 		upnp.configroot
+	</a></li>
+	
+	<li><a href="../modules/upnp.html#upnp.readconfigfile">
+		upnp.readconfigfile
+	</a></li>
+	
+	<li><a href="../modules/upnp.html#upnp.existsconfigfile">
+		upnp.existsconfigfile
 	</a></li>
 	
 </ul>

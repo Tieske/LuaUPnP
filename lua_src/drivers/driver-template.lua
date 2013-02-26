@@ -1,6 +1,11 @@
--- template for a LuaUPnP driver
+-----------------------------------------------------------------------------
+-- Template code file for a UPnP gateway driver.
+-- Additional drivers can be implemented using this template and can be loaded
+-- by the gateway. See <a href="../modules/upnp.bootstrap.html">upnp.bootstrap</a>.
+-- @class module
+-- @name upnp.drivers.driver-template
 
--- throwing an error during startup will cancel loading and exit as fatal error.
+-- NOTE: throwing an error during startup will cancel loading and exit as fatal error.
 
 local driver = {
   _NAME = string.match(" ."..({...})[1], ".+%.(.+)$"),  -- the module name (last element) as provided to 'require()'
@@ -49,7 +54,10 @@ end
 -- DRIVER API IMPLEMENTATION
 --===================================================
 
+-----------------------------------------------------------------------------
+-- Device generator.
 -- Will be called after loading the driver, should return a device table
+-- @return device table to be inserted into the gateway device as a sub-device
 function driver:getdevice()
   if driver.device then return driver.device end
   -- create a basic device for the driver
@@ -82,28 +90,41 @@ function driver:getdevice()
   return device
 end
 
--- will be called to write the current configuration in a config file
+-----------------------------------------------------------------------------
+-- Configuration file writer.
+-- Will be called to write the current configuration in a config file.
+-- @return nothing, or <code>nil + errormsg</code> in case of an error
+-- @see upnp.writeconfigfile
 function driver:writeconfig()
   logger:info("Driver '%s' is now writing its configuration file", self._NAME)
   return upnp.writeconfigfile(self._NAME, config, configtext)
 end
 
--- will be called when UPnP is starting, Copas scheduler will not yet be running, no sockets, no timers
+-----------------------------------------------------------------------------
+-- Eventhandler for 'starting' event.
+-- Will be called when UPnP is starting, Copas scheduler will not yet be 
+-- running, no sockets nor timers will be available
 function driver:starting()
   logger:info("Driver '%s' is now running the 'starting' event", self._NAME)
 end
 
--- will be called when UPnP has started, copas is running, sockets and timers are running
+-----------------------------------------------------------------------------
+-- Eventhandler for 'started' event.
+-- Will be called when UPnP has started, copas is running, sockets and timers are running
 function driver:started()
   logger:info("Driver '%s' is now running the 'started' event", self._NAME)
 end
 
--- will be called when UPnP is stopping, copas is running, sockets and timers are running
+-----------------------------------------------------------------------------
+-- Eventhandler for 'stopping' event.
+-- Will be called when UPnP is stopping, copas is running, sockets and timers are running
 function driver:stopping()
   logger:info("Driver '%s' is now running the 'stopping' event", self._NAME)
 end
 
--- will be called when UPnP has stopped, Copas scheduler will no longer be running, no sockets, no timers
+-----------------------------------------------------------------------------
+-- Eventhandler for 'stopped' event.
+-- Will be called when UPnP has stopped, Copas scheduler will no longer be running, no sockets, no timers
 function driver:stopped()
   logger:info("Driver '%s' is now running the 'stopped' event", self._NAME)
 end
