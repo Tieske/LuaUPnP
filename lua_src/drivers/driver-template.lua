@@ -37,7 +37,6 @@ This is text that goes into the header of the config file, describe the options 
 if not upnp.existsconfigfile(driver._NAME) then
   upnp.writeconfigfile(driver._NAME, defaultconfig, configtext)
 end
-configtext = nil
 
 -- Load the configuration file
 local config, err = upnp.readconfigfile(driver._NAME, defaultconfig)
