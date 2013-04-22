@@ -39,6 +39,12 @@ build = {
             "lib_src/LuaUPnPcallback.c",
             "lib_src/LuaUPnPsupport.c",
           },
+          incdirs = {
+            "lib_src",
+          },
+          libraries = {
+            --"wsock32"
+          },
           defines = {
             --"LUASOCKET_DEBUG"
           }
@@ -57,6 +63,9 @@ build = {
             "lib_src/LuaUPnP.c",
             "lib_src/LuaUPnPcallback.c",
             "lib_src/LuaUPnPsupport.c",
+          },
+          incdirs = {
+            "lib_src",
           },
           libraries = {
             --"wsock32"
