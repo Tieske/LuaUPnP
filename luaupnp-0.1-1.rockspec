@@ -30,14 +30,14 @@ build = {
       modules = {
         ["upnp.core"] = {
           sources = {
-            "lib_src/LuaIXML.c",
-            "lib_src/LuaIXMLdocument.c",
-            "lib_src/LuaIXMLelement.c",
-            "lib_src/LuaIXMLnode.c",
-            "lib_src/LuaIXMLsupport.c",
-            "lib_src/LuaUPnP.c",
-            "lib_src/LuaUPnPcallback.c",
-            "lib_src/LuaUPnPsupport.c",
+            "lib_src/luaIXML.c",
+            "lib_src/luaIXMLdocument.c",
+            "lib_src/luaIXMLelement.c",
+            "lib_src/luaIXMLnode.c",
+            "lib_src/luaIXMLsupport.c",
+            "lib_src/luaUPnP.c",
+            "lib_src/luaUPnPcallback.c",
+            "lib_src/luaUPnPsupport.c",
           },
           incdirs = {
             "lib_src",
@@ -55,14 +55,14 @@ build = {
       modules = {
         ["upnp.core"] = {
           sources = {
-            "lib_src/LuaIXML.c",
-            "lib_src/LuaIXMLdocument.c",
-            "lib_src/LuaIXMLelement.c",
-            "lib_src/LuaIXMLnode.c",
-            "lib_src/LuaIXMLsupport.c",
-            "lib_src/LuaUPnP.c",
-            "lib_src/LuaUPnPcallback.c",
-            "lib_src/LuaUPnPsupport.c",
+            "lib_src/luaIXML.c",
+            "lib_src/luaIXMLdocument.c",
+            "lib_src/luaIXMLelement.c",
+            "lib_src/luaIXMLnode.c",
+            "lib_src/luaIXMLsupport.c",
+            "lib_src/luaUPnP.c",
+            "lib_src/luaUPnPcallback.c",
+            "lib_src/luaUPnPsupport.c",
           },
           incdirs = {
             "lib_src",
