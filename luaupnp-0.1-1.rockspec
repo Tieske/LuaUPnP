@@ -43,6 +43,7 @@ build = {
             "lib_src",
             "../pupnp/ixml/inc",
             "../pupnp/upnp/inc",
+            "../pupnp/upnp/src/inc",
             "../pupnp/threadutil/inc",
           },
           libraries = {
@@ -71,6 +72,7 @@ build = {
             "lib_src",
             "../pupnp/ixml/inc",
             "../pupnp/upnp/inc",
+            "../pupnp/upnp/src/inc",
             "../pupnp/threadutil/inc",
           },
           libraries = {
