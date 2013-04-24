@@ -49,7 +49,7 @@ build = {
             --"wsock32"
           },
           defines = {
-            --"LUASOCKET_DEBUG"
+            "SCRIPTSUPPORT",
           }
         }
       }
@@ -77,7 +77,7 @@ build = {
             --"wsock32"
           },
           defines = {
-            --"LUASOCKET_API=__declspec(dllexport)"
+            "SCRIPTSUPPORT",
           }
 
         }
