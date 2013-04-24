@@ -38,9 +38,11 @@ build = {
             "lib_src/luaUPnP.c",
             "lib_src/luaUPnPcallback.c",
             "lib_src/luaUPnPsupport.c",
+            "dss/darksidesync_aux.c",
           },
           incdirs = {
             "lib_src",
+            "dss",
             "../pupnp/ixml/inc",
             "../pupnp/upnp/inc",
             "../pupnp/upnp/src/inc",
@@ -67,9 +69,11 @@ build = {
             "lib_src/luaUPnP.c",
             "lib_src/luaUPnPcallback.c",
             "lib_src/luaUPnPsupport.c",
+            "dss/darksidesync_aux.c",
           },
           incdirs = {
             "lib_src",
+            "dss",
             "../pupnp/ixml/inc",
             "../pupnp/upnp/inc",
             "../pupnp/upnp/src/inc",
