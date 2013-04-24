@@ -66,6 +66,9 @@ build = {
           },
           incdirs = {
             "lib_src",
+            "../pupnp/ixml/inc",
+            "../pupnp/upnp/inc",
+            "../pupnp/threadutil/inc",
           },
           libraries = {
             --"wsock32"
