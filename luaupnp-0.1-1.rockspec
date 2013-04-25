@@ -111,11 +111,11 @@ build = {
     ["upnp.drivers.demo3"]           = "lua_src/drivers/demo3.lua",
     ["upnp.drivers.xplrfx"]          = "lua_src/drivers/xplrfx.lua",
     ["upnp.drivers.driver-template"] = "lua_src/drivers/driver-template.lua",
-    ["upnp.templates.action.upnp"]        = "lua_src/templates/action.upnp",
-    ["upnp.templates.device.upnp"]        = "lua_src/templates/device.upnp",
-    ["upnp.templates.rootdevice.upnp"]    = "lua_src/templates/rootdevice.upnp",
-    ["upnp.templates.service.upnp"]       = "lua_src/templates/service.upnp",
-    ["upnp.templates.statevariable.upnp"] = "lua_src/templates/statevariable.upnp",
+    ["upnp.templates.action"]        = "lua_src/templates/action.lua",
+    ["upnp.templates.device"]        = "lua_src/templates/device.lua",
+    ["upnp.templates.rootdevice"]    = "lua_src/templates/rootdevice.lua",
+    ["upnp.templates.service"]       = "lua_src/templates/service.lua",
+    ["upnp.templates.statevariable"] = "lua_src/templates/statevariable.lua",
   },
 --  copy_directories = { "doc", "samples", "etc", "test" }
 }

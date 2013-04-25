@@ -23,7 +23,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 local find, format, gsub, strsub = string.find, string.format, string.gsub, string.sub
 
 local lp = {}
-local extension = ".upnp"   -- extension used for template search in the module path
+local extension = ".lua"   -- extension used for template search in the module path
 local pathseparator = _G.package.config:sub(1,1)
 
 ----------------------------------------------------------------------------
