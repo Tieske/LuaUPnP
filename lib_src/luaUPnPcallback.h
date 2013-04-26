@@ -3,7 +3,7 @@
 
 //#include <ixml.h>
 #include <lua.h>
-#include <stdlib.h>
+#include <string.h>
 #include "upnptools.h"
 //#include <lauxlib.h>
 #include "luaIXML.h"
