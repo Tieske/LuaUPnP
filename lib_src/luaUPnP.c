@@ -783,18 +783,18 @@ static int L_UpnpCreatePropertySet(lua_State *L)
 }
 
 // creates a new UUID
-static int L_UpnpCreateUUID(lua_State *L)
-{
-	Upnp_SID temp_sid;
-	uuid_upnp uid;
-
-	if (! UPnPStarted) luaL_error(L, UpnpGetErrorMessage(UPNP_E_FINISH));
-	uuid_create(&uid);
-	uuid_unpack(&uid, temp_sid);
-
-	lua_pushstring(L, temp_sid);
-	return 1;
-}
+//static int L_UpnpCreateUUID(lua_State *L)
+//{
+//	Upnp_SID temp_sid;
+//	uuid_upnp uid;
+//
+//	if (! UPnPStarted) luaL_error(L, UpnpGetErrorMessage(UPNP_E_FINISH));
+//	uuid_create(&uid);
+//	uuid_unpack(&uid, temp_sid);
+//
+//	lua_pushstring(L, temp_sid);
+//	return 1;
+//}
 
 /*static int L_UpnpGetErrorMessage(lua_State *L)
 {
@@ -944,7 +944,7 @@ static const struct luaL_Reg UPnPUtil[] = {
 	{"AddToPropertySet",L_UpnpAddToPropertySet},
 	{"CreatePropertySet",L_UpnpCreatePropertySet},
 	//{"GetErrorMessage",L_UpnpGetErrorMessage},
-	{"CreateUUID",L_UpnpCreateUUID},
+	//{"CreateUUID",L_UpnpCreateUUID},
 	{NULL,NULL}
 };
 

@@ -43,13 +43,11 @@ build = {
           incdirs = {
             "lib_src",
             "dss",
-            "../pupnp/ixml/inc",
-            "../pupnp/upnp/inc",
-            "../pupnp/upnp/src/inc",
-            "../pupnp/threadutil/inc",
+            "/usr/local/include/upnp",
           },
           libraries = {
-            --"wsock32"
+            "upnp",
+            "ixml",
           },
           defines = {
             "SCRIPTSUPPORT",

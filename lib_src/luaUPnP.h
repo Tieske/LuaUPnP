@@ -3,7 +3,7 @@
 
 #include "upnp.h"
 #include "upnptools.h"
-#include "uuid.h"
+//#include "uuid.h"
 #include <lua.h>
 #include <lauxlib.h>
 #include "luaIXML.h"
