@@ -50,7 +50,7 @@ build = {
             "ixml",
           },
           defines = {
-            "SCRIPTSUPPORT",
+            "IXML_HAS_SCRIPTSUPPORT",
           }
         }
       }
@@ -81,7 +81,7 @@ build = {
             --"wsock32"
           },
           defines = {
-            "SCRIPTSUPPORT",
+            "IXML_HAS_SCRIPTSUPPORT",
           }
 
         }
