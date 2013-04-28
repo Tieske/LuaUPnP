@@ -22,6 +22,7 @@ dependencies = {
    "loop",
    "coxpcall >= 1.13",
    "date >= 2.0.1",
+   "uuid >= 0.1.0",
 }
 build = {
   type = "builtin",

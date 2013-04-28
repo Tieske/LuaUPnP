@@ -71,6 +71,7 @@ logger:debug("Loading DSS")
 local dss = require('dss')                  -- load darksidesync module (required for UPnP)
 logger:debug("Loading UPnP core")
 local lib = require("upnp.core")            -- load UPnP core module (C code)
+local uuid = require("uuid")
 
 -- create a global table
 upnp = {}   -- create a global table
@@ -112,23 +113,12 @@ copas.addserver(dss.getsocket(), function(skt)
     end)
 
 
-local oldCreateUUID = upnp.lib.util.CreateUUID
 ---------------------------------------------------------------------
--- wraps original function to work even when library is not started
+-- Gererated uuids, by external module, no longer from pupnp
 upnp.lib.util.CreateUUID =  function()
-  local success, uuid = pcall(oldCreateUUID)
-  if not success and uuid == "UPNP_E_FINISH" then
-    -- library not started, so start, do UUID, and stop again.
-    logger:debug("Temporary starting upnp lib to create a UUID")
-    upnp.lib.Init(function() end)
-    success, uuid = pcall(oldCreateUUID)
-    upnp.lib.Finish()
-  end
-  if not success then
-    error(uuid)
-  end
-  logger:info("created new id; uuid:%s", uuid)
-  return "uuid:" .. uuid
+  local id = uuid()
+  logger:info("created new id; uuid:%s", id)
+  return "uuid:" .. id
 end
 
 
