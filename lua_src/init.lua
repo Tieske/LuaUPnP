@@ -71,7 +71,9 @@ logger:debug("Loading DSS")
 local dss = require('dss')                  -- load darksidesync module (required for UPnP)
 logger:debug("Loading UPnP core")
 local lib = require("upnp.core")            -- load UPnP core module (C code)
-local uuid = require("uuid")
+
+require("socket")                           -- ensure to load luasocket BEFORE uuid
+local uuid = require("uuid")                -- this sets the ransom seed properly, see uuid docs.
 
 -- create a global table
 upnp = {}   -- create a global table

@@ -18,6 +18,7 @@ dependencies = {
    "luafilesystem = 1.6.2",
    "darksidesync >= 0.1",
    "copas >= 1.1.6",
+   "copastimer >= 0.4.0",
    "lualogging >= 1.3",
    "loop",
    "coxpcall >= 1.13",
