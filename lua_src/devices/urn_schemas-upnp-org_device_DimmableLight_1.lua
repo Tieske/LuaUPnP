@@ -105,7 +105,7 @@ statefromdevice = function(self, power, level)
     -- go update
     self.lastlevel = level
     self.lastpower = power
-    levels = self.dimlevels
+    local levels = self.dimlevels
     if not self.zeroisoff then
       level = level + 1
       levels = levels + 1

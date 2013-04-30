@@ -8,6 +8,7 @@
 -- set the proper classname here, this should match the filename without the '.lua' extension
 local super = upnp.classes.upnpbase
 local classname = "device"
+local logger = upnp.logger
 
 -----------------
 -- LOCAL STUFF --

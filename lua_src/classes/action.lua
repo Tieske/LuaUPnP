@@ -8,6 +8,7 @@
 -- set the proper classname here, this should match the filename without the '.lua' extension
 local classname = "action"
 local super = upnp.classes.upnpbase
+local logger = upnp.logger
 
 -----------------
 -- LOCAL STUFF --
@@ -233,8 +234,8 @@ function action:checkresults(result)
     -- proper order, and UPnP typed values
     logger:debug("Entering action:checkresults() for action '%s'", tostring(self._name))
     result = result or {}
-    names = {}
-    values = {}
+    local names = {}
+    local values = {}
     local i = 1
     for _, arg in ipairs(self.argumentlist or {}) do
         if arg.direction == "out" then

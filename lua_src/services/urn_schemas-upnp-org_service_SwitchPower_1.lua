@@ -12,8 +12,6 @@
 -- @class module
 -- @name urn_schemas-upnp-org_service_SwitchPower_1
 
-local logger = upnp.logger
-
 local newservice = function()
   return {
     serviceType = "urn:schemas-upnp-org:service:SwitchPower:1",

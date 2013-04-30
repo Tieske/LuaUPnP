@@ -10,6 +10,7 @@ local classname = "statevariable"
 local super = upnp.classes.upnpbase
 
 local date = require("date")
+local logger = upnp.logger
 
 -----------------
 -- LOCAL STUFF --

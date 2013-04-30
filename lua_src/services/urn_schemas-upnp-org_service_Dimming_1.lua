@@ -16,6 +16,7 @@
 -- @name urn_schemas-upnp-org_service_Dimming_1
 
 local gettime = require("socket").gettime
+local copas = require("copastimer")
 
 local newservice = function()
   return {
@@ -160,7 +161,6 @@ local newservice = function()
           end
           local service = self:getservice()
           -- create new timer with upvalues
-          local ramptarget
           local callback = function()
             -- this will run as a timer callback, on the MAIN Lua thread, so not a scheduler thread
             -- what fraction of time still to go?
@@ -168,7 +168,7 @@ local newservice = function()
             local fraction = (service.rampendtime - gettime()) / fullruntime
             -- calculate new target value
             local newtarget = service.ramptarget - (service.ramptarget - service.rampstartlevel) * fraction
-            local newtarget = math.floor(newtarget + 0.5)  -- round to full %
+            newtarget = math.floor(newtarget + 0.5)  -- round to full %
             if newtarget < 0 then newtarget = 0 elseif newtarget > 100 then newtarget = 100 end
             -- if we've approached target within 3%, then close enough so set target now
             if newtarget-service.ramptarget >= -3 and newtarget-service.ramptarget <= 3 then

@@ -46,7 +46,7 @@ logger = logging.console()
 logger:setLevel (logging.DEBUG)
 logger:debug("Starting logger")             -- possible: debug, info, warn, error, fatal
 -- replace print function with logger
-local oldprint = print
+--local oldprint = print
 function print(...)
     local arg = {n=select('#',...),...}
     local i = 1
@@ -66,7 +66,7 @@ local lfs = require('lfs')
 logger:debug("Loading Copas Timer")
 local copas = require('copas.timer')        -- load Copas socket scheduler
 logger:debug("Loading Copas Eventer")
-local eventer = require('copas.eventer')    -- add event capability to Copas
+require('copas.eventer')                    -- add event capability to Copas
 logger:debug("Loading DSS")
 local dss = require('dss')                  -- load darksidesync module (required for UPnP)
 logger:debug("Loading UPnP core")
