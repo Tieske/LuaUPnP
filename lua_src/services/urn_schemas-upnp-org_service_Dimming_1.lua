@@ -16,7 +16,7 @@
 -- @name urn_schemas-upnp-org_service_Dimming_1
 
 local gettime = require("socket").gettime
-local copas = require("copastimer")
+local copas = require("copas.timer")
 
 local newservice = function()
   return {
