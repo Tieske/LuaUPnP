@@ -206,7 +206,7 @@ end
 -- @return the handlers return 1 on succes, or nil + error upon failure
 local EventTypeHandlers
 EventTypeHandlers = {
-    DEVICE = function(event, wt)
+    DEVICE = function(event, deliverycb)
         if event.Event == "UPNP_EVENT_SUBSCRIPTION_REQUEST" then
             -- simply accept everything
             local device = upnp.devices[event.UDN or ""]
@@ -222,7 +222,7 @@ EventTypeHandlers = {
                 return upnperror(string.format("%s: device '%s' has no valid handle (bug??)", event.Event, tostring(event.UDN)))
             end
             local names, values = service:getupnpvalues()
-            wt:setresult(device:gethandle(), names, values)   -- getupnpvalues returns 2 tables!!
+            deliverycb(device:gethandle(), names, values)   -- getupnpvalues returns 2 tables!!
             logger:info("Subscription accepted, for service '%s' @ device '%s'", tostring(event.ServiceID), tostring(event.UDN))
             logger:debug("send the following statevariable list (names and values)")
             logger:debug(names)
@@ -246,41 +246,41 @@ EventTypeHandlers = {
             -- return results
             if errnr then
                 -- error
-                wt:setresult(errnr, errstr)
+                deliverycb(errnr, errstr)
                 return upnperror(string.format("%s: Error: %s, %s", event.Event, tostring(errnr), tostring(errstr)))
             else
                 -- success
-                wt:setresult(names, values)
+                deliverycb(names, values)
                 return 1
             end
         end
     end,
-    SOAP = function(event, wt)
+    SOAP = function(event, deliverycb)
         -- do nothing, no controlpoint yet
         print("Received unsupported request; SOAP, SSDP, GENA")
         return 1
     end,
-    SSDP = function(event, wt)
+    SSDP = function(event, deliverycb)
         -- for now pass on to SOAP handler
-        return EventTypeHandlers.SOAP(event, wt)
+        return EventTypeHandlers.SOAP(event, deliverycb)
     end,
-    GENA = function(event, wt)
+    GENA = function(event, deliverycb)
         -- for now pass on to SOAP handler
-        return EventTypeHandlers.SOAP(event, wt)
+        return EventTypeHandlers.SOAP(event, deliverycb)
     end,
 }
 
 ---------------------------------------------------------------------
 -- Callback function, executed whenever a UPnP event arrives through DSS.
 -- It will call the appropriate function from the <code>EventTypeHandlers</code> table
--- *param wt waitingthread object, on which 'setresult' must be called
+-- *param deliverycb waitingthread_callback, which must be called
 -- *param event table with event parameters
-local UPnPCallback = function (wt, event)
+local UPnPCallback = function (deliverycb, event)
     local err
-    if type(wt) ~= "userdata" then
+    if type(deliverycb) ~= "userdata" then
         err = event
-        event = wt
-        wt = nil
+        event = deliverycb
+        deliverycb = nil
     end
     if event then
         -- we've got an event to handle
@@ -289,7 +289,7 @@ local UPnPCallback = function (wt, event)
         local et = UPnPEvents[event.Event].type
         if EventTypeHandlers[et] then
             -- execute handler for the received event type
-            EventTypeHandlers[et](event, wt);
+            EventTypeHandlers[et](event, deliverycb);
         end
     else
         -- an error occured
