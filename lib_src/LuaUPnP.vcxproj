@@ -79,14 +79,14 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LUAUPNP_EXPORTS;SCRIPTSUPPORT;UPNP_USE_MSVCPP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LUAUPNP_EXPORTS;SCRIPTSUPPORT;UPNP_USE_MSVCPP;IXML_HAVE_SCRIPTSUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\pupnp\build\inc;$(SolutionDir)..\pupnp\build\msvc;$(SolutionDir)..\pupnp\upnp\inc;$(SolutionDir)..\pupnp\ixml\inc;$(SolutionDir)..\pupnp\threadutil\inc;$(SolutionDir)..\pupnp\upnp\src\inc;$(SolutionDir)..\pupnp\pthreads\include;C:\Users\Public\Lua\5.1\include;$(SolutionDir)dss;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\pupnp\build\inc;$(SolutionDir)..\pupnp\build\msvc;$(SolutionDir)..\pupnp\upnp\inc;$(SolutionDir)..\pupnp\ixml\inc;$(SolutionDir)..\pupnp\threadutil\inc;$(SolutionDir)..\pupnp\upnp\src\inc;$(SolutionDir)..\pupnp\pthreads\include;C:\Users\Public\Lua\5.1lfw\include;$(SolutionDir)dss;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -94,7 +94,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>$(SolutionDir)libupnp\$(Configuration);C:\Users\Public\Lua\5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)libupnp\$(Configuration);C:\Users\Public\Lua\5.1lfw\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>lua51.lib;libupnp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

@@ -75,7 +75,7 @@ static int LuaCallback(Upnp_EventType EventType, const void *Event, void *Cookie
 
 // Cancel method to be provide to DSS
 // when called, then DSS is shutting down, so we must also shut down
-void DSS_cancel(void* utilid, void* pData)
+void DSS_cancel(void* utilid)
 {
 	UpnpFinish();					// stop UPnP threads
 	UPnPStarted = FALSE;

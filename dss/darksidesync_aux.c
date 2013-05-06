@@ -40,9 +40,7 @@ void DSS_initialize(lua_State *L, DSS_cancel_1v0_t pCancel)
 	lua_pop(L,2); // pop apistruct and DSS global table
 
 	// Now register ourselves
-	// pData = NULL, because on errors the initialize function will not return
-	// and pData may leak resources, so set the pData after initializing.
-	DSSapi->reg(L, DSS_LibID, pCancel, NULL, &errcode);
+	DSSapi->reg(L, DSS_LibID, pCancel, &errcode);
 	if (errcode != DSS_SUCCESS)
 	{
 		DSSapi = NULL;
