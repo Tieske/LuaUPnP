@@ -13,7 +13,7 @@ static IXML_Document* copyIXMLdoc(IXML_Document* inputDoc)
 }
 
 // =================== Error reporting ===========================
-static int decodeUpnpCallbackError(lua_State *L, void* pData, void* pUtilData, void* utilid)
+static int decodeUpnpCallbackError(lua_State *L, void* pData, void* utilid)
 {
 	// Push the callback function first
 	lua_getfield(L, LUA_REGISTRYINDEX, UPNPCALLBACK);
@@ -39,7 +39,7 @@ static void pushstringfield(lua_State *L, const char* key, const char* value)
 }
 
 // =================== Discovery events ==========================
-static int decodeUpnpDiscovery(lua_State *L, void* pData, void* pUtilData, void* utilid)
+static int decodeUpnpDiscovery(lua_State *L, void* pData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
@@ -124,7 +124,7 @@ int deliverUpnpDiscovery(Upnp_EventType EventType, const UpnpDiscovery *dEvent, 
 }
 
 // =================== Action Complete events ==========================
-static int decodeUpnpActionComplete(lua_State *L, void* pData, void* pUtilData, void* utilid)
+static int decodeUpnpActionComplete(lua_State *L, void* pData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
@@ -213,7 +213,7 @@ int deliverUpnpActionComplete(Upnp_EventType EventType, const UpnpActionComplete
 }
 
 // =================== StateVar Complete events ==========================
-static int decodeUpnpStateVarComplete(lua_State *L, void* pData, void* pUtilData, void* utilid)
+static int decodeUpnpStateVarComplete(lua_State *L, void* pData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
@@ -279,7 +279,7 @@ int deliverUpnpStateVarComplete(Upnp_EventType EventType, const UpnpStateVarComp
 }
 
 // =================== Event events ==========================
-static int decodeUpnpEvent(lua_State *L, void* pData, void* pUtilData, void* utilid)
+static int decodeUpnpEvent(lua_State *L, void* pData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
@@ -355,7 +355,7 @@ int deliverUpnpEvent(Upnp_EventType EventType, const UpnpEvent *eEvent, void* co
 }
 
 // =================== Event Subscribe events ==========================
-static int decodeUpnpEventSubscribe(lua_State *L, void* pData, void* pUtilData, void* utilid)
+static int decodeUpnpEventSubscribe(lua_State *L, void* pData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
@@ -423,7 +423,7 @@ int deliverUpnpEventSubscribe(Upnp_EventType EventType, const UpnpEventSubscribe
 }
 
 // =================== Subscription Request events ==========================
-static int decodeUpnpSubscriptionRequest(lua_State *L, void* pData, void* pUtilData, void* utilid)
+static int decodeUpnpSubscriptionRequest(lua_State *L, void* pData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
@@ -454,7 +454,7 @@ static int decodeUpnpSubscriptionRequest(lua_State *L, void* pData, void* pUtilD
 //   3) a table with the corresponding statevariable values
 // The table is optional, and may be empty
 // Returns; 1, or nil + errormsg
-static int returnUpnpSubscriptionRequest(lua_State *L, void* pData, void* pUtilData, void* utilid, int garbage)
+static int returnUpnpSubscriptionRequest(lua_State *L, void* pData, void* utilid, int garbage)
 {
 	int err = 0;
 	int i = 1;
@@ -580,7 +580,7 @@ int deliverUpnpStateVarRequest(Upnp_EventType EventType, const UpnpStateVarReque
 }
 
 // =================== Action request events ==========================
-static int decodeUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, void* utilid)
+static int decodeUpnpActionRequest(lua_State *L, void* pData, void* utilid)
 {
 	int result = 0;
 	cbdelivery* mydata = (cbdelivery*)pData;
@@ -676,7 +676,7 @@ static int decodeUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, v
 // Returns;
 //   Lua: 1, or nil + errormsg
 //   C  : number of Lua args on stack
-static int returnUpnpActionRequest(lua_State *L, void* pData, void* pUtilData, void* utilid, int garbage)
+static int returnUpnpActionRequest(lua_State *L, void* pData, void* utilid, int garbage)
 {
 	int err = 0;
 	int i = 1;
