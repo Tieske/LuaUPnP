@@ -173,6 +173,7 @@ end
 -- Writes the xmlfiles as received from <code>xmlfactory.rootxml()</code> to
 -- the webserver.
 -- @param filelist list with filenames and file contents
+-- @return true on success, or nil + error on failure
 -- @see xmlfactory.rootxml
 xmlfactory.writetoweb = function(filelist)
   logger:debug("xmlfactory.writetoweb: writing filelist")
@@ -203,13 +204,16 @@ xmlfactory.writetoweb = function(filelist)
     logger:info("xmlfactory.writetoweb: now writing '%s'", fullname)
     local file, err = io.open(fullname,"w")
     if not file then
-      logger:error("xmlfactory.writetoweb: failed to write file '%s'. Error: %s", fullname, tostring(err))
+      err = ("Failed to write file '%s'. Error: %s"):format(fullname, tostring(err))
+      logger:error("xmlfactory.writetoweb: %s", err)
+      return nil, err
     else
       file:write(filelist[filename])
       file:close()
     end
   end
   logger:debug("xmlfactory.writetoweb: finished writing filelist")
+  return true
 end
 
 return xmlfactory

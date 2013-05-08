@@ -356,9 +356,8 @@ devicefactory.builddevice = function(domain, devicetype, version, customtable)
   
   -- write webserver files
   logger:debug("devicefactory.builddevice; xmls created, now writing them to webroot folder")
-  success, err, err2 = pcall(xmlfactory.writetoweb, xmllist)
+  success, err = xmlfactory.writetoweb(xmllist)
   if not success then return nil, err end -- pcall; err holds error
-  if err2 ~= nil then return nil, err2 end -- contained error (nil + errmsg)
   
   -- creator function
   local creations = {} -- created objects, index by themselves, value is sub-table of devtable
