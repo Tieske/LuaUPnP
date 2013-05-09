@@ -266,7 +266,10 @@ end
 -- <code>parent</code> property will remain unchanged)
 -- @param newudn New udn for the device
 function device:setudn(newudn)
-    logger:info("device:setudn(), setting device udn; %s", tostring(newudn))
+    logger:info("device:setudn(), setting device udn to %s (currently is: %s)", tostring(newudn), tostring(self._udn))
+    assert(type(newudn)=="string", "device:setudn(), expected string, got "..type(newudn))
+    assert((upnp.devices or {})[newudn] == nil or (upnp.devices or {})[newudn] == self,
+           "device:setudn(), Cannot set device UDN, new UDN is already in use by another device. UDN:"..tostring(newudn))
     if self._udn then
         -- already set, go clear existing stuff
         if self.parent then
@@ -294,7 +297,7 @@ end
 function device:addservice(service)
     assert(type(service) == "table", "Expected service table, got nil")
     assert(service:subclassof(upnp.classes.service), "The service is not a subclass of upnp.classes.service")
-assert(service.classname == "service")    
+    assert(service.classname == "service")
     assert(service.serviceid, "ServiceId not set, can't add to device")
     logger:info("device:addservice(), adding service; %s", tostring(service.serviceid))
     -- add to list
@@ -422,7 +425,7 @@ end
 -- in child classes to add specific startup functionality (starting hardware comms for example)
 -- See also <a href="upnp.upnpbase.html#upnpbase:start"><code>upnpbase:start()</code></a>
 function device:start()
-    logger:debug("entering device:start(), starting device  %s...", tostring(self._udn))
+    logger:debug("entering device:start(), starting device '%s','%s'...", tostring(self.friendlyname), tostring(self._udn))
     assert(self.handle == nil, "Cannot start device, device handle is already available, stop first.")
     -- start ancestor object
     super.start(self)
