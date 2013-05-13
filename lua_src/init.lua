@@ -62,6 +62,12 @@ function print(...)
     logger:info(result)
 end
 
+logger:debug("Loading LuaSocket")
+require('socket')                           -- unused value, but must load BEFORE uuid
+logger:debug("Loading uuid")
+local uuid = require("uuid")     
+uuid.seed()                        
+logger:debug("Loading Lua File System")
 local lfs = require('lfs')
 logger:debug("Loading Copas Timer")
 local copas = require('copas.timer')        -- load Copas socket scheduler
@@ -71,9 +77,6 @@ logger:debug("Loading DSS")
 local dss = require('dss')                  -- load darksidesync module (required for UPnP)
 logger:debug("Loading UPnP core")
 local lib = require("upnp.core")            -- load UPnP core module (C code)
-
-require("socket")                           -- ensure to load luasocket BEFORE uuid
-local uuid = require("uuid")                -- this sets the ransom seed properly, see uuid docs.
 
 -- create a global table
 upnp = {}   -- create a global table
