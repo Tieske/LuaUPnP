@@ -25,6 +25,12 @@ dependencies = {
    "date >= 2.0.1",
    "uuid >= 0.1.0",
 }
+external_dependencies = {
+  PUPNP = {
+    header = "upnp.h",
+    library = "upnp",
+  }
+}
 build = {
   type = "builtin",
   platforms = {
@@ -45,7 +51,10 @@ build = {
           incdirs = {
             "lib_src",
             "dss",
-            "/usr/local/include/upnp",
+            "$(PUPNP_INCDIR)",
+          },
+          libdirs = {
+            "$(PUPNP_LIBDIR)",
           },
           libraries = {
             "upnp",
@@ -57,6 +66,7 @@ build = {
         }
       }
     },
+--[[
     win32 = {
       modules = {
         ["upnp.core"] = {
@@ -85,11 +95,11 @@ build = {
           defines = {
             "IXML_HAVE_SCRIPTSUPPORT",
           }
-
         }
       }
     }
   },
+]]
   modules = {
     ["upnp.devicefactory"] = "lua_src/devicefactory.lua",
     ["upnp.init"]          = "lua_src/init.lua",
