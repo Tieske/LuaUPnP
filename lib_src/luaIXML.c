@@ -53,7 +53,7 @@ int L_RelaxParser(lua_State *L)
 	int newChar = 0;
 	newChar = luaL_checkinteger(L,1);
 
-	if (newChar < 0 && newChar > 255)
+	if (newChar < 0 || newChar > 255)
 	{
 		return luaL_error(L, "To set relaxed mode, the error replacement character provided must be from 1 to 255, or 0 to set strict mode");
 	}
